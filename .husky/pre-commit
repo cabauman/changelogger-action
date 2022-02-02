@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Uncomment to run commands such as eslint and prettier when making a commit.
+#npm run pre-commit

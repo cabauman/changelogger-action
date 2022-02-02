@@ -1,0 +1,5 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Uncomment to run unit tests when pushing to remote.
+npm run test:unit
