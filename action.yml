@@ -1,0 +1,26 @@
+name: 'Commits Diff'
+author: 'Colt Alan Bauman'
+description: 'Outputs a bullet list of commit message headers that took place since the last commit of the current branch (or since the previous tag if the workflow was triggered by a tag)'
+inputs:
+  token:
+    description: >
+      Personal access token (PAT) used to fetch the repository. The PAT is configured
+      with the local git config, which enables your scripts to run authenticated git
+      commands. The post-job step removes the PAT.
+      We recommend using a service account with the least permissions necessary.
+      Also when generating a new PAT, select the least scopes necessary.
+      [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
+    default: ${{ github.token }}
+    required: false
+  max-commits:
+    description: 'Max number of commits to include in the output'
+    required: false
+    default: '50'
+  preamble:
+    description: >
+      Message positioned before the list of commits. This message is displayed
+      even if the retrieval of commits fails.
+    required: false
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

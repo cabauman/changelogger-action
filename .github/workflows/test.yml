@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  npm-install-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  execute-action: # make sure the action works on a clean machine without building
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        id: run-action
+        with:
+          max-commits: 50
+          preamble: Test was successful
+      - run: echo "The output is '${{ steps.run-action.outputs.commit-list }}'"
