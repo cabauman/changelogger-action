@@ -1,0 +1,4 @@
+- option to include/exclude commit link and PR/issue link
+example: my commit message (#713) (a316dd0)
+
+- option to print commits in reverse

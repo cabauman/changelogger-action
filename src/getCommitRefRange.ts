@@ -1,20 +1,26 @@
 import * as core from '@actions/core'
 import executeCliCommand from './executeCliCommand'
-import { getCommitHashOfLastWorkflowByCurrentBranch } from './getCommitHashOfLastWorkflowByCurrentBranch'
+import { getCommitHashOfLastSuccessfulWorkflowByCurrentBranch } from './getCommitHashOfLastSuccessfulWorkflowByCurrentBranch'
 
-export default async function getCommitsDiff(githubRef: string) {
+/**
+ * Gets a commit range that can be used with a git log command (e.g. git log from..to).
+ * @param githubRef
+ * @returns references to the current commit and the last commit of the same branch or last tag
+ */
+export default async function getCommitRefRange(githubRef: string) {
   let currentState: string | undefined
   let previousState: string | undefined
 
+  // TODO: Make githubRef a value type.
   if (githubRef.startsWith('refs/heads/')) {
     const branchName = githubRef.slice('refs/heads/'.length)
     currentState = branchName
-    const commitHashOfLastWorkflowByCurrentBranch =
-      await getCommitHashOfLastWorkflowByCurrentBranch(branchName)
-    if (commitHashOfLastWorkflowByCurrentBranch == null) {
-      core.warning(`Failed to find a previous pipeline for ${branchName} branch.`)
+    // TODO: Inject this.
+    const previousState = await getCommitHashOfLastSuccessfulWorkflowByCurrentBranch(branchName)
+    if (previousState == null) {
+      // TODO: Include workflow name in message.
+      core.warning(`Failed to find a previous successful pipeline for ${branchName} branch.`)
     }
-    previousState = commitHashOfLastWorkflowByCurrentBranch
   } else if (githubRef.startsWith('refs/tags/')) {
     const tagName = githubRef.slice('refs/tags/'.length)
     currentState = tagName

@@ -1,24 +1,26 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import executeCliCommand from './executeCliCommand'
-import getCommitsDiff from './getCommitsDiff'
+import getConventionalOutput from './getConventionalOutput'
+import getCommitRefRange from './getCommitRefRange'
+import SlackMarkdown from './slackMarkdown'
+import { getCommits } from './getCommits'
+import { getChangelogConfig } from './getChangelogConfig'
 
 async function run() {
+  const isConventional = core.getBooleanInput('is-conventional')
   const maxCommits = core.getInput('max-commits') || '50'
 
-  const { currentState, previousState } = await getCommitsDiff(github.context.ref)
+  const { currentState, previousState } = await getCommitRefRange(github.context.ref)
+  const commits = await getCommits(previousState, currentState, maxCommits)
 
-  core.info(
-    `git log ${previousState}..${currentState} --oneline --reverse --max-count=${maxCommits}`,
-  )
-  const rawCommits = await executeCliCommand(
-    `git log ${previousState}..${currentState} --oneline --reverse --max-count=${maxCommits}`,
-  )
   let result = core.getInput('preamble') || ''
-  const commits = rawCommits.split('\n').filter((x) => x != '')
-  for (const commit of commits) {
-    const header = commit.split(' ', 1)[1]
-    result += `  • ${header}\n`
+  const markdown = new SlackMarkdown()
+  if (isConventional) {
+    const config = getChangelogConfig()
+    result += getConventionalOutput(commits, markdown, config)
+  } else {
+    const headers = commits.map((x) => x.header)
+    result += markdown.ul(headers)
   }
 
   result = result.trimEnd()
