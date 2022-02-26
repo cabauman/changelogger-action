@@ -19,6 +19,7 @@ async function run() {
   const commits = await getCommits(previousState, currentState, maxCommits)
 
   let result = core.getInput('preamble') || ''
+  result += result !== '' ? '\n' : ''
   const markdown = new SlackMarkdown()
   if (isConventional) {
     const config = getChangelogConfig()

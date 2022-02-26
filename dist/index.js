@@ -34229,6 +34229,7 @@ function run() {
         currentState = github.context.sha;
         const commits = yield (0, getCommits_1.getCommits)(previousState, currentState, maxCommits);
         let result = core.getInput('preamble') || '';
+        result += result !== '' ? '\n' : '';
         const markdown = new slackMarkdown_1.default();
         if (isConventional) {
             const config = (0, getChangelogConfig_1.getChangelogConfig)();
