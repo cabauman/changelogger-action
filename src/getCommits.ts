@@ -21,14 +21,22 @@ export async function getCommits(
   // const commitCount = await executeCliCommand(
   //   `git rev-list ${previousState}..${currentState} --count`,
   // )
-  core.info(
-    `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
-  )
+  core.info(`git fetch origin`)
   try {
-    await executeCliCommand(`git fetch origin`)
+    await executeCliCommand(`git fetch origin main`)
+    await executeCliCommand(`git fetch origin feat/conventional-commits`)
   } catch (error) {
     core.error(JSON.stringify(error, null, 2))
   }
+  core.info(`git reset --hard origin/feat/conventional-commits`)
+  try {
+    await executeCliCommand(`git fetch origin main`)
+  } catch (error) {
+    core.error(JSON.stringify(error, null, 2))
+  }
+  core.info(
+    `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
+  )
   const rawCommits = await executeCliCommand(
     `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
   )

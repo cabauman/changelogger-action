@@ -32816,13 +32816,22 @@ function getCommits(previousState, currentState, maxCommits) {
         // const commitCount = await executeCliCommand(
         //   `git rev-list ${previousState}..${currentState} --count`,
         // )
-        core.info(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
+        core.info(`git fetch origin`);
         try {
-            yield (0, executeCliCommand_1.default)(`git fetch origin`);
+            yield (0, executeCliCommand_1.default)(`git fetch origin main`);
+            yield (0, executeCliCommand_1.default)(`git fetch origin feat/conventional-commits`);
         }
         catch (error) {
             core.error(JSON.stringify(error, null, 2));
         }
+        core.info(`git reset --hard origin/feat/conventional-commits`);
+        try {
+            yield (0, executeCliCommand_1.default)(`git fetch origin main`);
+        }
+        catch (error) {
+            core.error(JSON.stringify(error, null, 2));
+        }
+        core.info(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
         const rawCommits = yield (0, executeCliCommand_1.default)(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
         const commitInfo = rawCommits.split(exports.DELIMITER + '\n').filter((x) => x != '');
         const commits = commitInfo.map((x) => {
