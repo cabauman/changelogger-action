@@ -31,6 +31,8 @@ export default async function getCommitRefRange(githubRef: string) {
     previousState = (
       await executeCliCommand(`git describe --tags --abbrev=0 --always ${tagName}`)
     ).trim()
+    // TODO: Handle case when --always takes affect (returns a sha instead of tag).
+    previousState = 'origin/' + previousState
   } else if (githubRef.startsWith('refs/pull/')) {
     // const pr = github.context.payload.pull_request!
     // const { data: prCommits } = await github.getOctokit('').rest.pulls.listCommits({
@@ -43,6 +45,7 @@ export default async function getCommitRefRange(githubRef: string) {
     //const githubRefName = process.env.GITHUB_REF_NAME
     previousState = process.env.GITHUB_BASE_REF // pr target
     currentState = process.env.GITHUB_HEAD_REF // pr source
+    previousState = 'origin/' + previousState
   } else {
     // TODO: Should we just log a warning (and set the preamble as output) instead of fail?
     core.setFailed(
