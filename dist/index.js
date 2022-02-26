@@ -32817,7 +32817,7 @@ function getCommits(previousState, currentState, maxCommits) {
         //   `git rev-list ${previousState}..${currentState} --count`,
         // )
         core.info(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
-        const rawCommits = yield (0, executeCliCommand_1.default)(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
+        const rawCommits = yield (0, executeCliCommand_1.default)(`git log ${previousState}..${currentState} -- --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
         const commitInfo = rawCommits.split(exports.DELIMITER + '\n').filter((x) => x != '');
         const commits = commitInfo.map((x) => {
             const components = x.split('|', 2);
