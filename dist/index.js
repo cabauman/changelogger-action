@@ -34065,7 +34065,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCommits = exports.DELIMITER = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-exports.DELIMITER = '------------------------ >8 ------------------------';
+exports.DELIMITER = '------------------------------------------------';
 /**
  * Gets a list commits between previousState and currentState
  * @param previousState

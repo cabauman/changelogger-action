@@ -3,7 +3,7 @@ import * as exec from '@actions/exec'
 import { Commit } from './commit'
 import executeCliCommand from './executeCliCommand'
 
-export const DELIMITER = '------------------------ >8 ------------------------'
+export const DELIMITER = '------------------------------------------------'
 
 /**
  * Gets a list commits between previousState and currentState
