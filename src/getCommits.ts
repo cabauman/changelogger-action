@@ -3,7 +3,7 @@ import * as exec from '@actions/exec'
 import { Commit } from './commit'
 import executeCliCommand from './executeCliCommand'
 
-export const DELIMITER = '------------------------------------------------'
+export const DELIMITER = '------------------------ >8 ------------------------'
 
 /**
  * Gets a list commits between previousState and currentState
@@ -32,18 +32,16 @@ export async function getCommits(
   core.info(`fetchResult: ${fetchResult}`)
   core.info(`git reset --hard origin/feat/conventional-commits`)
   try {
-    await exec.exec(`git reset --hard origin/feat/conventional-commits`)
+    await executeCliCommand(`git reset --hard origin/feat/conventional-commits`)
   } catch (error) {
     core.error(JSON.stringify(error, null, 2))
   }
   core.info(
     `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
   )
-  const result = await exec.getExecOutput(
+  const rawCommits = await executeCliCommand(
     `git log ${previousState}..HEAD --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
   )
-  core.info(`stderr: ${result.stderr}`)
-  const rawCommits = result.stdout
   const commitInfo = rawCommits.split(DELIMITER + '\n').filter((x) => x != '')
   const commits: Commit[] = commitInfo.map((x) => {
     const components = x.split('|', 2)

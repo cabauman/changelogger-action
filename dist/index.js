@@ -34039,11 +34039,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getCommits = exports.DELIMITER = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-exports.DELIMITER = '------------------------------------------------';
+const executeCliCommand_1 = __importDefault(__nccwpck_require__(4771));
+exports.DELIMITER = '------------------------ >8 ------------------------';
 /**
  * Gets a list commits between previousState and currentState
  * @param previousState
@@ -34068,15 +34072,13 @@ function getCommits(previousState, currentState, maxCommits) {
         core.info(`fetchResult: ${fetchResult}`);
         core.info(`git reset --hard origin/feat/conventional-commits`);
         try {
-            yield exec.exec(`git reset --hard origin/feat/conventional-commits`);
+            yield (0, executeCliCommand_1.default)(`git reset --hard origin/feat/conventional-commits`);
         }
         catch (error) {
             core.error(JSON.stringify(error, null, 2));
         }
         core.info(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
-        const result = yield exec.getExecOutput(`git log ${previousState}..HEAD --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
-        core.info(`stderr: ${result.stderr}`);
-        const rawCommits = result.stdout;
+        const rawCommits = yield (0, executeCliCommand_1.default)(`git log ${previousState}..HEAD --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
         const commitInfo = rawCommits.split(exports.DELIMITER + '\n').filter((x) => x != '');
         const commits = commitInfo.map((x) => {
             const components = x.split('|', 2);
