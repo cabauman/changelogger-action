@@ -24,7 +24,11 @@ export async function getCommits(
   core.info(
     `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
   )
-  await executeCliCommand(`git fetch`)
+  try {
+    await executeCliCommand(`git fetch origin`)
+  } catch (error) {
+    core.error(JSON.stringify(error, null, 2))
+  }
   const rawCommits = await executeCliCommand(
     `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
   )

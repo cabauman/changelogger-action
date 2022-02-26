@@ -32,4 +32,4 @@ async function run() {
   core.setOutput('commit-list', result)
 }
 
-run()
+run().catch((error) => core.error(JSON.stringify(error, null, 2)))
