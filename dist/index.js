@@ -32943,7 +32943,7 @@ function run() {
         if (!previousState || !currentState) {
             return;
         }
-        previousState = github.context.sha;
+        currentState = github.context.sha;
         const commits = yield (0, getCommits_1.getCommits)(previousState, currentState, maxCommits);
         let result = core.getInput('preamble') || '';
         const markdown = new slackMarkdown_1.default();

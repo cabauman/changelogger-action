@@ -15,7 +15,7 @@ async function run() {
   if (!previousState || !currentState) {
     return
   }
-  previousState = github.context.sha
+  currentState = github.context.sha
   const commits = await getCommits(previousState, currentState, maxCommits)
 
   let result = core.getInput('preamble') || ''
