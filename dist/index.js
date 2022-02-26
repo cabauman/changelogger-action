@@ -32714,6 +32714,7 @@ function getCommitRefRange(githubRef) {
     return __awaiter(this, void 0, void 0, function* () {
         let currentState;
         let previousState;
+        // TODO: Consider just setting currentState as github.context.sha.
         // TODO: Make githubRef a value type.
         if (githubRef.startsWith('refs/heads/')) {
             const branchName = githubRef.slice('refs/heads/'.length);
@@ -32731,9 +32732,23 @@ function getCommitRefRange(githubRef) {
             core.info(`git describe --tags --abbrev=0 --always ${tagName}`);
             previousState = (yield (0, executeCliCommand_1.default)(`git describe --tags --abbrev=0 --always ${tagName}`)).trim();
         }
+        else if (githubRef.startsWith('refs/pull/')) {
+            // const pr = github.context.payload.pull_request!
+            // const { data: prCommits } = await github.getOctokit('').rest.pulls.listCommits({
+            //   owner: pr.base.repo.owner.login,
+            //   repo: pr.base.repo.name,
+            //   pull_number: pr.number,
+            // })
+            // const commitSha = prCommits[0].sha
+            // const eventName = github.context.eventName // pull_request
+            //const githubRefName = process.env.GITHUB_REF_NAME
+            previousState = process.env.GITHUB_BASE_REF; // pr target
+            currentState = process.env.GITHUB_HEAD_REF; // pr source
+        }
         else {
             // TODO: Should we just log a warning (and set the preamble as output) instead of fail?
             core.setFailed(`Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`);
+            // refs/pull/1/merge
         }
         return { currentState, previousState };
     });
@@ -32920,7 +32935,10 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const isConventional = core.getBooleanInput('is-conventional');
         const maxCommits = core.getInput('max-commits') || '50';
-        const { currentState, previousState } = yield (0, getCommitRefRange_1.default)(github.context.ref);
+        const { previousState, currentState } = yield (0, getCommitRefRange_1.default)(github.context.ref);
+        if (!previousState || !currentState) {
+            return;
+        }
         const commits = yield (0, getCommits_1.getCommits)(previousState, currentState, maxCommits);
         let result = core.getInput('preamble') || '';
         const markdown = new slackMarkdown_1.default();
