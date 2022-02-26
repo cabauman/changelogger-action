@@ -33812,28 +33812,6 @@ exports["default"] = executeCliCommand;
 
 /***/ }),
 
-/***/ 2459:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getChangelogConfig = void 0;
-const fs_1 = __nccwpck_require__(7147);
-const defaultConfig_1 = __nccwpck_require__(9029);
-// https://github.com/conventional-changelog/standard-version/blob/master/lib/configuration.js
-function getChangelogConfig() {
-    const configPath = '';
-    const configJson = (0, fs_1.readFileSync)(configPath, 'utf8');
-    let config = JSON.parse(configJson);
-    config = (0, defaultConfig_1.defaultConfig)(config);
-    return config;
-}
-exports.getChangelogConfig = getChangelogConfig;
-
-
-/***/ }),
-
 /***/ 7538:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -34214,7 +34192,7 @@ const getConventionalOutput_1 = __importDefault(__nccwpck_require__(3697));
 const getCommitRefRange_1 = __importDefault(__nccwpck_require__(7690));
 const slackMarkdown_1 = __importDefault(__nccwpck_require__(9735));
 const getCommits_1 = __nccwpck_require__(4288);
-const getChangelogConfig_1 = __nccwpck_require__(2459);
+const defaultConfig_1 = __nccwpck_require__(9029);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const isConventional = core.getBooleanInput('is-conventional');
@@ -34230,7 +34208,7 @@ function run() {
         result += result !== '' ? '\n' : '';
         const markdown = new slackMarkdown_1.default();
         if (isConventional) {
-            const config = (0, getChangelogConfig_1.getChangelogConfig)();
+            const config = (0, defaultConfig_1.getDefaultConfig)(); //getChangelogConfig()
             result += (0, getConventionalOutput_1.default)(commits, markdown, config);
         }
         else {

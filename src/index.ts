@@ -5,6 +5,7 @@ import getCommitRefRange from './getCommitRefRange'
 import SlackMarkdown from './slackMarkdown'
 import { getCommits } from './getCommits'
 import { getChangelogConfig } from './getChangelogConfig'
+import { getDefaultConfig } from './defaultConfig'
 
 async function run() {
   const isConventional = core.getBooleanInput('is-conventional')
@@ -22,7 +23,7 @@ async function run() {
   result += result !== '' ? '\n' : ''
   const markdown = new SlackMarkdown()
   if (isConventional) {
-    const config = getChangelogConfig()
+    const config = getDefaultConfig() //getChangelogConfig()
     result += getConventionalOutput(commits, markdown, config)
   } else {
     const headers = commits.map((x) => x.header)
