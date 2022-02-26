@@ -32816,13 +32816,12 @@ function getCommits(previousState, currentState, maxCommits) {
         // const commitCount = await executeCliCommand(
         //   `git rev-list ${previousState}..${currentState} --count`,
         // )
-        core.info(`git fetch origin`);
-        try {
-            yield (0, executeCliCommand_1.default)(`git fetch origin`);
-        }
-        catch (error) {
-            core.error(JSON.stringify(error, null, 2));
-        }
+        // core.info(`git fetch origin`)
+        // try {
+        //   await executeCliCommand(`git fetch origin`)
+        // } catch (error) {
+        //   core.error(JSON.stringify(error, null, 2))
+        // }
         core.info(`git reset --hard origin/feat/conventional-commits`);
         try {
             yield (0, executeCliCommand_1.default)(`git reset --hard origin/feat/conventional-commits`);

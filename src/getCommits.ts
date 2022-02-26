@@ -21,12 +21,12 @@ export async function getCommits(
   // const commitCount = await executeCliCommand(
   //   `git rev-list ${previousState}..${currentState} --count`,
   // )
-  core.info(`git fetch origin`)
-  try {
-    await executeCliCommand(`git fetch origin`)
-  } catch (error) {
-    core.error(JSON.stringify(error, null, 2))
-  }
+  // core.info(`git fetch origin`)
+  // try {
+  //   await executeCliCommand(`git fetch origin`)
+  // } catch (error) {
+  //   core.error(JSON.stringify(error, null, 2))
+  // }
   core.info(`git reset --hard origin/feat/conventional-commits`)
   try {
     await executeCliCommand(`git reset --hard origin/feat/conventional-commits`)
