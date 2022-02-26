@@ -22,10 +22,10 @@ export async function getCommits(
   //   `git rev-list ${previousState}..${currentState} --count`,
   // )
   core.info(
-    `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
+    `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits} --`,
   )
   const rawCommits = await executeCliCommand(
-    `git log ${previousState}..${currentState} -- --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits}`,
+    `git log ${previousState}..${currentState} --format=%H'|'%B'${DELIMITER}' --max-count=${maxCommits} --`,
   )
   const commitInfo = rawCommits.split(DELIMITER + '\n').filter((x) => x != '')
   const commits: Commit[] = commitInfo.map((x) => {
