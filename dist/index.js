@@ -34098,6 +34098,25 @@ exports.getCommits = getCommits;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34110,6 +34129,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 /* eslint-disable @typescript-eslint/no-var-requires */
 const spec = __nccwpck_require__(8761);
+const core = __importStar(__nccwpck_require__(2186));
 const conventional_commits_parser_1 = __nccwpck_require__(1655);
 function getConventionalOutput(commits, markdown, changelogConfig) {
     var _a, _b, _c;
@@ -34117,8 +34137,11 @@ function getConventionalOutput(commits, markdown, changelogConfig) {
         const options = yield spec();
         const map = {};
         map['BREAKING'] = [];
+        core.info(`[getConventionalOutput] commits: ${commits.length}`);
         for (const commit of commits) {
+            core.info(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`);
             const parsed = (0, conventional_commits_parser_1.sync)(commit.rawBody, options.parserOpts);
+            core.info(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`);
             const type = (_a = parsed.type) !== null && _a !== void 0 ? _a : 'OTHER';
             const subject = (_b = parsed.subject) !== null && _b !== void 0 ? _b : commit.header;
             const items = (_c = map[type]) !== null && _c !== void 0 ? _c : [];
@@ -34130,6 +34153,7 @@ function getConventionalOutput(commits, markdown, changelogConfig) {
                 continue;
             map['BREAKING'].push(...breakingChanges.map((x) => x.text));
         }
+        core.info(`[getConventionalOutput] map: ${JSON.stringify(map)}`);
         let result = '';
         for (const key in map) {
             if (map[key].length === 0)
@@ -34141,6 +34165,7 @@ function getConventionalOutput(commits, markdown, changelogConfig) {
             result += markdown.heading(section);
             result += markdown.ul(map[key]);
         }
+        core.info(`[getConventionalOutput] result: ${result}`);
         return result;
     });
 }
