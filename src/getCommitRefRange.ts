@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import executeCliCommand from './executeCliCommand'
 import { getCommitHashOfLastSuccessfulWorkflowByCurrentBranch } from './getCommitHashOfLastSuccessfulWorkflowByCurrentBranch'
 
@@ -10,6 +11,8 @@ import { getCommitHashOfLastSuccessfulWorkflowByCurrentBranch } from './getCommi
 export default async function getCommitRefRange(githubRef: string) {
   let currentState: string | undefined
   let previousState: string | undefined
+
+  // TODO: Consider just setting currentState as github.context.sha.
 
   // TODO: Make githubRef a value type.
   if (githubRef.startsWith('refs/heads/')) {
@@ -28,11 +31,24 @@ export default async function getCommitRefRange(githubRef: string) {
     previousState = (
       await executeCliCommand(`git describe --tags --abbrev=0 --always ${tagName}`)
     ).trim()
+  } else if (githubRef.startsWith('refs/pull/')) {
+    // const pr = github.context.payload.pull_request!
+    // const { data: prCommits } = await github.getOctokit('').rest.pulls.listCommits({
+    //   owner: pr.base.repo.owner.login,
+    //   repo: pr.base.repo.name,
+    //   pull_number: pr.number,
+    // })
+    // const commitSha = prCommits[0].sha
+    // const eventName = github.context.eventName // pull_request
+    //const githubRefName = process.env.GITHUB_REF_NAME
+    previousState = process.env.GITHUB_BASE_REF // pr target
+    currentState = process.env.GITHUB_HEAD_REF // pr source
   } else {
     // TODO: Should we just log a warning (and set the preamble as output) instead of fail?
     core.setFailed(
       `Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`,
     )
+    // refs/pull/1/merge
   }
 
   return { currentState, previousState }
