@@ -32745,7 +32745,7 @@ function getCommitRefRange(githubRef) {
             // const eventName = github.context.eventName // pull_request
             //const githubRefName = process.env.GITHUB_REF_NAME
             previousState = process.env.GITHUB_BASE_REF; // pr target
-            currentState = 'origin/HEAD'; //process.env.GITHUB_HEAD_REF // pr source
+            currentState = 'HEAD'; //process.env.GITHUB_HEAD_REF // pr source
             previousState = 'origin/' + previousState;
         }
         else {
