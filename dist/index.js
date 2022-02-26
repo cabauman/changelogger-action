@@ -32938,10 +32938,12 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const isConventional = core.getBooleanInput('is-conventional');
         const maxCommits = core.getInput('max-commits') || '50';
-        const { previousState, currentState } = yield (0, getCommitRefRange_1.default)(github.context.ref);
+        // eslint-disable-next-line prefer-const
+        let { previousState, currentState } = yield (0, getCommitRefRange_1.default)(github.context.ref);
         if (!previousState || !currentState) {
             return;
         }
+        previousState = github.context.sha;
         const commits = yield (0, getCommits_1.getCommits)(previousState, currentState, maxCommits);
         let result = core.getInput('preamble') || '';
         const markdown = new slackMarkdown_1.default();
