@@ -24,7 +24,7 @@ async function run() {
   const markdown = new SlackMarkdown()
   if (isConventional) {
     const config = getDefaultConfig() //getChangelogConfig()
-    result += getConventionalOutput(commits, markdown, config)
+    result += await getConventionalOutput(commits, markdown, config)
   } else {
     const headers = commits.map((x) => x.header)
     result += markdown.ul(headers)

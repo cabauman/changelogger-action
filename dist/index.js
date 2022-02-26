@@ -34209,7 +34209,7 @@ function run() {
         const markdown = new slackMarkdown_1.default();
         if (isConventional) {
             const config = (0, defaultConfig_1.getDefaultConfig)(); //getChangelogConfig()
-            result += (0, getConventionalOutput_1.default)(commits, markdown, config);
+            result += yield (0, getConventionalOutput_1.default)(commits, markdown, config);
         }
         else {
             const headers = commits.map((x) => x.header);
