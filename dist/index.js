@@ -32826,7 +32826,7 @@ function getCommits(previousState, currentState, maxCommits) {
         }
         core.info(`git reset --hard origin/feat/conventional-commits`);
         try {
-            yield (0, executeCliCommand_1.default)(`git fetch origin main`);
+            yield (0, executeCliCommand_1.default)(`git reset --hard origin/feat/conventional-commits`);
         }
         catch (error) {
             core.error(JSON.stringify(error, null, 2));

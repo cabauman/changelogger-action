@@ -30,7 +30,7 @@ export async function getCommits(
   }
   core.info(`git reset --hard origin/feat/conventional-commits`)
   try {
-    await executeCliCommand(`git fetch origin main`)
+    await executeCliCommand(`git reset --hard origin/feat/conventional-commits`)
   } catch (error) {
     core.error(JSON.stringify(error, null, 2))
   }
