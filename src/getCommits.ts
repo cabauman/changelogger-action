@@ -23,8 +23,7 @@ export async function getCommits(
   // )
   core.info(`git fetch origin`)
   try {
-    await executeCliCommand(`git fetch origin main`)
-    await executeCliCommand(`git fetch origin feat/conventional-commits`)
+    await executeCliCommand(`git fetch origin`)
   } catch (error) {
     core.error(JSON.stringify(error, null, 2))
   }

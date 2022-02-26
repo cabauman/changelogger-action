@@ -32818,8 +32818,7 @@ function getCommits(previousState, currentState, maxCommits) {
         // )
         core.info(`git fetch origin`);
         try {
-            yield (0, executeCliCommand_1.default)(`git fetch origin main`);
-            yield (0, executeCliCommand_1.default)(`git fetch origin feat/conventional-commits`);
+            yield (0, executeCliCommand_1.default)(`git fetch origin`);
         }
         catch (error) {
             core.error(JSON.stringify(error, null, 2));
