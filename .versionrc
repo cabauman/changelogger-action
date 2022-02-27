@@ -2,53 +2,58 @@
   "types": [
     {
       "type": "feat",
-      "section": "Features",
+      "section": "✨ Features",
       "hidden": false
     },
     {
       "type": "fix",
-      "section": "Bug Fixes",
+      "section": "🐛 Bug Fixes",
       "hidden": false
     },
     {
       "type": "chore",
-      "section": "Chores",
-      "hidden": true
+      "section": "♻️ Chores",
+      "hidden": false
     },
     {
       "type": "docs",
-      "section": "Docs",
-      "hidden": true
+      "section": "📚 Docs",
+      "hidden": false
     },
     {
       "type": "style",
-      "section": "Style",
-      "hidden": true
+      "section": "💎 Style",
+      "hidden": false
     },
     {
       "type": "refactor",
-      "section": "Refactor",
-      "hidden": true
+      "section": "📦 Refactor",
+      "hidden": false
     },
     {
       "type": "perf",
-      "section": "Performance",
+      "section": "🚀 Performance",
       "hidden": false
     },
     {
       "type": "test",
-      "section": "Tests",
-      "hidden": true
+      "section": "🧪 Tests",
+      "hidden": false
     },
     {
       "type": "ci",
-      "section": "CI",
-      "hidden": true
+      "section": "⚙️ Continuous Integrations",
+      "hidden": false
     },
     {
       "type": "build",
-      "section": "Build",
-      "hidden": true
+      "section": "🔨 Build",
+      "hidden": false
+    },
+    {
+      "type": "revert",
+      "section": "🗑 Reverts",
+      "hidden": false
     }
   ],
   "releaseCommitMessageFormat": "chore(release): {{currentTag}} [skip ci]"

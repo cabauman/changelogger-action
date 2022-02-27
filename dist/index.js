@@ -33758,7 +33758,10 @@ function defaultConfig(config) {
         { type: 'build', section: 'Build System', hidden: true },
         { type: 'ci', section: 'Continuous Integration', hidden: true },
     ];
-    return config;
+    config.types.push({ type: 'BREAKING', section: 'BREAKING CHANGES', hidden: false });
+    config.types.push({ type: 'OTHER', section: 'Other', hidden: false });
+    const result = config.types.map((x) => [x.type, x]);
+    return { types: new Map(result) };
 }
 exports.defaultConfig = defaultConfig;
 function getDefaultConfig() {
@@ -33808,6 +33811,28 @@ function executeCliCommand(command) {
     });
 }
 exports["default"] = executeCliCommand;
+
+
+/***/ }),
+
+/***/ 2459:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getChangelogConfig = void 0;
+const fs_1 = __nccwpck_require__(7147);
+const defaultConfig_1 = __nccwpck_require__(9029);
+// https://github.com/conventional-changelog/standard-version/blob/master/lib/configuration.js
+function getChangelogConfig() {
+    const configPath = './.versionrc';
+    const configJson = (0, fs_1.readFileSync)(configPath, 'utf8');
+    let config = JSON.parse(configJson);
+    config = (0, defaultConfig_1.defaultConfig)(config);
+    return config;
+}
+exports.getChangelogConfig = getChangelogConfig;
 
 
 /***/ }),
@@ -34124,11 +34149,11 @@ function getConventionalOutput(commits, markdown, changelogConfig) {
         const options = yield spec();
         const map = {};
         map['BREAKING'] = [];
-        core.info(`[getConventionalOutput] commits: ${commits.length}`);
+        core.debug(`[getConventionalOutput] commits: ${commits.length}`);
         for (const commit of commits) {
-            core.info(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`);
+            core.debug(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`);
             const parsed = (0, conventional_commits_parser_1.sync)(commit.rawBody, options.parserOpts);
-            core.info(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`);
+            core.debug(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`);
             const type = (_a = parsed.type) !== null && _a !== void 0 ? _a : 'OTHER';
             const subject = (_b = parsed.subject) !== null && _b !== void 0 ? _b : commit.header;
             const items = (_c = map[type]) !== null && _c !== void 0 ? _c : [];
@@ -34140,7 +34165,7 @@ function getConventionalOutput(commits, markdown, changelogConfig) {
                 continue;
             map['BREAKING'].push(...breakingChanges.map((x) => x.text));
         }
-        core.info(`[getConventionalOutput] map: ${JSON.stringify(map)}`);
+        core.debug(`[getConventionalOutput] map: ${JSON.stringify(map)}`);
         let result = '';
         for (const key in map) {
             if (map[key].length === 0)
@@ -34152,7 +34177,7 @@ function getConventionalOutput(commits, markdown, changelogConfig) {
             result += markdown.heading(section);
             result += markdown.ul(map[key]);
         }
-        core.info(`[getConventionalOutput] result: ${result}`);
+        core.debug(`[getConventionalOutput] result: ${result}`);
         return result;
     });
 }
@@ -34204,7 +34229,7 @@ const getConventionalOutput_1 = __importDefault(__nccwpck_require__(3697));
 const getCommitRefRange_1 = __importDefault(__nccwpck_require__(7690));
 const slackMarkdown_1 = __importDefault(__nccwpck_require__(9735));
 const getCommits_1 = __nccwpck_require__(4288);
-const defaultConfig_1 = __nccwpck_require__(9029);
+const getChangelogConfig_1 = __nccwpck_require__(2459);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const isConventional = core.getBooleanInput('is-conventional');
@@ -34219,7 +34244,7 @@ function run() {
         result += result !== '' ? '\n' : '';
         const markdown = new slackMarkdown_1.default();
         if (isConventional) {
-            const config = (0, defaultConfig_1.getDefaultConfig)(); //getChangelogConfig()
+            const config = (0, getChangelogConfig_1.getChangelogConfig)();
             result += yield (0, getConventionalOutput_1.default)(commits, markdown, config);
         }
         else {
@@ -34230,7 +34255,7 @@ function run() {
         core.setOutput('commit-list', result);
     });
 }
-run().catch((error) => core.error(JSON.stringify(error, null, 2)));
+run().catch((error) => core.setFailed(JSON.stringify(error, null, 2)));
 
 
 /***/ }),

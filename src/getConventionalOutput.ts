@@ -15,6 +15,10 @@ export interface ChangelogConfig {
   types: ReadonlyMap<string, CommitType>
 }
 
+export interface RawChangelogConfig {
+  types: CommitType[]
+}
+
 export default async function getConventionalOutput(
   commits: ReadonlyArray<Commit>,
   markdown: IMarkdown,
@@ -24,11 +28,11 @@ export default async function getConventionalOutput(
 
   const map: { [key: string]: string[] } = {}
   map['BREAKING'] = []
-  core.info(`[getConventionalOutput] commits: ${commits.length}`)
+  core.debug(`[getConventionalOutput] commits: ${commits.length}`)
   for (const commit of commits) {
-    core.info(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`)
+    core.debug(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`)
     const parsed = sync(commit.rawBody, options.parserOpts)
-    core.info(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`)
+    core.debug(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`)
     const type = parsed.type ?? 'OTHER'
     const subject = parsed.subject ?? commit.header
     const items = map[type] ?? []
@@ -41,7 +45,7 @@ export default async function getConventionalOutput(
     map['BREAKING'].push(...breakingChanges.map((x) => x.text))
   }
 
-  core.info(`[getConventionalOutput] map: ${JSON.stringify(map)}`)
+  core.debug(`[getConventionalOutput] map: ${JSON.stringify(map)}`)
 
   let result = ''
   for (const key in map) {
@@ -53,6 +57,6 @@ export default async function getConventionalOutput(
     result += markdown.ul(map[key])
   }
 
-  core.info(`[getConventionalOutput] result: ${result}`)
+  core.debug(`[getConventionalOutput] result: ${result}`)
   return result
 }

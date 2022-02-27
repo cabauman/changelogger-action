@@ -1,8 +1,7 @@
-import { stringify } from 'querystring'
-import { ChangelogConfig, CommitType } from './getConventionalOutput'
+import { ChangelogConfig, CommitType, RawChangelogConfig } from './getConventionalOutput'
 
 // https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-changelog-conventionalcommits/writer-opts.js
-export function defaultConfig(config: ChangelogConfig) {
+export function defaultConfig(config: RawChangelogConfig) {
   config = config ?? {}
   config.types = config.types ?? [
     { type: 'feat', section: 'Features' },
@@ -18,7 +17,12 @@ export function defaultConfig(config: ChangelogConfig) {
     { type: 'ci', section: 'Continuous Integration', hidden: true },
   ]
 
-  return config
+  config.types.push({ type: 'BREAKING', section: 'BREAKING CHANGES', hidden: false })
+  config.types.push({ type: 'OTHER', section: 'Other', hidden: false })
+
+  const result: [string, CommitType][] = config.types.map((x) => [x.type, x])
+
+  return { types: new Map<string, CommitType>(result) }
 }
 
 export function getDefaultConfig(): ChangelogConfig {
