@@ -11,12 +11,11 @@ async function run() {
   const isConventional = core.getBooleanInput('is-conventional')
   const maxCommits = core.getInput('max-commits') || '50'
 
-  // eslint-disable-next-line prefer-const
-  let { previousState, currentState } = await getCommitRefRange(github.context.ref)
+  const { previousState, currentState } = await getCommitRefRange(github.context.ref)
   if (!previousState || !currentState) {
     return
   }
-  currentState = github.context.sha
+  core.info(`sha: ${github.context.sha}`)
   const commits = await getCommits(previousState, currentState, maxCommits)
 
   let result = core.getInput('preamble') || ''

@@ -33989,9 +33989,8 @@ function getCommitRefRange(githubRef) {
             // const commitSha = prCommits[0].sha
             // const eventName = github.context.eventName // pull_request
             //const githubRefName = process.env.GITHUB_REF_NAME
-            previousState = process.env.GITHUB_BASE_REF; // pr target
-            currentState = 'HEAD'; //process.env.GITHUB_HEAD_REF // pr source
-            previousState = 'origin/' + previousState;
+            previousState = 'origin/' + process.env.GITHUB_BASE_REF; // pr target
+            currentState = 'origin/' + process.env.GITHUB_HEAD_REF; // pr source
         }
         else {
             // TODO: Should we just log a warning (and set the preamble as output) instead of fail?
@@ -34062,23 +34061,9 @@ function getCommits(previousState, currentState, maxCommits) {
         // const commitCount = await executeCliCommand(
         //   `git rev-list ${previousState}..${currentState} --count`,
         // )
-        core.info(`git fetch origin`);
-        // try {
-        //   await executeCliCommand(`git fetch origin`)
-        // } catch (error) {
-        //   core.error(JSON.stringify(error, null, 2))
-        // }
-        const fetchResult = yield exec.exec('git fetch origin');
-        core.info(`fetchResult: ${fetchResult}`);
-        core.info(`git reset --hard origin/feat/conventional-commits`);
-        try {
-            yield (0, executeCliCommand_1.default)(`git reset --hard origin/feat/conventional-commits`);
-        }
-        catch (error) {
-            core.error(JSON.stringify(error, null, 2));
-        }
+        yield exec.exec('git fetch origin');
         core.info(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
-        const rawCommits = yield (0, executeCliCommand_1.default)(`git log ${previousState}..HEAD --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
+        const rawCommits = yield (0, executeCliCommand_1.default)(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
         const commitInfo = rawCommits.split(exports.DELIMITER + '\n').filter((x) => x != '');
         const commits = commitInfo.map((x) => {
             const components = x.split('|', 2);
@@ -34224,12 +34209,11 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const isConventional = core.getBooleanInput('is-conventional');
         const maxCommits = core.getInput('max-commits') || '50';
-        // eslint-disable-next-line prefer-const
-        let { previousState, currentState } = yield (0, getCommitRefRange_1.default)(github.context.ref);
+        const { previousState, currentState } = yield (0, getCommitRefRange_1.default)(github.context.ref);
         if (!previousState || !currentState) {
             return;
         }
-        currentState = github.context.sha;
+        core.info(`sha: ${github.context.sha}`);
         const commits = yield (0, getCommits_1.getCommits)(previousState, currentState, maxCommits);
         let result = core.getInput('preamble') || '';
         result += result !== '' ? '\n' : '';

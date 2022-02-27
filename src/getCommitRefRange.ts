@@ -1,5 +1,4 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 import executeCliCommand from './executeCliCommand'
 import { getCommitHashOfLastSuccessfulWorkflowByCurrentBranch } from './getCommitHashOfLastSuccessfulWorkflowByCurrentBranch'
 
@@ -43,9 +42,8 @@ export default async function getCommitRefRange(githubRef: string) {
     // const commitSha = prCommits[0].sha
     // const eventName = github.context.eventName // pull_request
     //const githubRefName = process.env.GITHUB_REF_NAME
-    previousState = process.env.GITHUB_BASE_REF // pr target
-    currentState = 'HEAD' //process.env.GITHUB_HEAD_REF // pr source
-    previousState = 'origin/' + previousState
+    previousState = 'origin/' + process.env.GITHUB_BASE_REF // pr target
+    currentState = 'origin/' + process.env.GITHUB_HEAD_REF // pr source
   } else {
     // TODO: Should we just log a warning (and set the preamble as output) instead of fail?
     core.setFailed(
