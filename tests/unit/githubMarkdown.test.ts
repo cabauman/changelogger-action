@@ -1,10 +1,10 @@
 import { expect } from 'chai'
-import MdMarkdown from '../../src/mdMarkdown'
+import GitHubMarkdown from '../../src/githubMarkdown'
 
-describe('MdMarkdown', () => {
+describe('GitHubMarkdown', () => {
   context('bold', () => {
     it('returns expected', async () => {
-      const sut = new MdMarkdown()
+      const sut = new GitHubMarkdown()
       const targetText = 'hello, world'
       const actual = sut.bold(targetText)
       expect(actual).to.equal(`**${targetText}**`)
@@ -13,7 +13,7 @@ describe('MdMarkdown', () => {
 
   context('heading', () => {
     it('returns expected', async () => {
-      const sut = new MdMarkdown()
+      const sut = new GitHubMarkdown()
       const targetText = 'hello, world'
       const actual = sut.heading(targetText)
       expect(actual).to.equal(`### ${targetText}\n\n`)
@@ -22,7 +22,7 @@ describe('MdMarkdown', () => {
 
   context('link', () => {
     it('returns expected', async () => {
-      const sut = new MdMarkdown()
+      const sut = new GitHubMarkdown()
       const link = 'https://www.github.com'
       const display = 'my link'
       const actual = sut.link(link, display)
@@ -32,7 +32,7 @@ describe('MdMarkdown', () => {
 
   context('ul', () => {
     it('returns expected', async () => {
-      const sut = new MdMarkdown()
+      const sut = new GitHubMarkdown()
       const targetText1 = 'item 1'
       const targetText2 = 'item 2'
       const actual = sut.ul([targetText1, targetText2])

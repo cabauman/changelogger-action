@@ -11,8 +11,6 @@ export default async function getCommitRefRange(githubRef: string) {
   let currentState: string | undefined
   let previousState: string | undefined
 
-  // TODO: Consider just setting currentState as github.context.sha.
-
   // TODO: Make githubRef a value type.
   if (githubRef.startsWith('refs/heads/')) {
     const branchName = githubRef.slice('refs/heads/'.length)

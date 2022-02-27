@@ -30,9 +30,9 @@ inputs:
     default: 'false'
   markdown-flavor:
     description: >
-      Either slack or md
+      Either slack or github
     required: false
-    default: 'md'
+    default: 'github'
 
 runs:
   using: 'node16'

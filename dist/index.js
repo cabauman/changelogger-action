@@ -33984,7 +33984,6 @@ function getCommitRefRange(githubRef) {
     return __awaiter(this, void 0, void 0, function* () {
         let currentState;
         let previousState;
-        // TODO: Consider just setting currentState as github.context.sha.
         // TODO: Make githubRef a value type.
         if (githubRef.startsWith('refs/heads/')) {
             const branchName = githubRef.slice('refs/heads/'.length);
@@ -34186,6 +34185,31 @@ exports["default"] = getConventionalOutput;
 
 /***/ }),
 
+/***/ 4875:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class GitHubMarkdown {
+    heading(text) {
+        return `### ${text}\n\n`;
+    }
+    bold(text) {
+        return `**${text}**`;
+    }
+    link(link, display) {
+        return `[${display}](${link})`;
+    }
+    ul(list) {
+        return `* ${list.join('\n* ')}\n\n`;
+    }
+}
+exports["default"] = GitHubMarkdown;
+
+
+/***/ }),
+
 /***/ 6144:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -34230,6 +34254,7 @@ const getCommitRefRange_1 = __importDefault(__nccwpck_require__(7690));
 const slackMarkdown_1 = __importDefault(__nccwpck_require__(9735));
 const getCommits_1 = __nccwpck_require__(4288);
 const getChangelogConfig_1 = __nccwpck_require__(2459);
+const githubMarkdown_1 = __importDefault(__nccwpck_require__(4875));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         const isConventional = core.getBooleanInput('is-conventional');
@@ -34238,11 +34263,15 @@ function run() {
         if (!previousState || !currentState) {
             return;
         }
-        core.info(`sha: ${github.context.sha}`);
         const commits = yield (0, getCommits_1.getCommits)(previousState, currentState, maxCommits);
         let result = core.getInput('preamble') || '';
         result += result !== '' ? '\n' : '';
-        const markdown = new slackMarkdown_1.default();
+        const markdownFlavor = core.getInput('markdown-flavor');
+        if (markdownFlavor !== 'slack' && markdownFlavor !== 'github') {
+            core.setFailed(`Invalid input for markdown-flavor. Only 'github' and 'slack' are supported, ` +
+                `but received ${markdownFlavor}`);
+        }
+        const markdown = markdownFlavor === 'github' ? new githubMarkdown_1.default() : new slackMarkdown_1.default();
         if (isConventional) {
             const config = (0, getChangelogConfig_1.getChangelogConfig)();
             result += yield (0, getConventionalOutput_1.default)(commits, markdown, config);

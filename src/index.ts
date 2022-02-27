@@ -5,6 +5,7 @@ import getCommitRefRange from './getCommitRefRange'
 import SlackMarkdown from './slackMarkdown'
 import { getCommits } from './getCommits'
 import { getChangelogConfig } from './getChangelogConfig'
+import GitHubMarkdown from './githubMarkdown'
 
 async function run() {
   const isConventional = core.getBooleanInput('is-conventional')
@@ -14,12 +15,18 @@ async function run() {
   if (!previousState || !currentState) {
     return
   }
-  core.info(`sha: ${github.context.sha}`)
   const commits = await getCommits(previousState, currentState, maxCommits)
 
   let result = core.getInput('preamble') || ''
   result += result !== '' ? '\n' : ''
-  const markdown = new SlackMarkdown()
+  const markdownFlavor = core.getInput('markdown-flavor')
+  if (markdownFlavor !== 'slack' && markdownFlavor !== 'github') {
+    core.setFailed(
+      `Invalid input for markdown-flavor. Only 'github' and 'slack' are supported, ` +
+        `but received ${markdownFlavor}`,
+    )
+  }
+  const markdown = markdownFlavor === 'github' ? new GitHubMarkdown() : new SlackMarkdown()
   if (isConventional) {
     const config = getChangelogConfig()
     result += await getConventionalOutput(commits, markdown, config)

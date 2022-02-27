@@ -1,6 +1,6 @@
 import IMarkdown from './markdown'
 
-export default class MdMarkdown implements IMarkdown {
+export default class GitHubMarkdown implements IMarkdown {
   heading(text: string): string {
     return `### ${text}\n\n`
   }
