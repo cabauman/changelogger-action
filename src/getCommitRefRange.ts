@@ -24,22 +24,17 @@ export default async function getCommitRefRange(githubRef: string) {
   } else if (githubRef.startsWith('refs/tags/')) {
     const tagName = githubRef.slice('refs/tags/'.length)
     currentState = tagName
-    core.info(`git describe --tags --abbrev=0 --always ${tagName}`)
-    previousState = (
-      await executeCliCommand(`git describe --tags --abbrev=0 --always ${tagName}`)
-    ).trim()
-    // TODO: Handle case when --always takes affect (returns a sha instead of tag).
+    core.info(`git describe --tags --abbrev=0 --always ${tagName}^`)
+    try {
+      previousState = (
+        await executeCliCommand(`git describe --tags --abbrev=0 --always ${tagName}^`)
+      ).trim()
+    } catch (error) {
+      core.info(`This is the first commit so there are no earlier commits to compare to.`)
+    }
+    // TODO: --always causes command to return sha of previous commit if no earler tags exist.
     previousState = 'origin/' + previousState
   } else if (githubRef.startsWith('refs/pull/')) {
-    // const pr = github.context.payload.pull_request!
-    // const { data: prCommits } = await github.getOctokit('').rest.pulls.listCommits({
-    //   owner: pr.base.repo.owner.login,
-    //   repo: pr.base.repo.name,
-    //   pull_number: pr.number,
-    // })
-    // const commitSha = prCommits[0].sha
-    // const eventName = github.context.eventName // pull_request
-    //const githubRefName = process.env.GITHUB_REF_NAME
     previousState = 'origin/' + process.env.GITHUB_BASE_REF // pr target
     currentState = 'origin/' + process.env.GITHUB_HEAD_REF // pr source
   } else {

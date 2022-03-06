@@ -2,6 +2,7 @@ const parser = require("conventional-commits-parser");
 const spec = require("conventional-changelog-conventionalcommits");
 const through = require('through2')
 const {sync} = require('conventional-commits-parser')
+const core = require('@actions/core')
 // import conventionalCommitsParser from 'conventional-commits-parser'
 // import through from 'through2'
 
@@ -47,6 +48,7 @@ async function run() {
     result += `• ${map[key].join('\n• ')}\n\n`
   }
   console.log(result)
+  core.info('hello info')
 }
 
 
