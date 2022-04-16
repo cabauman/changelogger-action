@@ -1,7 +1,7 @@
 import { expect } from 'chai'
-import { Commit } from '../../src/commit'
-import CommitListCalculator from '../../src/newStructure/commitListCalculator'
-import { CommitRefRange } from '../../src/newStructure/interfaces'
+import { Commit } from '../../../src/contracts/types'
+import CommitListCalculator from '../../../src/mainDependencies/commitListCalculator'
+import { CommitRefRange } from '../../../src/contracts/types'
 
 describe('CommitListCalculator', () => {
   it('returns list of 2 commits', async () => {

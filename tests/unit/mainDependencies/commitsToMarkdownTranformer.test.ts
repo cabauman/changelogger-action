@@ -1,13 +1,13 @@
 import { expect } from 'chai'
 import * as tsSinon from 'ts-sinon'
-import { Commit } from '../../src/commit'
-import IMarkdown from '../../src/markdown'
-import CommitsToMarkdownTranformer from '../../src/newStructure/commitsToMarkdownTranformer'
-import { IActionInput } from '../../src/newStructure/interfaces'
+import { Commit } from '../../../src/contracts/types'
+import IMarkdown from '../../../src/markdown/markdown'
+import CommitsToMarkdownTranformer from '../../../src/mainDependencies/commitsToMarkdownTranformer'
+import { ActionInput } from '../../../src/contracts/types'
 
 describe('commitsToMarkdownTranformer', () => {
   it('returns expected output', async () => {
-    const input: IActionInput = {
+    const input: ActionInput = {
       isConventional: false,
       markdownFlavor: 'github',
       maxCommits: '50',

@@ -1,12 +1,12 @@
 import * as core from '@actions/core'
-import CommitHashCalculator from './commitHashCalculator'
-import { CommitRefRange, IActionContext } from './interfaces'
+import CommitHashCalculator from '../helpers/commitHashCalculator'
+import { CommitRefRange, ActionContext } from '../contracts/types'
 
 // TODO: Consider splitting this into 3 distinct implementations of an interface,
 // one of which is chosen at composition time.
 export default class CommitRefRangeCalculator {
   constructor(
-    private readonly context: IActionContext,
+    private readonly context: ActionContext,
     private readonly commitHashCalculator: CommitHashCalculator,
     private readonly previousTagProvider: (currentTag: string) => Promise<string>,
   ) {}
@@ -31,7 +31,9 @@ export default class CommitRefRangeCalculator {
         core.info(`This is the first commit so there are no earlier commits to compare to.`)
       }
       // TODO: --always causes command to return sha of previous commit if no earler tags exist.
-      previousRef = 'origin/' + previousRef
+      if (previousRef) {
+        previousRef = 'origin/' + previousRef
+      }
     } else if (githubRef.startsWith('refs/pull/')) {
       previousRef = 'origin/' + this.context.prTarget
       currentRef = 'origin/' + this.context.prSource

@@ -1,18 +1,31 @@
 import * as core from '@actions/core'
 import * as tsSinon from 'ts-sinon'
 import { expect } from 'chai'
-import CompositionRoot from '../../src/newStructure/compositionRoot'
-import { IActionInput, IActionContext, CommitRefRange } from '../../src/newStructure/interfaces'
-import WorkflowIdProvider from '../../src/newStructure/workflowIdProvider'
-import WorkflowShaProvider from '../../src/newStructure/workflowShaProvider'
+import CompositionRoot from '../../src/compositionRoot'
+import { IResultSetter } from '../../src/contracts/interfaces'
+import { ActionInput, ActionContext, CommitRefRange } from '../../src/contracts/types'
+import WorkflowIdProvider from '../../src/helpers/workflowIdProvider'
+import WorkflowShaProvider from '../../src/helpers/workflowShaProvider'
 
 class TestCompositionRoot extends CompositionRoot {
+  public resultSetter?: IResultSetter
+
   public constructor() {
     super()
     core.info('constructing TestCompositionRoot...')
   }
 
-  protected getContext(): IActionContext {
+  protected getInput(): ActionInput {
+    return {
+      isConventional: true,
+      markdownFlavor: 'github',
+      maxCommits: '50',
+      preamble: 'Commit List:',
+      token: 'dummy-token',
+    }
+  }
+
+  protected getContext(): ActionContext {
     return {
       owner: 'colt',
       repo: 'CommitsDiff',
@@ -21,14 +34,9 @@ class TestCompositionRoot extends CompositionRoot {
     }
   }
 
-  protected getInput(): IActionInput {
-    return {
-      isConventional: true,
-      markdownFlavor: 'github',
-      maxCommits: '50',
-      preamble: 'Commit List:',
-      token: 'dummy-token',
-    }
+  protected getResultSetter(): IResultSetter {
+    this.resultSetter ??= tsSinon.stubInterface<IResultSetter>()
+    return this.resultSetter
   }
 
   protected getWorkflowIdProvider() {
@@ -54,10 +62,17 @@ class TestCompositionRoot extends CompositionRoot {
       return `47c6658|feat: my feature\n${delimeter}\n47c6658|fix: my fix\n${delimeter}`
     }
   }
+
+  protected getPreviousTagProvider() {
+    return async (currentTag: string) => {
+      // TODO: Implement.
+      return ''
+    }
+  }
 }
 
 describe('compositionRoot', () => {
-  it('1 + 2', async () => {
+  it('creates Action and runs without error', async () => {
     const result = TestCompositionRoot.constructAction()
     expect(result == null).to.be.false
     await result.run()

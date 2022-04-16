@@ -26,7 +26,7 @@ export default class CommitHashCalculator {
         break
       } catch (e) {
         // A force push must have overwritten this commit.
-        core.debug(`commit '${workflowSha}' doesn't exist.`)
+        //core.debug(`commit '${workflowSha}' doesn't exist.`)
       }
     }
     return result

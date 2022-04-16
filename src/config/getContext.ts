@@ -1,7 +1,7 @@
 import * as github from '@actions/github'
-import { IActionContext } from './interfaces'
+import { ActionContext } from '../contracts/types'
 
-export default function getContext(): IActionContext {
+export default function getContext(): ActionContext {
   return {
     owner: github.context.repo.owner,
     repo: github.context.repo.repo,

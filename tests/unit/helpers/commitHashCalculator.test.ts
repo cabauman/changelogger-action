@@ -1,10 +1,10 @@
 import { expect } from 'chai'
 import * as tsSinon from 'ts-sinon'
-import CommitHashCalculator from '../../src/newStructure/commitHashCalculator'
-import WorkflowIdProvider from '../../src/newStructure/workflowIdProvider'
-import WorkflowShaProvider from '../../src/newStructure/workflowShaProvider'
+import CommitHashCalculator from '../../../src/helpers/commitHashCalculator'
+import WorkflowIdProvider from '../../../src/helpers/workflowIdProvider'
+import WorkflowShaProvider from '../../../src/helpers/workflowShaProvider'
 
-describe.only('CommitHashCalculator', () => {
+describe('CommitHashCalculator', () => {
   it('return expected sha', async () => {
     const branchName = 'my-branch'
     const workflowId = 45

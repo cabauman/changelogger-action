@@ -1,11 +1,10 @@
 import { expect } from 'chai'
 import * as tsSinon from 'ts-sinon'
-import retrieveAndValidateInput, {
-  SUPPORTED_MARKDOWN_FLAVORS,
-} from '../../src/newStructure/getInput'
-import { IActionInput, IInputRetriever } from '../../src/newStructure/interfaces'
+import retrieveAndValidateInput, { SUPPORTED_MARKDOWN_FLAVORS } from '../../../src/config/getInput'
+import { IInputRetriever } from '../../../src/contracts/interfaces'
+import { ActionInput } from '../../../src/contracts/types'
 
-describe.only('retrieveAndValidateInput', () => {
+describe('retrieveAndValidateInput', () => {
   it('returns expected input', () => {
     const sut = retrieveAndValidateInput
     const inputRetriever = tsSinon.stubInterface<IInputRetriever>()
@@ -16,7 +15,7 @@ describe.only('retrieveAndValidateInput', () => {
     inputRetriever.getInput.withArgs('preamble').returns('Commit list:')
     inputRetriever.getInput.withArgs('token').returns('my-token')
     const actual = sut(inputRetriever)
-    const expected: IActionInput = {
+    const expected: ActionInput = {
       isConventional: true,
       markdownFlavor: 'github',
       maxCommits: '10',

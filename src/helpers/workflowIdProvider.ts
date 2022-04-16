@@ -1,8 +1,8 @@
 import { Api } from '@octokit/plugin-rest-endpoint-methods/dist-types/types'
-import { IActionContext } from './interfaces'
+import { ActionContext } from '../contracts/types'
 
 export default class WorkflowIdProvider {
-  public constructor(private readonly octokit: Api, private readonly context: IActionContext) {}
+  public constructor(private readonly octokit: Api, private readonly context: ActionContext) {}
 
   public async execute(): Promise<number> {
     const { data: currentRun } = await this.octokit.rest.actions.getWorkflowRun({

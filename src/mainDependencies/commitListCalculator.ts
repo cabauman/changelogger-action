@@ -1,5 +1,5 @@
-import { Commit } from '../commit'
-import { CommitRefRange } from './interfaces'
+import { Commit } from '../contracts/types'
+import { CommitRefRange } from '../contracts/types'
 
 export const DELIMITER = '------------------------'
 

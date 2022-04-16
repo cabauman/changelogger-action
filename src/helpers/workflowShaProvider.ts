@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
 import { Api } from '@octokit/plugin-rest-endpoint-methods/dist-types/types'
-import { IActionContext } from './interfaces'
+import { ActionContext } from '../contracts/types'
 
 export default class WorkflowShaProvider {
-  public constructor(private readonly octokit: Api, private readonly context: IActionContext) {}
+  public constructor(private readonly octokit: Api, private readonly context: ActionContext) {}
 
   public async execute(branchName: string, workflowId: number): Promise<string | undefined> {
     const response = await this.octokit.rest.actions.listWorkflowRuns({

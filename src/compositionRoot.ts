@@ -1,30 +1,24 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as exec from '@actions/exec'
-import retrieveAndValidateInput from './getInput'
-import GitHubMarkdown from '../githubMarkdown'
-import SlackMarkdown from '../slackMarkdown'
-import CommitHashCalculator from './commitHashCalculator'
-import CommitListCalculator from './commitListCalculator'
-import CommitRefRangeCalculator from './commitRefRangeCalculator'
-import CommitsToMarkdownTranformer from './commitsToMarkdownTranformer'
+import retrieveAndValidateInput from './config/getInput'
+import GitHubMarkdown from './markdown/githubMarkdown'
+import SlackMarkdown from './markdown/slackMarkdown'
+import CommitHashCalculator from './helpers/commitHashCalculator'
+import CommitListCalculator from './mainDependencies/commitListCalculator'
+import CommitRefRangeCalculator from './mainDependencies/commitRefRangeCalculator'
+import CommitsToMarkdownTranformer from './mainDependencies/commitsToMarkdownTranformer'
 import GitHubAction from './githubAction'
-import {
-  IActionInput,
-  IActionContext,
-  IResultSetter,
-  IOutputProvider,
-  CommitRefRange,
-} from './interfaces'
-import WorkflowIdProvider from './workflowIdProvider'
-import WorkflowShaProvider from './workflowShaProvider'
-import ConventionalOutputProvider from './conventionalOutputProvider'
-import { getChangelogConfig } from '../getChangelogConfig'
-import executeCliCommand from '../executeCliCommand'
+import { IResultSetter, IOutputProvider } from './contracts/interfaces'
+import { ActionInput, ActionContext, CommitRefRange } from './contracts/types'
+import WorkflowIdProvider from './helpers/workflowIdProvider'
+import WorkflowShaProvider from './helpers/workflowShaProvider'
+import ConventionalOutputProvider from './mainDependencies/conventionalOutputProvider'
+import { getChangelogConfig } from './config/getChangelogConfig'
 
 export default class CompositionRoot {
-  private actionInput?: IActionInput
-  private actionContext?: IActionContext
+  private actionInput?: ActionInput
+  private actionContext?: ActionContext
 
   protected constructAction(): GitHubAction {
     return new GitHubAction(
@@ -40,13 +34,13 @@ export default class CompositionRoot {
     return compositionRoot.constructAction()
   }
 
-  // =============== Override in tests =============== //
-  protected getInput(): IActionInput {
+  // =============== BEGIN Override in tests =============== //
+  protected getInput(): ActionInput {
     this.actionInput ??= retrieveAndValidateInput(core)
     return this.actionInput
   }
 
-  protected getContext(): IActionContext {
+  protected getContext(): ActionContext {
     this.actionContext ??= {
       owner: github.context.repo.owner,
       repo: github.context.repo.repo,
@@ -75,7 +69,7 @@ export default class CompositionRoot {
 
   protected getCommitRefValidator() {
     return async (commitRef: string) => {
-      await executeCliCommand(`git cat-file -t ${commitRef}`)
+      await exec.exec(`git cat-file -t ${commitRef}`)
       return
     }
   }
@@ -99,7 +93,7 @@ export default class CompositionRoot {
       return gitDescribe.stdout.trim()
     }
   }
-  // =============== Override in tests =============== //
+  // =============== END Override in tests =============== //
 
   protected getCommitRefRangeCalculator() {
     return new CommitRefRangeCalculator(

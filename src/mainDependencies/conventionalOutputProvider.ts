@@ -2,11 +2,12 @@
 const spec = require('conventional-changelog-conventionalcommits')
 import * as core from '@actions/core'
 import { sync } from 'conventional-commits-parser'
-import { Commit } from '../commit'
-import { ChangelogConfig } from '../getConventionalOutput'
-import IMarkdown from '../markdown'
+import { Commit } from '../contracts/types'
+import { IMarkdown } from '../contracts/interfaces'
+import { IOutputProvider } from '../contracts/interfaces'
+import { ChangelogConfig } from '../contracts/types'
 
-export default class ConventionalOutputProvider {
+export default class ConventionalOutputProvider implements IOutputProvider {
   public constructor(
     private readonly markdown: IMarkdown,
     private readonly changelogConfig: ChangelogConfig,
@@ -17,11 +18,11 @@ export default class ConventionalOutputProvider {
 
     const map: { [key: string]: string[] } = {}
     map['BREAKING'] = []
-    core.debug(`[getConventionalOutput] commits: ${commits.length}`)
+    //core.debug(`[getConventionalOutput] commits: ${commits.length}`)
     for (const commit of commits) {
-      core.debug(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`)
+      //core.debug(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`)
       const parsed = sync(commit.rawBody, options.parserOpts)
-      core.debug(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`)
+      //core.debug(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`)
       const type = parsed.type ?? 'OTHER'
       const subject = parsed.subject ?? commit.header
       const items = map[type] ?? []
@@ -34,7 +35,7 @@ export default class ConventionalOutputProvider {
       map['BREAKING'].push(...breakingChanges.map((x) => x.text))
     }
 
-    core.debug(`[getConventionalOutput] map: ${JSON.stringify(map)}`)
+    //core.debug(`[getConventionalOutput] map: ${JSON.stringify(map)}`)
 
     let result = ''
     for (const key in map) {
@@ -46,7 +47,7 @@ export default class ConventionalOutputProvider {
       result += this.markdown.ul(map[key])
     }
 
-    core.debug(`[getConventionalOutput] result: ${result}`)
+    //core.debug(`[getConventionalOutput] result: ${result}`)
     return result
   }
 }

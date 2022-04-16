@@ -1,4 +1,4 @@
-import { ChangelogConfig, CommitType, RawChangelogConfig } from './getConventionalOutput'
+import { ChangelogConfig, CommitType, RawChangelogConfig } from '../contracts/types'
 
 // https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-changelog-conventionalcommits/writer-opts.js
 export function defaultConfig(config: RawChangelogConfig) {

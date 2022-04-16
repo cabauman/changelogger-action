@@ -1,6 +1,6 @@
-import CommitListCalculator from './commitListCalculator'
-import CommitRefRangeCalculator from './commitRefRangeCalculator'
-import { IOutputProvider, IResultSetter } from './interfaces'
+import CommitListCalculator from './mainDependencies/commitListCalculator'
+import CommitRefRangeCalculator from './mainDependencies/commitRefRangeCalculator'
+import { IOutputProvider, IResultSetter } from './contracts/interfaces'
 
 export default class GitHubAction {
   constructor(

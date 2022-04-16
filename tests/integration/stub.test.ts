@@ -2,14 +2,14 @@ import { expect } from 'chai'
 import * as tsSinon from 'ts-sinon'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { ILogger } from '../../src/newStructure/interfaces'
-import CommitRefRangeCalculator from '../../src/newStructure/commitRefRangeCalculator'
+import { ILogger } from '../../src/contracts/interfaces'
+import CommitRefRangeCalculator from '../../src/mainDependencies/commitRefRangeCalculator'
 
 class Dummy {
   constructor(private readonly logger: ILogger) {}
 }
 
-describe.only('integration.stub', () => {
+describe.skip('integration.stub', () => {
   it('1 + 2', () => {
     tsSinon.default.stub(core, 'info')
     //const testStub = tsSinon.stubObject<CommitRefRangeCalculator>(test, ['methodA'])

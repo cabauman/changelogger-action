@@ -1,14 +1,20 @@
-import { IActionInput, IInputRetriever } from './interfaces'
+import { IInputRetriever } from '../contracts/interfaces'
+import { ActionInput } from '../contracts/types'
 
 export const SUPPORTED_MARKDOWN_FLAVORS: string[] = ['github', 'slack']
+export const IS_CONVENTIONAL = 'is-conventional'
+export const MAX_COMMITS = 'max-commits'
+export const MARKDOWN_FLAVOR = 'markdown-flavor'
+export const PREAMBLE = 'preamble'
+export const TOKEN = 'token'
 
-export default function retrieveAndValidateInput(inputRetriever: IInputRetriever): IActionInput {
-  const input: IActionInput = {
-    isConventional: inputRetriever.getBooleanInput('is-conventional'),
-    maxCommits: inputRetriever.getInput('max-commits'),
-    markdownFlavor: inputRetriever.getInput('markdown-flavor'),
-    preamble: inputRetriever.getInput('preamble'),
-    token: inputRetriever.getInput('token'),
+export default function retrieveAndValidateInput(inputRetriever: IInputRetriever): ActionInput {
+  const input: ActionInput = {
+    isConventional: inputRetriever.getBooleanInput(IS_CONVENTIONAL),
+    maxCommits: inputRetriever.getInput(MAX_COMMITS),
+    markdownFlavor: inputRetriever.getInput(MARKDOWN_FLAVOR),
+    preamble: inputRetriever.getInput(PREAMBLE),
+    token: inputRetriever.getInput(TOKEN),
   }
   validateMarkdownFlavor(input.markdownFlavor)
   validateMaxCommits(input.maxCommits)
