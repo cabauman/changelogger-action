@@ -33734,7 +33734,139 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 9029:
+/***/ 852:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+const exec = __importStar(__nccwpck_require__(1514));
+const getInput_1 = __importDefault(__nccwpck_require__(7254));
+const githubMarkdown_1 = __importDefault(__nccwpck_require__(3808));
+const slackMarkdown_1 = __importDefault(__nccwpck_require__(1270));
+const commitHashCalculator_1 = __importDefault(__nccwpck_require__(2237));
+const commitListCalculator_1 = __importDefault(__nccwpck_require__(7261));
+const commitRefRangeCalculator_1 = __importDefault(__nccwpck_require__(1802));
+const commitsToMarkdownTranformer_1 = __importDefault(__nccwpck_require__(3636));
+const githubAction_1 = __importDefault(__nccwpck_require__(6900));
+const workflowIdProvider_1 = __importDefault(__nccwpck_require__(5264));
+const workflowShaProvider_1 = __importDefault(__nccwpck_require__(5219));
+const conventionalOutputProvider_1 = __importDefault(__nccwpck_require__(8447));
+const getChangelogConfig_1 = __nccwpck_require__(8921);
+class CompositionRoot {
+    constructAction() {
+        return new githubAction_1.default(this.getCommitRefRangeCalculator(), this.getCommitListCalculator(), this.getCommitsToMarkdownTranformer(), this.getResultSetter());
+    }
+    static constructAction() {
+        const compositionRoot = new this();
+        return compositionRoot.constructAction();
+    }
+    // =============== BEGIN Override in tests =============== //
+    getInput() {
+        var _a;
+        (_a = this.actionInput) !== null && _a !== void 0 ? _a : (this.actionInput = (0, getInput_1.default)(core));
+        return this.actionInput;
+    }
+    getContext() {
+        var _a;
+        (_a = this.actionContext) !== null && _a !== void 0 ? _a : (this.actionContext = {
+            owner: github.context.repo.owner,
+            repo: github.context.repo.repo,
+            ref: github.context.ref,
+            runId: github.context.runId,
+        });
+        return this.actionContext;
+    }
+    getResultSetter() {
+        return core;
+    }
+    getOctokit() {
+        // TODO: single instance
+        return github.getOctokit(this.getInput().token);
+    }
+    getWorkflowIdProvider() {
+        return new workflowIdProvider_1.default(this.getOctokit(), this.getContext());
+    }
+    getWorkflowShaProvider() {
+        return new workflowShaProvider_1.default(this.getOctokit(), this.getContext());
+    }
+    getCommitRefValidator() {
+        return (commitRef) => __awaiter(this, void 0, void 0, function* () {
+            yield exec.exec(`git cat-file -t ${commitRef}`);
+            return;
+        });
+    }
+    getCommitProvider() {
+        return ({ previousRef, currentRef }, delimeter) => __awaiter(this, void 0, void 0, function* () {
+            const gitLog = yield exec.getExecOutput(`git log ${previousRef}..${currentRef} --format=%H|%B${delimeter} --max-count=${this.getInput().maxCommits}`);
+            return gitLog.stdout;
+        });
+    }
+    getPreviousTagProvider() {
+        return (currentTag) => __awaiter(this, void 0, void 0, function* () {
+            const gitDescribe = yield exec.getExecOutput(`git describe --tags --abbrev=0 --always ${currentTag}^`);
+            return gitDescribe.stdout.trim();
+        });
+    }
+    // =============== END Override in tests =============== //
+    getCommitRefRangeCalculator() {
+        return new commitRefRangeCalculator_1.default(this.getContext(), this.getCommitHashCalculator(), this.getPreviousTagProvider());
+    }
+    getCommitListCalculator() {
+        return new commitListCalculator_1.default(this.getCommitProvider());
+    }
+    getCommitsToMarkdownTranformer() {
+        if (this.getInput().isConventional) {
+            return new conventionalOutputProvider_1.default(this.getMarkdown(), (0, getChangelogConfig_1.getChangelogConfig)());
+        }
+        return new commitsToMarkdownTranformer_1.default(this.getInput(), this.getMarkdown());
+    }
+    getCommitHashCalculator() {
+        return new commitHashCalculator_1.default(this.getWorkflowIdProvider(), this.getWorkflowShaProvider(), this.getCommitRefValidator());
+    }
+    getMarkdown() {
+        return this.getInput().markdownFlavor === 'github' ? new githubMarkdown_1.default() : new slackMarkdown_1.default();
+    }
+}
+exports["default"] = CompositionRoot;
+
+
+/***/ }),
+
+/***/ 7630:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -33788,34 +33920,7 @@ exports.getDefaultConfig = getDefaultConfig;
 
 /***/ }),
 
-/***/ 4771:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const child_process_1 = __nccwpck_require__(2081);
-function executeCliCommand(command) {
-    return new Promise((resolve, reject) => {
-        (0, child_process_1.exec)(command, function (error, stdout, stderr) {
-            if (error) {
-                reject(error);
-            }
-            else if (stderr) {
-                reject(stderr);
-            }
-            else {
-                resolve(stdout);
-            }
-        });
-    });
-}
-exports["default"] = executeCliCommand;
-
-
-/***/ }),
-
-/***/ 2459:
+/***/ 8921:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -33823,7 +33928,7 @@ exports["default"] = executeCliCommand;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getChangelogConfig = void 0;
 const fs_1 = __nccwpck_require__(7147);
-const defaultConfig_1 = __nccwpck_require__(9029);
+const defaultConfig_1 = __nccwpck_require__(7630);
 // https://github.com/conventional-changelog/standard-version/blob/master/lib/configuration.js
 function getChangelogConfig() {
     const configPath = './.versionrc';
@@ -33837,7 +33942,188 @@ exports.getChangelogConfig = getChangelogConfig;
 
 /***/ }),
 
-/***/ 7538:
+/***/ 7254:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TOKEN = exports.PREAMBLE = exports.MARKDOWN_FLAVOR = exports.MAX_COMMITS = exports.IS_CONVENTIONAL = exports.SUPPORTED_MARKDOWN_FLAVORS = void 0;
+exports.SUPPORTED_MARKDOWN_FLAVORS = ['github', 'slack'];
+exports.IS_CONVENTIONAL = 'is-conventional';
+exports.MAX_COMMITS = 'max-commits';
+exports.MARKDOWN_FLAVOR = 'markdown-flavor';
+exports.PREAMBLE = 'preamble';
+exports.TOKEN = 'token';
+function retrieveAndValidateInput(inputRetriever) {
+    const input = {
+        isConventional: inputRetriever.getBooleanInput(exports.IS_CONVENTIONAL),
+        maxCommits: inputRetriever.getInput(exports.MAX_COMMITS),
+        markdownFlavor: inputRetriever.getInput(exports.MARKDOWN_FLAVOR),
+        preamble: inputRetriever.getInput(exports.PREAMBLE),
+        token: inputRetriever.getInput(exports.TOKEN),
+    };
+    validateMarkdownFlavor(input.markdownFlavor);
+    validateMaxCommits(input.maxCommits);
+    validateToken(input.token);
+    return input;
+}
+exports["default"] = retrieveAndValidateInput;
+function validateMarkdownFlavor(value) {
+    if (!exports.SUPPORTED_MARKDOWN_FLAVORS.includes(value)) {
+        throw new Error(`Invalid value '${value}' for 'markdown-flavor' input. It must be one of ${exports.SUPPORTED_MARKDOWN_FLAVORS}`);
+    }
+}
+function validateMaxCommits(value) {
+    if (value === '' ||
+        !Number.isInteger(Number(value)) ||
+        value.startsWith('0b') ||
+        value.startsWith('0x') ||
+        value.startsWith('0o')) {
+        throw new Error(`Invalid value '${value}' for 'max-commits' input.`);
+    }
+}
+function validateToken(value) {
+    if (value === '') {
+        throw new Error(`Invalid value '${value}' for 'token' input.`);
+    }
+}
+
+
+/***/ }),
+
+/***/ 6900:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class GitHubAction {
+    constructor(commitRefRangeCalculator, commitListCalculator, commitsToMarkdownTranformer, resultSetter) {
+        this.commitRefRangeCalculator = commitRefRangeCalculator;
+        this.commitListCalculator = commitListCalculator;
+        this.commitsToMarkdownTranformer = commitsToMarkdownTranformer;
+        this.resultSetter = resultSetter;
+    }
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                console.log('running action...');
+                const commitRefRange = yield this.commitRefRangeCalculator.execute();
+                const commits = yield this.commitListCalculator.execute(commitRefRange); // commitListCreator
+                const markdown = yield this.commitsToMarkdownTranformer.execute(commits); // markdownCreator
+                this.resultSetter.setOutput('commit-list', markdown);
+            }
+            catch (error) {
+                const message = error instanceof Error ? error.message : JSON.stringify(error);
+                console.log(message);
+                this.resultSetter.setFailed(message);
+            }
+        });
+    }
+}
+exports["default"] = GitHubAction;
+
+
+/***/ }),
+
+/***/ 2237:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class CommitHashCalculator {
+    constructor(workflowIdProvider, workflowShaProvider, commitRefValidator) {
+        this.workflowIdProvider = workflowIdProvider;
+        this.workflowShaProvider = workflowShaProvider;
+        this.commitRefValidator = commitRefValidator;
+    }
+    execute(branchName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result;
+            const workflowId = yield this.workflowIdProvider.execute();
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const workflowSha = yield this.workflowShaProvider.execute(branchName, workflowId);
+                if (!workflowSha) {
+                    break;
+                }
+                try {
+                    // Check if the commit still exists.
+                    yield this.commitRefValidator(workflowSha);
+                    result = workflowSha;
+                    break;
+                }
+                catch (e) {
+                    // A force push must have overwritten this commit.
+                    //core.debug(`commit '${workflowSha}' doesn't exist.`)
+                }
+            }
+            return result;
+        });
+    }
+}
+exports["default"] = CommitHashCalculator;
+
+
+/***/ }),
+
+/***/ 5264:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class WorkflowIdProvider {
+    constructor(octokit, context) {
+        this.octokit = octokit;
+        this.context = context;
+    }
+    execute() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { data: currentRun } = yield this.octokit.rest.actions.getWorkflowRun({
+                owner: this.context.owner,
+                repo: this.context.repo,
+                run_id: this.context.runId,
+            });
+            return currentRun.workflow_id;
+        });
+    }
+}
+exports["default"] = WorkflowIdProvider;
+
+
+/***/ }),
+
+/***/ 5219:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -33870,241 +34156,100 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCommitHashOfLastSuccessfulWorkflowByCurrentBranch = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
-const executeCliCommand_1 = __importDefault(__nccwpck_require__(4771));
-/**
- * Only checks workflows matching the currently executing workflow.
- * @param branchName
- * @returns the commit hash of the last successful workflow by the current branch,
- * or undefined if no successful workflows were found; also returns undefined if
- * the commit of a successful workflow no longer exists (e.g. due to a force push)
- */
-function getCommitHashOfLastSuccessfulWorkflowByCurrentBranch(branchName) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = core.getInput('token');
-        const octokit = github.getOctokit(token);
-        let result;
-        const { data: currentRun } = yield octokit.rest.actions.getWorkflowRun({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            run_id: Number(github.context.runId),
-        });
-        //workflow_ids.push(String(current_run.workflow_id))
-        //const workflowId = String(currentRun.workflow_id)
-        let page;
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            const response = yield octokit.rest.actions.listWorkflowRuns({
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo,
-                // TODO: Provide this filename as a parameter.
-                workflow_id: currentRun.workflow_id,
+class WorkflowShaProvider {
+    constructor(octokit, context) {
+        this.octokit = octokit;
+        this.context = context;
+    }
+    execute(branchName, workflowId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield this.octokit.rest.actions.listWorkflowRuns({
+                owner: this.context.owner,
+                repo: this.context.repo,
+                workflow_id: workflowId,
                 branch: branchName,
                 status: 'success',
                 per_page: 1,
-                page: page,
             });
             const workflowCount = response.data.total_count;
             if (workflowCount === 0) {
-                core.info(`No successful workflows were found for [${branchName}] branch and [${github.context.workflow}] workflow.`);
-                break;
+                core.info(`No successful workflows were found for '${branchName}' branch and '${workflowId}' workflow.`);
+                return undefined;
             }
-            const workflowRun = response.data.workflow_runs[0];
-            try {
-                // Check if the commit still exists.
-                (0, executeCliCommand_1.default)(`git cat-file -t ${workflowRun.head_sha}`);
-                result = workflowRun.head_sha;
-                break;
-            }
-            catch (e) {
-                // A force push must have overwritten this commit.
-                core.debug(`commit [${workflowRun.head_sha}] doesn't exist.`);
-            }
-        }
-        return result;
-    });
-}
-exports.getCommitHashOfLastSuccessfulWorkflowByCurrentBranch = getCommitHashOfLastSuccessfulWorkflowByCurrentBranch;
-
-
-/***/ }),
-
-/***/ 7690:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
-const executeCliCommand_1 = __importDefault(__nccwpck_require__(4771));
-const getCommitHashOfLastSuccessfulWorkflowByCurrentBranch_1 = __nccwpck_require__(7538);
-/**
- * Gets a commit range that can be used with a git log command (e.g. git log from..to).
- * @param githubRef
- * @returns references to the current commit and the last commit of the same branch or last tag
- */
-function getCommitRefRange(githubRef) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let currentState;
-        let previousState;
-        // TODO: Make githubRef a value type.
-        if (githubRef.startsWith('refs/heads/')) {
-            const branchName = githubRef.slice('refs/heads/'.length);
-            currentState = branchName;
-            // TODO: Inject this.
-            const previousState = yield (0, getCommitHashOfLastSuccessfulWorkflowByCurrentBranch_1.getCommitHashOfLastSuccessfulWorkflowByCurrentBranch)(branchName);
-            if (previousState == null) {
-                // TODO: Include workflow name in message.
-                core.warning(`Failed to find a previous successful pipeline for ${branchName} branch.`);
-            }
-        }
-        else if (githubRef.startsWith('refs/tags/')) {
-            const tagName = githubRef.slice('refs/tags/'.length);
-            currentState = tagName;
-            core.info(`git describe --tags --abbrev=0 --always ${tagName}`);
-            previousState = (yield (0, executeCliCommand_1.default)(`git describe --tags --abbrev=0 --always ${tagName}`)).trim();
-            // TODO: Handle case when --always takes affect (returns a sha instead of tag).
-            previousState = 'origin/' + previousState;
-        }
-        else if (githubRef.startsWith('refs/pull/')) {
-            // const pr = github.context.payload.pull_request!
-            // const { data: prCommits } = await github.getOctokit('').rest.pulls.listCommits({
-            //   owner: pr.base.repo.owner.login,
-            //   repo: pr.base.repo.name,
-            //   pull_number: pr.number,
-            // })
-            // const commitSha = prCommits[0].sha
-            // const eventName = github.context.eventName // pull_request
-            //const githubRefName = process.env.GITHUB_REF_NAME
-            previousState = 'origin/' + process.env.GITHUB_BASE_REF; // pr target
-            currentState = 'origin/' + process.env.GITHUB_HEAD_REF; // pr source
-        }
-        else {
-            // TODO: Should we just log a warning (and set the preamble as output) instead of fail?
-            core.setFailed(`Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`);
-            // refs/pull/1/merge
-        }
-        return { currentState, previousState };
-    });
-}
-exports["default"] = getCommitRefRange;
-
-
-/***/ }),
-
-/***/ 4288:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getCommits = exports.DELIMITER = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const exec = __importStar(__nccwpck_require__(1514));
-const executeCliCommand_1 = __importDefault(__nccwpck_require__(4771));
-exports.DELIMITER = '------------------------ >8 ------------------------';
-/**
- * Gets a list commits between previousState and currentState
- * @param previousState
- * @param currentState
- * @param maxCommits
- * @returns a list of commits
- */
-function getCommits(previousState, currentState, maxCommits) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // TODO: Get the total count of commits so we can inform the user how many
-        // are being excluded from output due to maxCommits.
-        // const commitCount = await executeCliCommand(
-        //   `git rev-list ${previousState}..${currentState} --count`,
-        // )
-        yield exec.exec('git fetch origin');
-        core.info(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
-        const rawCommits = yield (0, executeCliCommand_1.default)(`git log ${previousState}..${currentState} --format=%H'|'%B'${exports.DELIMITER}' --max-count=${maxCommits}`);
-        const commitInfo = rawCommits.split(exports.DELIMITER + '\n').filter((x) => x != '');
-        const commits = commitInfo.map((x) => {
-            const components = x.split('|', 2);
-            const commitHash = components[0];
-            const rawBody = components[1];
-            const header = rawBody.split('\n', 1)[0];
-            return { commitHash, rawBody, header };
+            return response.data.workflow_runs[0].head_sha;
         });
-        return commits;
-    });
+    }
 }
-exports.getCommits = getCommits;
+exports["default"] = WorkflowShaProvider;
 
 
 /***/ }),
 
-/***/ 3697:
+/***/ 6144:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const compositionRoot_1 = __importDefault(__nccwpck_require__(852));
+compositionRoot_1.default.constructAction().run();
+
+
+/***/ }),
+
+/***/ 7261:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DELIMITER = void 0;
+exports.DELIMITER = '------------------------';
+class CommitListCalculator {
+    constructor(commitProvider) {
+        this.commitProvider = commitProvider;
+    }
+    execute(commitRefRange) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // TODO: Get the total count of commits so we can inform the user how many
+            // are being excluded from output due to maxCommits.
+            // const commitCount = await executeCliCommand(
+            //   `git rev-list ${previousState}..${currentState} --count`,
+            // )
+            //await exec.exec('git fetch origin')
+            const rawCommits = yield this.commitProvider(commitRefRange, exports.DELIMITER);
+            const commitInfo = rawCommits.split(`\n${exports.DELIMITER}\n`).filter((x) => x != '');
+            const commits = commitInfo.map((x) => {
+                const components = x.split('|', 2);
+                const commitHash = components[0];
+                const rawBody = components[1];
+                const header = rawBody.split('\n', 1)[0];
+                return { commitHash, rawBody, header };
+            });
+            return commits;
+        });
+    }
+}
+exports["default"] = CommitListCalculator;
+
+
+/***/ }),
+
+/***/ 1802:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -34128,6 +34273,107 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(2186));
+// TODO: Consider splitting this into 3 distinct implementations of an interface,
+// one of which is chosen at composition time.
+class CommitRefRangeCalculator {
+    constructor(context, commitHashCalculator, previousTagProvider) {
+        this.context = context;
+        this.commitHashCalculator = commitHashCalculator;
+        this.previousTagProvider = previousTagProvider;
+    }
+    execute() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let currentRef;
+            let previousRef;
+            const githubRef = this.context.ref;
+            if (githubRef.startsWith('refs/heads/')) {
+                const branchName = githubRef.slice('refs/heads/'.length);
+                currentRef = branchName;
+                previousRef = yield this.commitHashCalculator.execute(branchName);
+                if (previousRef == null) {
+                    core.warning(`Failed to find a previous successful pipeline for ${branchName} branch.`);
+                }
+            }
+            else if (githubRef.startsWith('refs/tags/')) {
+                const tagName = githubRef.slice('refs/tags/'.length);
+                currentRef = tagName;
+                try {
+                    previousRef = yield this.previousTagProvider(tagName);
+                }
+                catch (error) {
+                    core.info(`This is the first commit so there are no earlier commits to compare to.`);
+                }
+                // TODO: --always causes command to return sha of previous commit if no earler tags exist.
+                if (previousRef) {
+                    previousRef = 'origin/' + previousRef;
+                }
+            }
+            else if (githubRef.startsWith('refs/pull/')) {
+                previousRef = 'origin/' + this.context.prTarget;
+                currentRef = 'origin/' + this.context.prSource;
+            }
+            else {
+                throw new Error(`Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`);
+            }
+            return { currentRef, previousRef };
+        });
+    }
+}
+exports["default"] = CommitRefRangeCalculator;
+
+
+/***/ }),
+
+/***/ 3636:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class CommitsToMarkdownTranformer {
+    constructor(input, markdown) {
+        this.input = input;
+        this.markdown = markdown;
+    }
+    execute(commits) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = this.input.preamble;
+            const headers = commits.map((x) => x.header);
+            result += this.markdown.ul(headers);
+            return result;
+        });
+    }
+}
+exports["default"] = CommitsToMarkdownTranformer;
+
+
+/***/ }),
+
+/***/ 8447:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34140,52 +34386,57 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 /* eslint-disable @typescript-eslint/no-var-requires */
 const spec = __nccwpck_require__(8761);
-const core = __importStar(__nccwpck_require__(2186));
 const conventional_commits_parser_1 = __nccwpck_require__(1655);
-function getConventionalOutput(commits, markdown, changelogConfig) {
-    var _a, _b, _c;
-    return __awaiter(this, void 0, void 0, function* () {
-        const options = yield spec();
-        const map = {};
-        map['BREAKING'] = [];
-        core.debug(`[getConventionalOutput] commits: ${commits.length}`);
-        for (const commit of commits) {
-            core.debug(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`);
-            const parsed = (0, conventional_commits_parser_1.sync)(commit.rawBody, options.parserOpts);
-            core.debug(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`);
-            const type = (_a = parsed.type) !== null && _a !== void 0 ? _a : 'OTHER';
-            const subject = (_b = parsed.subject) !== null && _b !== void 0 ? _b : commit.header;
-            const items = (_c = map[type]) !== null && _c !== void 0 ? _c : [];
-            map[type] = items;
-            const prefix = parsed.scope ? markdown.bold(`${parsed.scope}: `) : '';
-            items.push(prefix + subject);
-            const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE');
-            if (breakingChanges.length === 0)
-                continue;
-            map['BREAKING'].push(...breakingChanges.map((x) => x.text));
-        }
-        core.debug(`[getConventionalOutput] map: ${JSON.stringify(map)}`);
-        let result = '';
-        for (const key in map) {
-            if (map[key].length === 0)
-                continue;
-            const commitType = changelogConfig.types.get(key);
-            if (!commitType || commitType.hidden)
-                continue;
-            const section = commitType.section;
-            result += markdown.heading(section);
-            result += markdown.ul(map[key]);
-        }
-        core.debug(`[getConventionalOutput] result: ${result}`);
-        return result;
-    });
+class ConventionalOutputProvider {
+    constructor(markdown, changelogConfig) {
+        this.markdown = markdown;
+        this.changelogConfig = changelogConfig;
+    }
+    execute(commits) {
+        var _a, _b, _c;
+        return __awaiter(this, void 0, void 0, function* () {
+            const options = yield spec();
+            const map = {};
+            map['BREAKING'] = [];
+            //core.debug(`[getConventionalOutput] commits: ${commits.length}`)
+            for (const commit of commits) {
+                //core.debug(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`)
+                const parsed = (0, conventional_commits_parser_1.sync)(commit.rawBody, options.parserOpts);
+                //core.debug(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`)
+                const type = (_a = parsed.type) !== null && _a !== void 0 ? _a : 'OTHER';
+                const subject = (_b = parsed.subject) !== null && _b !== void 0 ? _b : commit.header;
+                const items = (_c = map[type]) !== null && _c !== void 0 ? _c : [];
+                map[type] = items;
+                const prefix = parsed.scope ? this.markdown.bold(`${parsed.scope}: `) : '';
+                items.push(prefix + subject);
+                const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE');
+                if (breakingChanges.length === 0)
+                    continue;
+                map['BREAKING'].push(...breakingChanges.map((x) => x.text));
+            }
+            //core.debug(`[getConventionalOutput] map: ${JSON.stringify(map)}`)
+            let result = '';
+            for (const key in map) {
+                if (map[key].length === 0)
+                    continue;
+                const commitType = this.changelogConfig.types.get(key);
+                if (!commitType || commitType.hidden)
+                    continue;
+                const section = commitType.section;
+                result += this.markdown.heading(section);
+                result += this.markdown.ul(map[key]);
+            }
+            //core.debug(`[getConventionalOutput] result: ${result}`)
+            return result;
+        });
+    }
 }
-exports["default"] = getConventionalOutput;
+exports["default"] = ConventionalOutputProvider;
 
 
 /***/ }),
 
-/***/ 4875:
+/***/ 3808:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -34210,86 +34461,7 @@ exports["default"] = GitHubMarkdown;
 
 /***/ }),
 
-/***/ 6144:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
-const getConventionalOutput_1 = __importDefault(__nccwpck_require__(3697));
-const getCommitRefRange_1 = __importDefault(__nccwpck_require__(7690));
-const slackMarkdown_1 = __importDefault(__nccwpck_require__(9735));
-const getCommits_1 = __nccwpck_require__(4288);
-const getChangelogConfig_1 = __nccwpck_require__(2459);
-const githubMarkdown_1 = __importDefault(__nccwpck_require__(4875));
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const isConventional = core.getBooleanInput('is-conventional');
-        const maxCommits = core.getInput('max-commits') || '50';
-        const { previousState, currentState } = yield (0, getCommitRefRange_1.default)(github.context.ref);
-        if (!previousState || !currentState) {
-            return;
-        }
-        const commits = yield (0, getCommits_1.getCommits)(previousState, currentState, maxCommits);
-        let result = core.getInput('preamble') || '';
-        result += result !== '' ? '\n' : '';
-        const markdownFlavor = core.getInput('markdown-flavor');
-        if (markdownFlavor !== 'slack' && markdownFlavor !== 'github') {
-            core.setFailed(`Invalid input for markdown-flavor. Only 'github' and 'slack' are supported, ` +
-                `but received ${markdownFlavor}`);
-        }
-        const markdown = markdownFlavor === 'github' ? new githubMarkdown_1.default() : new slackMarkdown_1.default();
-        if (isConventional) {
-            const config = (0, getChangelogConfig_1.getChangelogConfig)();
-            result += yield (0, getConventionalOutput_1.default)(commits, markdown, config);
-        }
-        else {
-            const headers = commits.map((x) => x.header);
-            result += markdown.ul(headers);
-        }
-        result = result.trimEnd();
-        core.setOutput('commit-list', result);
-    });
-}
-run().catch((error) => core.setFailed(JSON.stringify(error, null, 2)));
-
-
-/***/ }),
-
-/***/ 9735:
+/***/ 1270:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
