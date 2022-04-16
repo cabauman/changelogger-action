@@ -33807,6 +33807,8 @@ class CompositionRoot {
             repo: github.context.repo.repo,
             ref: github.context.ref,
             runId: github.context.runId,
+            prSource: process.env.GITHUB_HEAD_REF,
+            prTarget: process.env.GITHUB_BASE_REF,
         });
         return this.actionContext;
     }
