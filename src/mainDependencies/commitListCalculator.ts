@@ -1,3 +1,4 @@
+import * as exec from '@actions/exec'
 import { Commit } from '../contracts/types'
 import { CommitRefRange } from '../contracts/types'
 
@@ -17,7 +18,7 @@ export default class CommitListCalculator {
     //   `git rev-list ${previousState}..${currentState} --count`,
     // )
 
-    //await exec.exec('git fetch origin')
+    await exec.exec('git fetch origin')
 
     const rawCommits = await this.commitProvider(commitRefRange, DELIMITER)
     const commitInfo = rawCommits.split(`\n${DELIMITER}\n`).filter((x) => x != '')
