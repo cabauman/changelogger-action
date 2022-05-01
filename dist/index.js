@@ -33839,9 +33839,20 @@ class CompositionRoot {
         });
     }
     getPreviousTagProvider() {
+        const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/;
         return (currentTag) => __awaiter(this, void 0, void 0, function* () {
-            const gitDescribe = yield exec.getExecOutput(`git describe --tags --abbrev=0 --always ${currentTag}^`);
-            return gitDescribe.stdout.trim();
+            let current = currentTag;
+            // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
+            do {
+                try {
+                    const gitDescribe = yield exec.getExecOutput(`git describe --tags --abbrev=0 ${current}^`);
+                    current = gitDescribe.stdout.trim();
+                }
+                catch (error) {
+                    current = null;
+                }
+            } while (current != null && !regex.test(current));
+            return current !== null && current !== void 0 ? current : currentTag;
         });
     }
     // =============== END Override in tests =============== //
@@ -34303,6 +34314,7 @@ class CommitRefRangeCalculator {
             let currentRef;
             let previousRef;
             const githubRef = this.context.ref;
+            core.info(`githubRef: ${githubRef}`);
             if (githubRef.startsWith('refs/heads/')) {
                 const branchName = githubRef.slice('refs/heads/'.length);
                 currentRef = branchName;
@@ -34320,7 +34332,6 @@ class CommitRefRangeCalculator {
                 catch (error) {
                     core.info(`This is the first commit so there are no earlier commits to compare to.`);
                 }
-                // TODO: --always causes command to return sha of previous commit if no earler tags exist.
                 if (previousRef) {
                     previousRef = 'origin/' + previousRef;
                 }

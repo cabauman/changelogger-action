@@ -89,11 +89,22 @@ export default class CompositionRoot {
   }
 
   protected getPreviousTagProvider() {
-    return async (currentTag: string) => {
-      const gitDescribe = await exec.getExecOutput(
-        `git describe --tags --abbrev=0 --always ${currentTag}^`,
-      )
-      return gitDescribe.stdout.trim()
+    const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/
+    return async (currentTag: string): Promise<string> => {
+      let current: string | null = currentTag
+      // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
+      do {
+        try {
+          const gitDescribe: exec.ExecOutput = await exec.getExecOutput(
+            `git describe --tags --abbrev=0 ${current}^`,
+          )
+          current = gitDescribe.stdout.trim()
+        } catch (error) {
+          current = null
+        }
+      } while (current != null && !regex.test(current))
+
+      return current ?? currentTag
     }
   }
   // =============== END Override in tests =============== //

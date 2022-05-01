@@ -15,6 +15,7 @@ export default class CommitRefRangeCalculator {
     let previousRef: string | undefined
 
     const githubRef = this.context.ref
+    core.info(`githubRef: ${githubRef}`)
     if (githubRef.startsWith('refs/heads/')) {
       const branchName = githubRef.slice('refs/heads/'.length)
       currentRef = branchName
@@ -30,7 +31,6 @@ export default class CommitRefRangeCalculator {
       } catch (error) {
         core.info(`This is the first commit so there are no earlier commits to compare to.`)
       }
-      // TODO: --always causes command to return sha of previous commit if no earler tags exist.
       if (previousRef) {
         previousRef = 'origin/' + previousRef
       }
