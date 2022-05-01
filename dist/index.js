@@ -34022,7 +34022,10 @@ class GitHubAction {
             try {
                 console.log('running action...');
                 const commitRefRange = yield this.commitRefRangeCalculator.execute();
-                // TODO: Consider existing gracefully when previousRef is undefined.
+                if (commitRefRange.previousRef == null) {
+                    this.resultSetter.setOutput('commit-list', 'No previous commits to compare to.');
+                    return;
+                }
                 const commits = yield this.commitListCalculator.execute(commitRefRange); // commitListCreator
                 const markdown = yield this.commitsToMarkdownTranformer.execute(commits); // markdownCreator
                 this.resultSetter.setOutput('commit-list', markdown);
