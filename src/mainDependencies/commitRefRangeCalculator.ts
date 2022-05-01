@@ -35,6 +35,7 @@ export default class CommitRefRangeCalculator {
         previousRef = 'origin/' + previousRef
       }
     } else if (githubRef.startsWith('refs/pull/')) {
+      // TODO: Check if undefined.
       previousRef = 'origin/' + this.context.prTarget
       currentRef = 'origin/' + this.context.prSource
     } else {

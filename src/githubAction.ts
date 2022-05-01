@@ -14,6 +14,7 @@ export default class GitHubAction {
     try {
       console.log('running action...')
       const commitRefRange = await this.commitRefRangeCalculator.execute()
+      // TODO: Consider existing gracefully when previousRef is undefined.
       const commits = await this.commitListCalculator.execute(commitRefRange) // commitListCreator
       const markdown = await this.commitsToMarkdownTranformer.execute(commits) // markdownCreator
       this.resultSetter.setOutput('commit-list', markdown)

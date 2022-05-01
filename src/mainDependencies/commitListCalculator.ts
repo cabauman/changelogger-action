@@ -18,8 +18,6 @@ export default class CommitListCalculator {
     //   `git rev-list ${previousState}..${currentState} --count`,
     // )
 
-    await exec.exec('git fetch origin')
-
     const rawCommits = await this.commitProvider(commitRefRange, DELIMITER)
     const commitInfo = rawCommits.split(`\n${DELIMITER}\n`).filter((x) => x != '')
     const commits: Commit[] = commitInfo.map((x) => {

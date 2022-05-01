@@ -55,4 +55,19 @@ describe('retrieveAndValidateInput', () => {
         )
     })
   })
+
+  context(`token is falsy`, () => {
+    it('throws invalid value error for token', () => {
+      const sut = retrieveAndValidateInput
+      const inputRetriever = tsSinon.stubInterface<IInputRetriever>()
+      inputRetriever.getBooleanInput.withArgs('is-conventional').returns(true)
+      inputRetriever.getInput.withArgs('markdown-flavor').returns('github')
+      inputRetriever.getInput.withArgs('max-commits').returns('10')
+      inputRetriever.getInput.withArgs('preamble').returns('Commit list:')
+      inputRetriever.getInput.withArgs('token').returns('')
+      expect(() => sut(inputRetriever))
+        .to.throw()
+        .with.property('message', `Invalid value '' for 'token' input.`)
+    })
+  })
 })

@@ -78,6 +78,7 @@ export default class CompositionRoot {
 
   protected getCommitProvider() {
     return async ({ previousRef, currentRef }: CommitRefRange, delimeter: string) => {
+      await exec.exec('git fetch origin')
       const gitLog = await exec.getExecOutput(
         `git log ${previousRef}..${currentRef} --format=%H|%B${delimeter} --max-count=${
           this.getInput().maxCommits
