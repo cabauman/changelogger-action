@@ -33848,7 +33848,7 @@ class CompositionRoot {
                 try {
                     const gitDescribe = yield exec.getExecOutput(
                     // TODO: Handle case when tag isn't pushed to origin yet.
-                    `git describe --tags --abbrev=0 origin/${current}^`);
+                    `git describe --tags --abbrev=0 ${current}^`);
                     current = gitDescribe.stdout.trim();
                 }
                 catch (error) {
