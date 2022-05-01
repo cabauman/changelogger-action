@@ -34081,6 +34081,7 @@ class CommitHashCalculator {
             const workflowId = yield this.workflowIdProvider.execute();
             // eslint-disable-next-line no-constant-condition
             while (true) {
+                // TODO: Fix this infinite loop. It keeps grabbing the same sha.
                 const workflowSha = yield this.workflowShaProvider.execute(branchName, workflowId);
                 if (!workflowSha) {
                     break;
@@ -34318,7 +34319,13 @@ class CommitRefRangeCalculator {
             if (githubRef.startsWith('refs/heads/')) {
                 const branchName = githubRef.slice('refs/heads/'.length);
                 currentRef = branchName;
-                previousRef = yield this.commitHashCalculator.execute(branchName);
+                try {
+                    previousRef = yield this.previousTagProvider(currentRef);
+                }
+                catch (error) {
+                    core.info(`This is the first commit so there are no earlier commits to compare to.`);
+                }
+                //previousRef = await this.commitHashCalculator.execute(branchName)
                 if (previousRef == null) {
                     core.warning(`Failed to find a previous successful pipeline for ${branchName} branch.`);
                 }

@@ -15,6 +15,7 @@ export default class CommitHashCalculator {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
+      // TODO: Fix this infinite loop. It keeps grabbing the same sha.
       const workflowSha = await this.workflowShaProvider.execute(branchName, workflowId)
       if (!workflowSha) {
         break

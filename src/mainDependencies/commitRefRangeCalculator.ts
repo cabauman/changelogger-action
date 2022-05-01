@@ -19,7 +19,12 @@ export default class CommitRefRangeCalculator {
     if (githubRef.startsWith('refs/heads/')) {
       const branchName = githubRef.slice('refs/heads/'.length)
       currentRef = branchName
-      previousRef = await this.commitHashCalculator.execute(branchName)
+      try {
+        previousRef = await this.previousTagProvider(currentRef)
+      } catch (error) {
+        core.info(`This is the first commit so there are no earlier commits to compare to.`)
+      }
+      //previousRef = await this.commitHashCalculator.execute(branchName)
       if (previousRef == null) {
         core.warning(`Failed to find a previous successful pipeline for ${branchName} branch.`)
       }
