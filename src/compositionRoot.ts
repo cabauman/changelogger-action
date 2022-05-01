@@ -92,8 +92,7 @@ export default class CompositionRoot {
     const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/
     return async (currentTag: string): Promise<string> => {
       let current: string | null = currentTag
-      await exec.exec('git fetch --all')
-      await exec.exec('git pull --all')
+      await exec.exec('git fetch origin --depth=0')
       // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
       do {
         try {
