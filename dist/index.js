@@ -33842,7 +33842,8 @@ class CompositionRoot {
         const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/;
         return (currentTag) => __awaiter(this, void 0, void 0, function* () {
             let current = currentTag;
-            yield exec.exec('git fetch origin --all');
+            yield exec.exec('git fetch --all');
+            yield exec.exec('git pull --all');
             // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
             do {
                 try {
