@@ -66,7 +66,11 @@ export default class CompositionRoot {
   }
 
   protected getWorkflowShaProvider() {
-    return new WorkflowShaProvider(this.getOctokit(), this.getContext())
+    return new WorkflowShaProvider(
+      this.getOctokit(),
+      this.getContext(),
+      this.getCommitRefValidator(),
+    )
   }
 
   protected getCommitRefValidator() {
@@ -97,7 +101,6 @@ export default class CompositionRoot {
       do {
         try {
           const gitDescribe: exec.ExecOutput = await exec.getExecOutput(
-            // TODO: Handle case when tag isn't pushed to origin yet.
             `git describe --tags --abbrev=0 ${current}^`,
           )
           current = gitDescribe.stdout.trim()
@@ -131,11 +134,7 @@ export default class CompositionRoot {
   }
 
   protected getCommitHashCalculator() {
-    return new CommitHashCalculator(
-      this.getWorkflowIdProvider(),
-      this.getWorkflowShaProvider(),
-      this.getCommitRefValidator(),
-    )
+    return new CommitHashCalculator(this.getWorkflowIdProvider(), this.getWorkflowShaProvider())
   }
 
   protected getMarkdown() {

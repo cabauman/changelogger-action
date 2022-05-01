@@ -33823,7 +33823,7 @@ class CompositionRoot {
         return new workflowIdProvider_1.default(this.getOctokit(), this.getContext());
     }
     getWorkflowShaProvider() {
-        return new workflowShaProvider_1.default(this.getOctokit(), this.getContext());
+        return new workflowShaProvider_1.default(this.getOctokit(), this.getContext(), this.getCommitRefValidator());
     }
     getCommitRefValidator() {
         return (commitRef) => __awaiter(this, void 0, void 0, function* () {
@@ -33846,9 +33846,7 @@ class CompositionRoot {
             // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
             do {
                 try {
-                    const gitDescribe = yield exec.getExecOutput(
-                    // TODO: Handle case when tag isn't pushed to origin yet.
-                    `git describe --tags --abbrev=0 ${current}^`);
+                    const gitDescribe = yield exec.getExecOutput(`git describe --tags --abbrev=0 ${current}^`);
                     current = gitDescribe.stdout.trim();
                 }
                 catch (error) {
@@ -33872,7 +33870,7 @@ class CompositionRoot {
         return new commitsToMarkdownTranformer_1.default(this.getInput(), this.getMarkdown());
     }
     getCommitHashCalculator() {
-        return new commitHashCalculator_1.default(this.getWorkflowIdProvider(), this.getWorkflowShaProvider(), this.getCommitRefValidator());
+        return new commitHashCalculator_1.default(this.getWorkflowIdProvider(), this.getWorkflowShaProvider());
     }
     getMarkdown() {
         return this.getInput().markdownFlavor === 'github' ? new githubMarkdown_1.default() : new slackMarkdown_1.default();
@@ -34073,34 +34071,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class CommitHashCalculator {
-    constructor(workflowIdProvider, workflowShaProvider, commitRefValidator) {
+    constructor(workflowIdProvider, workflowShaProvider) {
         this.workflowIdProvider = workflowIdProvider;
         this.workflowShaProvider = workflowShaProvider;
-        this.commitRefValidator = commitRefValidator;
     }
     execute(branchName) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result;
             const workflowId = yield this.workflowIdProvider.execute();
-            // eslint-disable-next-line no-constant-condition
-            while (true) {
-                // TODO: Fix this infinite loop. It keeps grabbing the same sha.
-                const workflowSha = yield this.workflowShaProvider.execute(branchName, workflowId);
-                if (!workflowSha) {
-                    break;
-                }
-                try {
-                    // Check if the commit still exists.
-                    yield this.commitRefValidator(workflowSha);
-                    result = workflowSha;
-                    break;
-                }
-                catch (e) {
-                    // A force push must have overwritten this commit.
-                    //core.debug(`commit '${workflowSha}' doesn't exist.`)
-                }
-            }
-            return result;
+            const workflowSha = yield this.workflowShaProvider.execute(branchName, workflowId);
+            return workflowSha;
         });
     }
 }
@@ -34181,26 +34160,44 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 class WorkflowShaProvider {
-    constructor(octokit, context) {
+    constructor(octokit, context, commitRefValidator) {
         this.octokit = octokit;
         this.context = context;
+        this.commitRefValidator = commitRefValidator;
     }
     execute(branchName, workflowId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.octokit.rest.actions.listWorkflowRuns({
-                owner: this.context.owner,
-                repo: this.context.repo,
-                workflow_id: workflowId,
-                branch: branchName,
-                status: 'success',
-                per_page: 1,
-            });
-            const workflowCount = response.data.total_count;
-            if (workflowCount === 0) {
-                core.info(`No successful workflows were found for '${branchName}' branch and '${workflowId}' workflow.`);
-                return undefined;
+            let page = 1;
+            let workflowSha;
+            // eslint-disable-next-line no-constant-condition
+            while (true) {
+                const response = yield this.octokit.rest.actions.listWorkflowRuns({
+                    owner: this.context.owner,
+                    repo: this.context.repo,
+                    workflow_id: workflowId,
+                    branch: branchName,
+                    status: 'success',
+                    per_page: 1,
+                    page,
+                });
+                const workflowCount = response.data.total_count;
+                if (workflowCount === 0) {
+                    core.info(`No successful workflows were found for '${branchName}' branch and '${workflowId}' workflow.`);
+                    return undefined;
+                }
+                workflowSha = response.data.workflow_runs[0].head_sha;
+                try {
+                    // Check if the commit still exists.
+                    yield this.commitRefValidator(workflowSha);
+                    break;
+                }
+                catch (e) {
+                    // A force push must have overwritten this commit.
+                    core.debug(`commit '${workflowSha}' doesn't exist.`);
+                    page += 1;
+                }
             }
-            return response.data.workflow_runs[0].head_sha;
+            return workflowSha;
         });
     }
 }
@@ -34347,9 +34344,8 @@ class CommitRefRangeCalculator {
                 }
             }
             else if (githubRef.startsWith('refs/pull/')) {
-                // TODO: Check if undefined.
-                previousRef = 'origin/' + this.context.prTarget;
-                currentRef = 'origin/' + this.context.prSource;
+                previousRef = this.context.prTarget ? 'origin/' + this.context.prTarget : undefined;
+                currentRef = this.context.prSource ? 'origin/' + this.context.prSource : undefined;
             }
             else {
                 throw new Error(`Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`);
