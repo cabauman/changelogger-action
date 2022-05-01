@@ -34323,7 +34323,7 @@ class CommitRefRangeCalculator {
                 const branchName = githubRef.slice('refs/heads/'.length);
                 currentRef = branchName;
                 try {
-                    previousRef = yield this.previousTagProvider(currentRef);
+                    previousRef = yield this.previousTagProvider(process.env.GITHUB_SHA);
                 }
                 catch (error) {
                     core.info(`This is the first commit so there are no earlier commits to compare to.`);
