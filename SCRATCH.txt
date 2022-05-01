@@ -1,0 +1,9 @@
+    // const pr = github.context.payload.pull_request!
+    // const { data: prCommits } = await github.getOctokit('').rest.pulls.listCommits({
+    //   owner: pr.base.repo.owner.login,
+    //   repo: pr.base.repo.name,
+    //   pull_number: pr.number,
+    // })
+    // const commitSha = prCommits[0].sha
+    // const eventName = github.context.eventName // pull_request
+    // const githubRefName = process.env.GITHUB_REF_NAME

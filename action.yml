@@ -21,6 +21,19 @@ inputs:
       Message positioned before the list of commits. This message is displayed
       even if the retrieval of commits fails.
     required: false
+  is-conventional:
+    description: >
+      Parse conventional commits and organize into sections (like conventional changelog libraries).
+      By default, only feat, fix, and breaking changes are included.
+      Can be customized by specifying a .versionrc file path for the `config-path` input.
+    required: false
+    default: 'false'
+  markdown-flavor:
+    description: >
+      Either slack or github
+    required: false
+    default: 'github'
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
