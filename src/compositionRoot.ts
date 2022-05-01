@@ -66,7 +66,11 @@ export default class CompositionRoot {
   }
 
   protected getWorkflowShaProvider() {
-    return new WorkflowShaProvider(this.getOctokit(), this.getContext())
+    return new WorkflowShaProvider(
+      this.getOctokit(),
+      this.getContext(),
+      this.getCommitRefValidator(),
+    )
   }
 
   protected getCommitRefValidator() {
@@ -92,6 +96,7 @@ export default class CompositionRoot {
     const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/
     return async (currentTag: string): Promise<string> => {
       let current: string | null = currentTag
+      await exec.exec('git fetch origin --unshallow')
       // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
       do {
         try {
@@ -129,11 +134,7 @@ export default class CompositionRoot {
   }
 
   protected getCommitHashCalculator() {
-    return new CommitHashCalculator(
-      this.getWorkflowIdProvider(),
-      this.getWorkflowShaProvider(),
-      this.getCommitRefValidator(),
-    )
+    return new CommitHashCalculator(this.getWorkflowIdProvider(), this.getWorkflowShaProvider())
   }
 
   protected getMarkdown() {

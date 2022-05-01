@@ -19,7 +19,12 @@ export default class CommitRefRangeCalculator {
     if (githubRef.startsWith('refs/heads/')) {
       const branchName = githubRef.slice('refs/heads/'.length)
       currentRef = branchName
-      previousRef = await this.commitHashCalculator.execute(branchName)
+      try {
+        previousRef = await this.previousTagProvider(process.env.GITHUB_SHA as string)
+      } catch (error) {
+        core.info(`This is the first commit so there are no earlier commits to compare to.`)
+      }
+      //previousRef = await this.commitHashCalculator.execute(branchName)
       if (previousRef == null) {
         core.warning(`Failed to find a previous successful pipeline for ${branchName} branch.`)
       }
@@ -35,9 +40,8 @@ export default class CommitRefRangeCalculator {
         previousRef = 'origin/' + previousRef
       }
     } else if (githubRef.startsWith('refs/pull/')) {
-      // TODO: Check if undefined.
-      previousRef = 'origin/' + this.context.prTarget
-      currentRef = 'origin/' + this.context.prSource
+      previousRef = this.context.prTarget ? 'origin/' + this.context.prTarget : undefined
+      currentRef = this.context.prSource ? 'origin/' + this.context.prSource : undefined
     } else {
       throw new Error(
         `Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`,

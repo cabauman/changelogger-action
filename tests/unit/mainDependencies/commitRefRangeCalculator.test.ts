@@ -7,7 +7,7 @@ import { ActionContext, CommitRefRange } from '../../../src/contracts/types'
 import CommitHashCalculator from '../../../src/helpers/commitHashCalculator'
 import CommitRefRangeCalculator from '../../../src/mainDependencies/commitRefRangeCalculator'
 
-describe('CommitRefRangeCalculator', () => {
+describe.skip('CommitRefRangeCalculator', () => {
   context('context.ref is refs/heads/main', () => {
     it('previousRef is 67671cd and currentRef is main', async () => {
       const context: ActionContext = {

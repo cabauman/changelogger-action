@@ -14,14 +14,7 @@ describe('CommitHashCalculator', () => {
       const workflowShaProvider = tsSinon.stubConstructor(WorkflowShaProvider)
       workflowIdProvider.execute.resolves(workflowId)
       workflowShaProvider.execute.withArgs(branchName, workflowId).resolves('abc1234')
-      const commitRefValidator = async (commitRef: string) => {
-        return
-      }
-      const sut = new CommitHashCalculator(
-        workflowIdProvider,
-        workflowShaProvider,
-        commitRefValidator,
-      )
+      const sut = new CommitHashCalculator(workflowIdProvider, workflowShaProvider)
 
       // Act
       const actual = await sut.execute(branchName)
@@ -41,14 +34,7 @@ describe('CommitHashCalculator', () => {
       const workflowShaProvider = tsSinon.stubConstructor(WorkflowShaProvider)
       workflowIdProvider.execute.resolves(workflowId)
       workflowShaProvider.execute.withArgs(branchName, workflowId).resolves(undefined)
-      const commitRefValidator = async (commitRef: string) => {
-        return
-      }
-      const sut = new CommitHashCalculator(
-        workflowIdProvider,
-        workflowShaProvider,
-        commitRefValidator,
-      )
+      const sut = new CommitHashCalculator(workflowIdProvider, workflowShaProvider)
 
       // Act
       const actual = await sut.execute(branchName)

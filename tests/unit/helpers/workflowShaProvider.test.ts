@@ -17,15 +17,18 @@ describe('WorkflowShaProvider', () => {
         repo: 'CommitsDiff',
         runId: 2,
       }
+      const commitRefValidator = async (commitRef: string) => {
+        return
+      }
 
       const scoped = nock('https://api.github.com')
         .get(
-          `/repos/${context.owner}/${context.repo}/actions/workflows/${workflowId}/runs?branch=${branchName}&status=success&per_page=1`,
+          `/repos/${context.owner}/${context.repo}/actions/workflows/${workflowId}/runs?branch=${branchName}&status=success&per_page=1&page=1`,
         )
         .reply(200, { total_count: 1, workflow_runs: [{ head_sha: 'xyz1234' }] })
 
       // Act
-      const sut = new WorkflowShaProvider(octokit, context)
+      const sut = new WorkflowShaProvider(octokit, context, commitRefValidator)
 
       // Assert
       const actual = await sut.execute(branchName, workflowId)
@@ -45,15 +48,18 @@ describe('WorkflowShaProvider', () => {
         repo: 'CommitsDiff',
         runId: 2,
       }
+      const commitRefValidator = async (commitRef: string) => {
+        return
+      }
 
       const scoped = nock('https://api.github.com')
         .get(
-          `/repos/${context.owner}/${context.repo}/actions/workflows/${workflowId}/runs?branch=${branchName}&status=success&per_page=1`,
+          `/repos/${context.owner}/${context.repo}/actions/workflows/${workflowId}/runs?branch=${branchName}&status=success&per_page=1&page=1`,
         )
         .reply(200, { total_count: 0, workflow_runs: [] })
 
       // Act
-      const sut = new WorkflowShaProvider(octokit, context)
+      const sut = new WorkflowShaProvider(octokit, context, commitRefValidator)
 
       // Assert
       const actual = await sut.execute(branchName, workflowId)
