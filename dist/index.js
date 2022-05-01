@@ -33846,7 +33846,9 @@ class CompositionRoot {
             // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
             do {
                 try {
-                    const gitDescribe = yield exec.getExecOutput(`git describe --tags --abbrev=0 ${current}^`);
+                    const gitDescribe = yield exec.getExecOutput(
+                    // TODO: Handle case when tag isn't pushed to origin yet.
+                    `git describe --tags --abbrev=0 origin/${current}^`);
                     current = gitDescribe.stdout.trim();
                 }
                 catch (error) {

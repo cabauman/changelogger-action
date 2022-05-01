@@ -97,7 +97,8 @@ export default class CompositionRoot {
       do {
         try {
           const gitDescribe: exec.ExecOutput = await exec.getExecOutput(
-            `git describe --tags --abbrev=0 ${current}^`,
+            // TODO: Handle case when tag isn't pushed to origin yet.
+            `git describe --tags --abbrev=0 origin/${current}^`,
           )
           current = gitDescribe.stdout.trim()
         } catch (error) {
