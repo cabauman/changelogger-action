@@ -36,9 +36,6 @@ export default class CommitRefRangeCalculator {
       } catch (error) {
         core.info(`This is the first commit so there are no earlier commits to compare to.`)
       }
-      if (previousRef) {
-        previousRef = 'origin/' + previousRef
-      }
     } else if (githubRef.startsWith('refs/pull/')) {
       previousRef = this.context.prTarget ? 'origin/' + this.context.prTarget : undefined
       currentRef = this.context.prSource ? 'origin/' + this.context.prSource : undefined
