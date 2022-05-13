@@ -1,6 +1,9 @@
 import { expect } from 'chai'
 import * as tsSinon from 'ts-sinon'
-import retrieveAndValidateInput, { SUPPORTED_MARKDOWN_FLAVORS } from '../../../src/config/getInput'
+import retrieveAndValidateInput, {
+  BRANCH_COMPARISON_STRATEGY,
+  SUPPORTED_MARKDOWN_FLAVORS,
+} from '../../../src/config/getInput'
 import { IInputRetriever } from '../../../src/contracts/interfaces'
 import { ActionInput } from '../../../src/contracts/types'
 
@@ -14,6 +17,7 @@ describe('retrieveAndValidateInput', () => {
     inputRetriever.getInput.withArgs('max-commits').returns('10')
     inputRetriever.getInput.withArgs('preamble').returns('Commit list:')
     inputRetriever.getInput.withArgs('token').returns('my-token')
+    inputRetriever.getInput.withArgs(BRANCH_COMPARISON_STRATEGY).returns('tag')
     const actual = sut(inputRetriever)
     const expected: ActionInput = {
       isConventional: true,
@@ -21,6 +25,7 @@ describe('retrieveAndValidateInput', () => {
       maxCommits: '10',
       preamble: 'Commit list:',
       token: 'my-token',
+      branchComparisonStrategy: 'tag',
     }
     expect(actual).to.deep.equal(expected)
   })

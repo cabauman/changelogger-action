@@ -115,8 +115,10 @@ export default class CompositionRoot {
   // =============== END Override in tests =============== //
 
   protected getCommitRefRangeCalculator() {
+    const { ref: githubRef, prTarget, prSource } = this.getContext()
+    const { branchComparisonStrategy } = this.getInput()
     return new CommitRefRangeCalculator(
-      this.getContext(),
+      { githubRef, prTarget, prSource, branchComparisonStrategy },
       this.getCommitHashCalculator(),
       this.getPreviousTagProvider(),
     )

@@ -1,6 +1,6 @@
-name: 'Commits Diff'
+name: 'Changelogger'
 author: 'Colt Alan Bauman'
-description: 'Outputs a bullet list of commit message headers that took place since the last commit of the current branch (or since the previous tag if the workflow was triggered by a tag)'
+description: 'Outputs a changelog diff'
 inputs:
   token:
     description: >
@@ -15,7 +15,7 @@ inputs:
   max-commits:
     description: 'Max number of commits to include in the output'
     required: false
-    default: '50'
+    default: '100'
   preamble:
     description: >
       Message positioned before the list of commits. This message is displayed
@@ -25,14 +25,23 @@ inputs:
     description: >
       Parse conventional commits and organize into sections (like conventional changelog libraries).
       By default, only feat, fix, and breaking changes are included.
-      Can be customized by specifying a .versionrc file path for the `config-path` input.
+      Will use the .versionrc file if present.
     required: false
-    default: 'false'
+    default: 'true'
   markdown-flavor:
     description: >
       Either slack or github
     required: false
     default: 'github'
+  branch-comparison-strategy:
+    description: >
+      Either tag or workflow
+      Only applies when the workflow trigger ref starts with `refs/heads/`
+      tag: searches for the last non-prerelease tag, and uses that to compare against HEAD
+      workflow: searches for the last successful workflow run for the current branch + current workflow,
+        and uses that to compare against HEAD
+    required: false
+    default: 'tag'
 
 runs:
   using: 'node16'

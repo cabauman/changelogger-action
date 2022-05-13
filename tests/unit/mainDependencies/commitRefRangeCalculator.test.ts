@@ -7,7 +7,7 @@ import { ActionContext, CommitRefRange } from '../../../src/contracts/types'
 import CommitHashCalculator from '../../../src/helpers/commitHashCalculator'
 import CommitRefRangeCalculator from '../../../src/mainDependencies/commitRefRangeCalculator'
 
-describe.skip('CommitRefRangeCalculator', () => {
+describe('CommitRefRangeCalculator', () => {
   context('context.ref is refs/heads/main', () => {
     it('previousRef is 67671cd and currentRef is main', async () => {
       const context: ActionContext = {
@@ -16,6 +16,8 @@ describe.skip('CommitRefRangeCalculator', () => {
         repo: 'CommitsDiff',
         runId: 1,
       }
+      const branchComparisonStrategy = 'workflow'
+      const { ref: githubRef, prSource, prTarget } = context
       const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
       const previousTagProvider = (currentTag: string) => {
         return Promise.resolve('v0.1.0')
@@ -23,7 +25,11 @@ describe.skip('CommitRefRangeCalculator', () => {
 
       commitHashCalculator.execute.withArgs('main').resolves('67671cd')
 
-      const sut = new CommitRefRangeCalculator(context, commitHashCalculator, previousTagProvider)
+      const sut = new CommitRefRangeCalculator(
+        { githubRef, prSource, prTarget, branchComparisonStrategy },
+        commitHashCalculator,
+        previousTagProvider,
+      )
 
       // Act
       const actual = await sut.execute()
@@ -40,6 +46,8 @@ describe.skip('CommitRefRangeCalculator', () => {
           repo: 'CommitsDiff',
           runId: 1,
         }
+        const branchComparisonStrategy = 'workflow'
+        const { ref: githubRef, prSource, prTarget } = context
         const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
         const previousTagProvider = (currentTag: string) => {
           return Promise.resolve('v0.1.0')
@@ -47,7 +55,11 @@ describe.skip('CommitRefRangeCalculator', () => {
 
         commitHashCalculator.execute.withArgs('main').resolves(undefined)
 
-        const sut = new CommitRefRangeCalculator(context, commitHashCalculator, previousTagProvider)
+        const sut = new CommitRefRangeCalculator(
+          { githubRef, prSource, prTarget, branchComparisonStrategy },
+          commitHashCalculator,
+          previousTagProvider,
+        )
 
         // Act
         const actual = await sut.execute()
@@ -59,13 +71,15 @@ describe.skip('CommitRefRangeCalculator', () => {
   })
 
   context('context.ref is refs/tags/v0.2.0', () => {
-    it('previousRef is origin/v0.1.0 and currentRef is v0.2.0', async () => {
+    it('previousRef is v0.1.0 and currentRef is v0.2.0', async () => {
       const context: ActionContext = {
         owner: 'colt',
         ref: 'refs/tags/v0.2.0',
         repo: 'CommitsDiff',
         runId: 1,
       }
+      const branchComparisonStrategy = 'workflow'
+      const { ref: githubRef, prSource, prTarget } = context
       const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
       const previousTagProvider = (currentTag: string) => {
         return Promise.resolve('v0.1.0')
@@ -73,12 +87,16 @@ describe.skip('CommitRefRangeCalculator', () => {
 
       commitHashCalculator.execute.rejects('This was not supposed to be called.')
 
-      const sut = new CommitRefRangeCalculator(context, commitHashCalculator, previousTagProvider)
+      const sut = new CommitRefRangeCalculator(
+        { githubRef, prSource, prTarget, branchComparisonStrategy },
+        commitHashCalculator,
+        previousTagProvider,
+      )
 
       // Act
       const actual = await sut.execute()
 
-      const expected: CommitRefRange = { previousRef: 'origin/v0.1.0', currentRef: 'v0.2.0' }
+      const expected: CommitRefRange = { previousRef: 'v0.1.0', currentRef: 'v0.2.0' }
       expect(actual).to.deep.equal(expected)
     })
 
@@ -90,6 +108,8 @@ describe.skip('CommitRefRangeCalculator', () => {
           repo: 'CommitsDiff',
           runId: 1,
         }
+        const branchComparisonStrategy = 'workflow'
+        const { ref: githubRef, prSource, prTarget } = context
         const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
         const previousTagProvider = (currentTag: string) => {
           return Promise.reject()
@@ -97,7 +117,11 @@ describe.skip('CommitRefRangeCalculator', () => {
 
         commitHashCalculator.execute.rejects('This was not supposed to be called.')
 
-        const sut = new CommitRefRangeCalculator(context, commitHashCalculator, previousTagProvider)
+        const sut = new CommitRefRangeCalculator(
+          { githubRef, prSource, prTarget, branchComparisonStrategy },
+          commitHashCalculator,
+          previousTagProvider,
+        )
 
         // Act
         const actual = await sut.execute()
@@ -118,6 +142,8 @@ describe.skip('CommitRefRangeCalculator', () => {
         prSource: 'my-feat',
         prTarget: 'main',
       }
+      const branchComparisonStrategy = 'workflow'
+      const { ref: githubRef, prSource, prTarget } = context
       const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
       const previousTagProvider = (currentTag: string) => {
         return Promise.resolve('v0.1.0')
@@ -125,7 +151,11 @@ describe.skip('CommitRefRangeCalculator', () => {
 
       commitHashCalculator.execute.rejects('This was not supposed to be called.')
 
-      const sut = new CommitRefRangeCalculator(context, commitHashCalculator, previousTagProvider)
+      const sut = new CommitRefRangeCalculator(
+        { githubRef, prSource, prTarget, branchComparisonStrategy },
+        commitHashCalculator,
+        previousTagProvider,
+      )
 
       // Act
       const actual = await sut.execute()
@@ -145,6 +175,8 @@ describe.skip('CommitRefRangeCalculator', () => {
         prSource: 'my-feat',
         prTarget: 'main',
       }
+      const branchComparisonStrategy = 'workflow'
+      const { ref: githubRef, prSource, prTarget } = context
       const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
       const previousTagProvider = (currentTag: string) => {
         return Promise.resolve('v0.1.0')
@@ -152,7 +184,11 @@ describe.skip('CommitRefRangeCalculator', () => {
 
       commitHashCalculator.execute.rejects('This was not supposed to be called.')
 
-      const sut = new CommitRefRangeCalculator(context, commitHashCalculator, previousTagProvider)
+      const sut = new CommitRefRangeCalculator(
+        { githubRef, prSource, prTarget, branchComparisonStrategy },
+        commitHashCalculator,
+        previousTagProvider,
+      )
 
       // Act
       const fn = () => sut.execute()

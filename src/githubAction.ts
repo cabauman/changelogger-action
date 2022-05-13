@@ -15,6 +15,7 @@ export default class GitHubAction {
       console.log('running action...')
       const commitRefRange = await this.commitRefRangeCalculator.execute()
       if (commitRefRange.previousRef == null) {
+        // TODO: Consider setting the preamble as the output.
         this.resultSetter.setOutput('commit-list', 'No previous commits to compare to.')
         return
       }
@@ -22,8 +23,8 @@ export default class GitHubAction {
       const markdown = await this.commitsToMarkdownTranformer.execute(commits) // markdownCreator
       this.resultSetter.setOutput('commit-list', markdown)
     } catch (error) {
+      // TODO: Consider using error util. JSON.stringify doesn't do well with errors.
       const message = error instanceof Error ? error.message : JSON.stringify(error)
-      console.log(message)
       this.resultSetter.setFailed(message)
     }
   }

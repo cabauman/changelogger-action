@@ -13,6 +13,7 @@ describe('commitsToMarkdownTranformer', () => {
       maxCommits: '50',
       preamble: 'Commit list:',
       token: 'my-token',
+      branchComparisonStrategy: 'tag',
     }
     const markdownWriter = tsSinon.stubInterface<IMarkdown>()
     markdownWriter.ul.returns('expected output')

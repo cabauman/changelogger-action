@@ -2,3 +2,9 @@
 example: my commit message (#713) (a316dd0)
 
 - option to print commits in reverse
+
+- Consider supporting 'cumulative' input: compositionRoot.getPreviousTagProvider
+
+const regex2 = /^v[0-9]+\.[0-9]+\.[0-9]+-(.*\.)[0-9]+$/
+const suppliedTagIsStableRelease = regex.test(currentTag)
+const isPrerelease = regex2.test(current)

@@ -33858,7 +33858,9 @@ class CompositionRoot {
     }
     // =============== END Override in tests =============== //
     getCommitRefRangeCalculator() {
-        return new commitRefRangeCalculator_1.default(this.getContext(), this.getCommitHashCalculator(), this.getPreviousTagProvider());
+        const { ref: githubRef, prTarget, prSource } = this.getContext();
+        const { branchComparisonStrategy } = this.getInput();
+        return new commitRefRangeCalculator_1.default({ githubRef, prTarget, prSource, branchComparisonStrategy }, this.getCommitHashCalculator(), this.getPreviousTagProvider());
     }
     getCommitListCalculator() {
         return new commitListCalculator_1.default(this.getCommitProvider());
@@ -33963,13 +33965,15 @@ exports.getChangelogConfig = getChangelogConfig;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TOKEN = exports.PREAMBLE = exports.MARKDOWN_FLAVOR = exports.MAX_COMMITS = exports.IS_CONVENTIONAL = exports.SUPPORTED_MARKDOWN_FLAVORS = void 0;
+exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.MARKDOWN_FLAVOR = exports.MAX_COMMITS = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_MARKDOWN_FLAVORS = void 0;
 exports.SUPPORTED_MARKDOWN_FLAVORS = ['github', 'slack'];
+exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = ['tag', 'workflow'];
 exports.IS_CONVENTIONAL = 'is-conventional';
 exports.MAX_COMMITS = 'max-commits';
 exports.MARKDOWN_FLAVOR = 'markdown-flavor';
 exports.PREAMBLE = 'preamble';
 exports.TOKEN = 'token';
+exports.BRANCH_COMPARISON_STRATEGY = 'branch-comparison-strategy';
 function retrieveAndValidateInput(inputRetriever) {
     const input = {
         isConventional: inputRetriever.getBooleanInput(exports.IS_CONVENTIONAL),
@@ -33977,10 +33981,12 @@ function retrieveAndValidateInput(inputRetriever) {
         markdownFlavor: inputRetriever.getInput(exports.MARKDOWN_FLAVOR),
         preamble: inputRetriever.getInput(exports.PREAMBLE),
         token: inputRetriever.getInput(exports.TOKEN),
+        branchComparisonStrategy: inputRetriever.getInput(exports.BRANCH_COMPARISON_STRATEGY),
     };
     validateMarkdownFlavor(input.markdownFlavor);
     validateMaxCommits(input.maxCommits);
     validateToken(input.token);
+    validateBranchComparisonStrategy(input.branchComparisonStrategy);
     return input;
 }
 exports["default"] = retrieveAndValidateInput;
@@ -34001,6 +34007,12 @@ function validateMaxCommits(value) {
 function validateToken(value) {
     if (value === '') {
         throw new Error(`Invalid value '${value}' for 'token' input.`);
+    }
+}
+function validateBranchComparisonStrategy(value) {
+    if (!exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES.includes(value)) {
+        throw new Error(`Invalid value '${value}' for 'branch-comparison-strategy' input. ` +
+            `It must be one of ${exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES}`);
     }
 }
 
@@ -34035,6 +34047,7 @@ class GitHubAction {
                 console.log('running action...');
                 const commitRefRange = yield this.commitRefRangeCalculator.execute();
                 if (commitRefRange.previousRef == null) {
+                    // TODO: Consider setting the preamble as the output.
                     this.resultSetter.setOutput('commit-list', 'No previous commits to compare to.');
                     return;
                 }
@@ -34043,8 +34056,8 @@ class GitHubAction {
                 this.resultSetter.setOutput('commit-list', markdown);
             }
             catch (error) {
+                // TODO: Consider using error util. JSON.stringify doesn't do well with errors.
                 const message = error instanceof Error ? error.message : JSON.stringify(error);
-                console.log(message);
                 this.resultSetter.setFailed(message);
             }
         });
@@ -34305,8 +34318,8 @@ const core = __importStar(__nccwpck_require__(2186));
 // TODO: Consider splitting this into 3 distinct implementations of an interface,
 // one of which is chosen at composition time.
 class CommitRefRangeCalculator {
-    constructor(context, commitHashCalculator, previousTagProvider) {
-        this.context = context;
+    constructor(input, commitHashCalculator, previousTagProvider) {
+        this.input = input;
         this.commitHashCalculator = commitHashCalculator;
         this.previousTagProvider = previousTagProvider;
     }
@@ -34314,20 +34327,23 @@ class CommitRefRangeCalculator {
         return __awaiter(this, void 0, void 0, function* () {
             let currentRef;
             let previousRef;
-            const githubRef = this.context.ref;
-            core.info(`githubRef: ${githubRef}`);
+            const githubRef = this.input.githubRef;
             if (githubRef.startsWith('refs/heads/')) {
                 const branchName = githubRef.slice('refs/heads/'.length);
                 currentRef = branchName;
-                try {
-                    previousRef = yield this.previousTagProvider(process.env.GITHUB_SHA);
+                if (this.input.branchComparisonStrategy === 'tag') {
+                    try {
+                        previousRef = yield this.previousTagProvider(branchName);
+                    }
+                    catch (error) {
+                        core.info(`This is the first commit so there are no earlier commits to compare to.`);
+                    }
                 }
-                catch (error) {
-                    core.info(`This is the first commit so there are no earlier commits to compare to.`);
+                else if (this.input.branchComparisonStrategy === 'workflow') {
+                    previousRef = yield this.commitHashCalculator.execute(branchName);
                 }
-                //previousRef = await this.commitHashCalculator.execute(branchName)
-                if (previousRef == null) {
-                    core.warning(`Failed to find a previous successful pipeline for ${branchName} branch.`);
+                else {
+                    throw new Error(`Unsupported branchComparisonStrategy: ${this.input.branchComparisonStrategy}`);
                 }
             }
             else if (githubRef.startsWith('refs/tags/')) {
@@ -34341,8 +34357,8 @@ class CommitRefRangeCalculator {
                 }
             }
             else if (githubRef.startsWith('refs/pull/')) {
-                previousRef = this.context.prTarget ? 'origin/' + this.context.prTarget : undefined;
-                currentRef = this.context.prSource ? 'origin/' + this.context.prSource : undefined;
+                previousRef = this.input.prTarget ? 'origin/' + this.input.prTarget : undefined;
+                currentRef = this.input.prSource ? 'origin/' + this.input.prSource : undefined;
             }
             else {
                 throw new Error(`Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`);

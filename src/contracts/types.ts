@@ -16,6 +16,7 @@ export type ActionInput = {
   maxCommits: string
   markdownFlavor: string
   isConventional: boolean
+  branchComparisonStrategy: string
 }
 
 export type ActionContext = {
