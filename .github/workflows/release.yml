@@ -25,17 +25,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up git config
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+
       - name: Version bump
         env:
           prerelease: ${{ github.event.inputs.prerelease }}
           release-as: ${{ github.event.inputs.release-as }}
-        run: npx standard-version --skip.changelog 
+        run: >
+          npx standard-version --skip.changelog 
           ${{ env.prerelease != '' && format('--prerelease {0}', env.prerelease) || '' }}
           ${{ env.release-as != 'auto' && format('--release-as {0}', env.release-as) || '' }}
 
       - name: Get latest tag
         id: get-latest-tag
-        run: echo ::set-output name=tag::$(git describe --tags --abbrev=0)
+        run: echo ::set-output name=version-tag::$(git describe --tags --abbrev=0)
 
       - name: Generate changelog
         id: changelog
@@ -44,12 +50,20 @@ jobs:
           is-conventional: true
           preamble: What changed?
 
+      - name: Commit changes
+        env:
+          version-tag: ${{ steps.get-latest-tag.outputs.version-tag }}
+        run: |
+          git push origin ${{ env.version-tag }}
+          git push origin main
+
       - name: Create Release
         uses: actions/create-release@v1.1.4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get-latest-tag.outputs.version }}
-          release_name: ${{ steps.get-latest-tag.outputs.version }}
+          tag_name: ${{ steps.get-latest-tag.outputs.version-tag }}
+          release_name: ${{ steps.get-latest-tag.outputs.version-tag }}
+          prerelease: ${{ github.event.inputs.prerelease != '' }}
           body: |
             ${{ steps.changelog.outputs.commit-list }}
