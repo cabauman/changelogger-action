@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: Prerelease tag (optional)
+        required: false
+        type: string
+        default: ''
+      release-as:
+        required: true
+        type: choice
+        default: auto
+        description: If you want an automated or a manual version bump
+        options:
+          - auto
+          - major
+          - minor
+          - patch
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Version bump
+        env:
+          prerelease: ${{ github.event.inputs.prerelease }}
+          release-as: ${{ github.event.inputs.release-as }}
+        run: npx standard-version --skip.changelog 
+          ${{ inputs.prerelease != '' && format('--prerelease {0}', inputs.prerelease) || '' }}
+          ${{ inputs.release_as != 'auto' && format('--release-as {0}', inputs.release_as) || '' }}
+
+      - name: Get latest tag
+        id: get-latest-tag
+        run: echo ::set-output name=tag::$(git describe --tags --abbrev=0)
+
+      - name: Generate changelog
+        id: changelog
+        uses: ./
+        with:
+          is-conventional: true
+          preamble: What changed?
+
+      - name: Create Release
+        uses: actions/create-release@v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get-latest-tag.outputs.version }}
+          release_name: ${{ steps.get-latest-tag.outputs.version }}
+          body: |
+            ${{ steps.changelog.outputs.commit-list }}
