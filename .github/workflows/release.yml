@@ -30,8 +30,8 @@ jobs:
           prerelease: ${{ github.event.inputs.prerelease }}
           release-as: ${{ github.event.inputs.release-as }}
         run: npx standard-version --skip.changelog 
-          ${{ inputs.prerelease != '' && format('--prerelease {0}', inputs.prerelease) || '' }}
-          ${{ inputs.release_as != 'auto' && format('--release-as {0}', inputs.release_as) || '' }}
+          ${{ env.prerelease != '' && format('--prerelease {0}', env.prerelease) || '' }}
+          ${{ env.release-as != 'auto' && format('--release-as {0}', env.release-as) || '' }}
 
       - name: Get latest tag
         id: get-latest-tag
