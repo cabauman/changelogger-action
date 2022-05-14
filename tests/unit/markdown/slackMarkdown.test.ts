@@ -15,7 +15,7 @@ describe('SlackMarkdown', () => {
     it('returns expected', async () => {
       const sut = new SlackMarkdown()
       const targetText = 'hello, world'
-      const actual = sut.heading(targetText)
+      const actual = sut.heading(targetText, 3)
       expect(actual).to.equal(`*${targetText}*\n`)
     })
   })
@@ -25,7 +25,7 @@ describe('SlackMarkdown', () => {
       const sut = new SlackMarkdown()
       const link = 'https://www.github.com'
       const display = 'my link'
-      const actual = sut.link(link, display)
+      const actual = sut.link(display, link)
       expect(actual).to.equal(`<${link}|${display}>`)
     })
   })

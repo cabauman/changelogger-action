@@ -11,9 +11,9 @@ export interface ILogger {
 }
 
 export interface IMarkdown {
-  heading(text: string): string
+  heading(text: string, level: number): string
   bold(text: string): string
-  link(link: string, display: string): string
+  link(display: string, link: string): string
   ul(list: string[]): string
 }
 

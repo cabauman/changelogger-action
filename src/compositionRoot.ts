@@ -7,7 +7,7 @@ import SlackMarkdown from './markdown/slackMarkdown'
 import CommitHashCalculator from './helpers/commitHashCalculator'
 import CommitListCalculator from './mainDependencies/commitListCalculator'
 import CommitRefRangeCalculator from './mainDependencies/commitRefRangeCalculator'
-import CommitsToMarkdownTranformer from './mainDependencies/commitsToMarkdownTranformer'
+import NonConventionalOutputProvider from './mainDependencies/nonConventionalOutputProvider'
 import GitHubAction from './githubAction'
 import { IResultSetter, IOutputProvider } from './contracts/interfaces'
 import { ActionInput, ActionContext, CommitRefRange } from './contracts/types'
@@ -15,6 +15,7 @@ import WorkflowIdProvider from './helpers/workflowIdProvider'
 import WorkflowShaProvider from './helpers/workflowShaProvider'
 import ConventionalOutputProvider from './mainDependencies/conventionalOutputProvider'
 import { getChangelogConfig } from './config/getChangelogConfig'
+import DecoratedOutputProvider from './mainDependencies/decoratedOutputProvider'
 
 export default class CompositionRoot {
   private actionInput?: ActionInput
@@ -24,7 +25,7 @@ export default class CompositionRoot {
     return new GitHubAction(
       this.getCommitRefRangeCalculator(),
       this.getCommitListCalculator(),
-      this.getCommitsToMarkdownTranformer(),
+      this.getOutputProvider(),
       this.getResultSetter(),
     )
   }
@@ -49,6 +50,10 @@ export default class CompositionRoot {
       prSource: process.env.GITHUB_HEAD_REF,
       prTarget: process.env.GITHUB_BASE_REF,
     }
+    // const url = `https://github.com/${this.actionContext.owner}/${this.actionContext.repo}`
+    // const commitUrl = `${url}/commit/${sha}`
+    // const issueUrl = `${url}/issues/${id}`
+    // const compareUrl = `${url}/compare/${from}...${to}`
     return this.actionContext
   }
 
@@ -128,11 +133,15 @@ export default class CompositionRoot {
     return new CommitListCalculator(this.getCommitProvider())
   }
 
-  protected getCommitsToMarkdownTranformer(): IOutputProvider {
+  protected getOutputProvider(): IOutputProvider {
+    const markdownWriter = this.getMarkdown()
+    let outputProvider: IOutputProvider
     if (this.getInput().isConventional) {
-      return new ConventionalOutputProvider(this.getMarkdown(), getChangelogConfig())
+      outputProvider = new ConventionalOutputProvider(markdownWriter, getChangelogConfig())
+    } else {
+      outputProvider = new NonConventionalOutputProvider(markdownWriter)
     }
-    return new CommitsToMarkdownTranformer(this.getInput(), this.getMarkdown())
+    return new DecoratedOutputProvider(outputProvider, markdownWriter, this.getInput().preamble)
   }
 
   protected getCommitHashCalculator() {

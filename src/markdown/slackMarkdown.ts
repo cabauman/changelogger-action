@@ -1,7 +1,7 @@
-import IMarkdown from './markdown'
+import { IMarkdown } from '../contracts/interfaces'
 
 export default class SlackMarkdown implements IMarkdown {
-  heading(text: string): string {
+  heading(text: string, level: number): string {
     return this.bold(text) + '\n'
   }
 
@@ -9,7 +9,7 @@ export default class SlackMarkdown implements IMarkdown {
     return `*${text}*`
   }
 
-  link(link: string, display: string): string {
+  link(display: string, link: string): string {
     return `<${link}|${display}>`
   }
 

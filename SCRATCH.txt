@@ -7,3 +7,6 @@
     // const commitSha = prCommits[0].sha
     // const eventName = github.context.eventName // pull_request
     // const githubRefName = process.env.GITHUB_REF_NAME
+
+    const versionLink = this.markdown.link('version', 'url')
+    let result = this.markdown.heading(versionLink, 2)

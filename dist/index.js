@@ -33780,15 +33780,16 @@ const slackMarkdown_1 = __importDefault(__nccwpck_require__(1270));
 const commitHashCalculator_1 = __importDefault(__nccwpck_require__(2237));
 const commitListCalculator_1 = __importDefault(__nccwpck_require__(7261));
 const commitRefRangeCalculator_1 = __importDefault(__nccwpck_require__(1802));
-const commitsToMarkdownTranformer_1 = __importDefault(__nccwpck_require__(3636));
+const nonConventionalOutputProvider_1 = __importDefault(__nccwpck_require__(6359));
 const githubAction_1 = __importDefault(__nccwpck_require__(6900));
 const workflowIdProvider_1 = __importDefault(__nccwpck_require__(5264));
 const workflowShaProvider_1 = __importDefault(__nccwpck_require__(5219));
 const conventionalOutputProvider_1 = __importDefault(__nccwpck_require__(8447));
 const getChangelogConfig_1 = __nccwpck_require__(8921);
+const decoratedOutputProvider_1 = __importDefault(__nccwpck_require__(331));
 class CompositionRoot {
     constructAction() {
-        return new githubAction_1.default(this.getCommitRefRangeCalculator(), this.getCommitListCalculator(), this.getCommitsToMarkdownTranformer(), this.getResultSetter());
+        return new githubAction_1.default(this.getCommitRefRangeCalculator(), this.getCommitListCalculator(), this.getOutputProvider(), this.getResultSetter());
     }
     static constructAction() {
         const compositionRoot = new this();
@@ -33810,6 +33811,10 @@ class CompositionRoot {
             prSource: process.env.GITHUB_HEAD_REF,
             prTarget: process.env.GITHUB_BASE_REF,
         });
+        // const url = `https://github.com/${this.actionContext.owner}/${this.actionContext.repo}`
+        // const commitUrl = `${url}/commit/${sha}`
+        // const issueUrl = `${url}/issues/${id}`
+        // const compareUrl = `${url}/compare/${from}...${to}`
         return this.actionContext;
     }
     getResultSetter() {
@@ -33865,11 +33870,16 @@ class CompositionRoot {
     getCommitListCalculator() {
         return new commitListCalculator_1.default(this.getCommitProvider());
     }
-    getCommitsToMarkdownTranformer() {
+    getOutputProvider() {
+        const markdownWriter = this.getMarkdown();
+        let outputProvider;
         if (this.getInput().isConventional) {
-            return new conventionalOutputProvider_1.default(this.getMarkdown(), (0, getChangelogConfig_1.getChangelogConfig)());
+            outputProvider = new conventionalOutputProvider_1.default(markdownWriter, (0, getChangelogConfig_1.getChangelogConfig)());
         }
-        return new commitsToMarkdownTranformer_1.default(this.getInput(), this.getMarkdown());
+        else {
+            outputProvider = new nonConventionalOutputProvider_1.default(markdownWriter);
+        }
+        return new decoratedOutputProvider_1.default(outputProvider, markdownWriter, this.getInput().preamble);
     }
     getCommitHashCalculator() {
         return new commitHashCalculator_1.default(this.getWorkflowIdProvider(), this.getWorkflowShaProvider());
@@ -34035,10 +34045,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class GitHubAction {
-    constructor(commitRefRangeCalculator, commitListCalculator, commitsToMarkdownTranformer, resultSetter) {
+    constructor(commitRefRangeCalculator, commitListCalculator, outputProvider, resultSetter) {
         this.commitRefRangeCalculator = commitRefRangeCalculator;
         this.commitListCalculator = commitListCalculator;
-        this.commitsToMarkdownTranformer = commitsToMarkdownTranformer;
+        this.outputProvider = outputProvider;
         this.resultSetter = resultSetter;
     }
     run() {
@@ -34052,7 +34062,7 @@ class GitHubAction {
                     return;
                 }
                 const commits = yield this.commitListCalculator.execute(commitRefRange); // commitListCreator
-                const markdown = yield this.commitsToMarkdownTranformer.execute(commits); // markdownCreator
+                const markdown = yield this.outputProvider.execute(commits); // markdownCreator
                 this.resultSetter.setOutput('commit-list', markdown);
             }
             catch (error) {
@@ -34372,40 +34382,6 @@ exports["default"] = CommitRefRangeCalculator;
 
 /***/ }),
 
-/***/ 3636:
-/***/ (function(__unused_webpack_module, exports) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-class CommitsToMarkdownTranformer {
-    constructor(input, markdown) {
-        this.input = input;
-        this.markdown = markdown;
-    }
-    execute(commits) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let result = this.input.preamble;
-            const headers = commits.map((x) => x.header);
-            result += this.markdown.ul(headers);
-            return result;
-        });
-    }
-}
-exports["default"] = CommitsToMarkdownTranformer;
-
-
-/***/ }),
-
 /***/ 8447:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -34435,11 +34411,8 @@ class ConventionalOutputProvider {
             const options = yield spec();
             const map = {};
             map['BREAKING'] = [];
-            //core.debug(`[getConventionalOutput] commits: ${commits.length}`)
             for (const commit of commits) {
-                //core.debug(`[getConventionalOutput] commit: ${JSON.stringify(commit)}`)
                 const parsed = (0, conventional_commits_parser_1.sync)(commit.rawBody, options.parserOpts);
-                //core.debug(`[getConventionalOutput] parsed: ${JSON.stringify(parsed)}`)
                 const type = (_a = parsed.type) !== null && _a !== void 0 ? _a : 'OTHER';
                 const subject = (_b = parsed.subject) !== null && _b !== void 0 ? _b : commit.header;
                 const items = (_c = map[type]) !== null && _c !== void 0 ? _c : [];
@@ -34451,7 +34424,6 @@ class ConventionalOutputProvider {
                     continue;
                 map['BREAKING'].push(...breakingChanges.map((x) => x.text));
             }
-            //core.debug(`[getConventionalOutput] map: ${JSON.stringify(map)}`)
             let result = '';
             for (const key in map) {
                 if (map[key].length === 0)
@@ -34460,15 +34432,80 @@ class ConventionalOutputProvider {
                 if (!commitType || commitType.hidden)
                     continue;
                 const section = commitType.section;
-                result += this.markdown.heading(section);
+                result += this.markdown.heading(section, 3);
                 result += this.markdown.ul(map[key]);
             }
-            //core.debug(`[getConventionalOutput] result: ${result}`)
             return result;
         });
     }
 }
 exports["default"] = ConventionalOutputProvider;
+
+
+/***/ }),
+
+/***/ 331:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class DecoratedOutputProvider {
+    constructor(outputProvider, markdownWriter, preamble) {
+        this.outputProvider = outputProvider;
+        this.markdownWriter = markdownWriter;
+        this.preamble = preamble;
+    }
+    execute(commits) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = this.markdownWriter.heading(this.preamble, 2);
+            result += yield this.outputProvider.execute(commits);
+            return result;
+        });
+    }
+}
+exports["default"] = DecoratedOutputProvider;
+
+
+/***/ }),
+
+/***/ 6359:
+/***/ (function(__unused_webpack_module, exports) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+class NonConventionalOutputProvider {
+    constructor(markdown) {
+        this.markdown = markdown;
+    }
+    execute(commits) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const headers = commits.map((x) => x.header);
+            const result = this.markdown.ul(headers);
+            return result;
+        });
+    }
+}
+exports["default"] = NonConventionalOutputProvider;
 
 
 /***/ }),
@@ -34480,13 +34517,13 @@ exports["default"] = ConventionalOutputProvider;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class GitHubMarkdown {
-    heading(text) {
-        return `### ${text}\n\n`;
+    heading(text, level) {
+        return `${'#'.repeat(level)} ${text}\n\n`;
     }
     bold(text) {
         return `**${text}**`;
     }
-    link(link, display) {
+    link(display, link) {
         return `[${display}](${link})`;
     }
     ul(list) {
@@ -34505,13 +34542,13 @@ exports["default"] = GitHubMarkdown;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 class SlackMarkdown {
-    heading(text) {
+    heading(text, level) {
         return this.bold(text) + '\n';
     }
     bold(text) {
         return `*${text}*`;
     }
-    link(link, display) {
+    link(display, link) {
         return `<${link}|${display}>`;
     }
     ul(list) {

@@ -6,7 +6,7 @@ export default class GitHubAction {
   constructor(
     private readonly commitRefRangeCalculator: CommitRefRangeCalculator,
     private readonly commitListCalculator: CommitListCalculator,
-    private readonly commitsToMarkdownTranformer: IOutputProvider,
+    private readonly outputProvider: IOutputProvider,
     private readonly resultSetter: IResultSetter,
   ) {}
 
@@ -20,7 +20,7 @@ export default class GitHubAction {
         return
       }
       const commits = await this.commitListCalculator.execute(commitRefRange) // commitListCreator
-      const markdown = await this.commitsToMarkdownTranformer.execute(commits) // markdownCreator
+      const markdown = await this.outputProvider.execute(commits) // markdownCreator
       this.resultSetter.setOutput('commit-list', markdown)
     } catch (error) {
       // TODO: Consider using error util. JSON.stringify doesn't do well with errors.

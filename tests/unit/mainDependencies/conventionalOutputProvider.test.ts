@@ -2,10 +2,10 @@ import { expect } from 'chai'
 import * as tsSinon from 'ts-sinon'
 import { Commit } from '../../../src/contracts/types'
 import { getDefaultConfig } from '../../../src/config/defaultConfig'
-import IMarkdown from '../../../src/markdown/markdown'
 import ConventionalOutputProvider from '../../../src/mainDependencies/conventionalOutputProvider'
 import SlackMarkdown from '../../../src/markdown/slackMarkdown'
 import { ChangelogConfig } from '../../../src/contracts/types'
+import { IMarkdown } from '../../../src/contracts/interfaces'
 
 describe('conventionalOutputProvider', () => {
   it('returns expected output', async () => {

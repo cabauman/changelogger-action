@@ -15,7 +15,7 @@ describe('GitHubMarkdown', () => {
     it('returns expected', async () => {
       const sut = new GitHubMarkdown()
       const targetText = 'hello, world'
-      const actual = sut.heading(targetText)
+      const actual = sut.heading(targetText, 3)
       expect(actual).to.equal(`### ${targetText}\n\n`)
     })
   })
@@ -25,7 +25,7 @@ describe('GitHubMarkdown', () => {
       const sut = new GitHubMarkdown()
       const link = 'https://www.github.com'
       const display = 'my link'
-      const actual = sut.link(link, display)
+      const actual = sut.link(display, link)
       expect(actual).to.equal(`[${display}](${link})`)
     })
   })
