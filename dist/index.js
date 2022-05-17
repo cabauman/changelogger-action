@@ -33839,7 +33839,7 @@ class CompositionRoot {
     getCommitProvider() {
         return ({ previousRef, currentRef }, delimeter) => __awaiter(this, void 0, void 0, function* () {
             yield exec.exec('git fetch origin');
-            const gitLog = yield exec.getExecOutput(`git log ${previousRef}..${currentRef} --format=%H|%B${delimeter} --max-count=${this.getInput().maxCommits}`);
+            const gitLog = yield exec.getExecOutput(`git log ${previousRef}..${currentRef} --format=%h|%B${delimeter} --max-count=${this.getInput().maxCommits}`);
             return gitLog.stdout;
         });
     }
@@ -33956,6 +33956,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getChangelogConfig = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const defaultConfig_1 = __nccwpck_require__(7630);
+// TODO: Consider loading all the different versionrc file types.
 // https://github.com/conventional-changelog/standard-version/blob/master/lib/configuration.js
 function getChangelogConfig() {
     const configPath = './.versionrc';
@@ -34276,10 +34277,10 @@ class CommitListCalculator {
             const commitInfo = rawCommits.split(`\n${exports.DELIMITER}\n`).filter((x) => x != '');
             const commits = commitInfo.map((x) => {
                 const components = x.split('|', 2);
-                const commitHash = components[0];
+                const sha = components[0];
                 const rawBody = components[1];
                 const header = rawBody.split('\n', 1)[0];
-                return { commitHash, rawBody, header };
+                return { sha, rawBody, header };
             });
             return commits;
         });
@@ -34417,8 +34418,8 @@ class ConventionalOutputProvider {
                 const subject = (_b = parsed.subject) !== null && _b !== void 0 ? _b : commit.header;
                 const items = (_c = map[type]) !== null && _c !== void 0 ? _c : [];
                 map[type] = items;
-                const prefix = parsed.scope ? this.markdown.bold(`${parsed.scope}: `) : '';
-                items.push(prefix + subject);
+                const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) : '';
+                items.push(`${commit.sha} ${scope} ${subject}`);
                 const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE');
                 if (breakingChanges.length === 0)
                     continue;

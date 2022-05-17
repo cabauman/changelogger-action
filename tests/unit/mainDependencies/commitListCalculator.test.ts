@@ -15,8 +15,8 @@ describe('CommitListCalculator', () => {
     const commitRefRange: CommitRefRange = { previousRef: '', currentRef: '' }
     const actual = await sut.execute(commitRefRange)
     const expected: ReadonlyArray<Commit> = [
-      { commitHash: 'abc0123', header: 'feat: my feature', rawBody: 'feat: my feature' },
-      { commitHash: 'abc1234', header: 'fix: my fix', rawBody: 'fix: my fix' },
+      { sha: 'abc0123', header: 'feat: my feature', rawBody: 'feat: my feature' },
+      { sha: 'abc1234', header: 'fix: my fix', rawBody: 'fix: my fix' },
     ]
     expect(actual).to.deep.equal(expected)
   })

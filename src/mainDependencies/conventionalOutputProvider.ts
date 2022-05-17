@@ -23,8 +23,8 @@ export default class ConventionalOutputProvider implements IOutputProvider {
       const subject = parsed.subject ?? commit.header
       const items = map[type] ?? []
       map[type] = items
-      const prefix = parsed.scope ? this.markdown.bold(`${parsed.scope}: `) : ''
-      items.push(prefix + subject)
+      const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) + ' ' : ''
+      items.push(`${commit.sha} ${scope}${subject}`)
 
       const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE')
       if (breakingChanges.length === 0) continue

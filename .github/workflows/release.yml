@@ -48,7 +48,7 @@ jobs:
         uses: ./
         with:
           is-conventional: true
-          preamble: What changed?
+          preamble: What's changed?
 
       - name: Commit changes
         env:

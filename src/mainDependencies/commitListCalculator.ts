@@ -22,10 +22,10 @@ export default class CommitListCalculator {
     const commitInfo = rawCommits.split(`\n${DELIMITER}\n`).filter((x) => x != '')
     const commits: Commit[] = commitInfo.map((x) => {
       const components = x.split('|', 2)
-      const commitHash = components[0]
+      const sha = components[0]
       const rawBody = components[1]
       const header = rawBody.split('\n', 1)[0]
-      return { commitHash, rawBody, header }
+      return { sha, rawBody, header }
     })
     return commits
   }

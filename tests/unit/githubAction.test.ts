@@ -20,7 +20,7 @@ describe('GitHubAction', () => {
 
       const commitRefRange = { previousRef: 'v0.1.0', currentRef: 'v0.2.0' }
       const commits: Commit[] = [
-        { commitHash: 'abc1234', header: 'feat: my feature', rawBody: 'feat: my feature' },
+        { sha: 'abc1234', header: 'feat: my feature', rawBody: 'feat: my feature' },
       ]
       const markdown = '### Features\n\n• my feature'
 

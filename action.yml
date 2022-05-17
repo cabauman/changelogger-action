@@ -12,15 +12,18 @@ inputs:
       [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
     default: ${{ github.token }}
     required: false
+  # Consider getting rid of this option.
   max-commits:
     description: 'Max number of commits to include in the output'
     required: false
     default: '100'
+  # Consider adding postamble like: Full Changelog: v11.2.3...v11.3.0
   preamble:
     description: >
       Message positioned before the list of commits. This message is displayed
       even if the retrieval of commits fails.
     required: false
+  # Consider only supporting conventional commits.
   is-conventional:
     description: >
       Parse conventional commits and organize into sections (like conventional changelog libraries).
@@ -33,6 +36,7 @@ inputs:
       Either slack or github
     required: false
     default: 'github'
+  # Consider only supporting tag comparisons.
   branch-comparison-strategy:
     description: >
       Either tag or workflow
@@ -42,6 +46,7 @@ inputs:
         and uses that to compare against HEAD
     required: false
     default: 'tag'
+  # Consider adding formatting support: {{sha}} {{commit-message}}
 
 runs:
   using: 'node16'
