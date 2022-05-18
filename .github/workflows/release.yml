@@ -66,7 +66,7 @@ jobs:
           echo ::set-output name=base-version::$BASE_VERSION
 
       - name: Upsert release
-        uses: actions/github-script@v4
+        uses: actions/github-script@v6.1.0
         env:
           BASE_VERSION: ${{ steps.get-latest-tag.outputs.get-base-version }}
           RELEASE_NAME: ${{ steps.get-latest-tag.outputs.version-tag }}
@@ -76,9 +76,9 @@ jobs:
           script: |
             const { BASE_VERSION, RELEASE_NAME, PRERELEASE, BODY } = process.env
             const { owner, repo } = context.repo
-            const { data: { id, tag_name } } = await github.repos.getLatestRelease({ owner, repo })
+            const { data: { id, tag_name } } = await github.rest.repos.getLatestRelease({ owner, repo })
             if (tag_name.startsWith(BASE_VERSION)) {
-              await github.repos.updateRelease({
+              await github.rest.repos.updateRelease({
                 owner,
                 repo,
                 release_id: id,
@@ -88,7 +88,7 @@ jobs:
                 body: BODY,
               })
             } else {
-              await github.repos.createRelease({
+              await github.rest.repos.createRelease({
                 owner,
                 repo,
                 prerelease: PRERELEASE === 'true',
