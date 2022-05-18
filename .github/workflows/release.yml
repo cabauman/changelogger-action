@@ -68,21 +68,21 @@ jobs:
       - name: Upsert release
         uses: actions/github-script@v6.1.0
         env:
-          BASE_VERSION: ${{ steps.get-latest-tag.outputs.get-base-version }}
+          BASE_VERSION: ${{ steps.get-base-version.outputs.base-version }}
           RELEASE_NAME: ${{ steps.get-latest-tag.outputs.version-tag }}
           PRERELEASE: ${{ github.event.inputs.prerelease != '' }}
           BODY: ${{ steps.changelog.outputs.commit-list }}
         with:
-          github-token: ${{ secrets.PAT }}
           script: |
             const { BASE_VERSION, RELEASE_NAME, PRERELEASE, BODY } = process.env
             const { owner, repo } = context.repo
-            const { data: { id, tag_name } } = await github.rest.repos.getLatestRelease({ owner, repo })
-            if (tag_name.startsWith(BASE_VERSION)) {
+            const { data } = await github.rest.repos.listReleases({ owner, repo, per_page: 1 })
+            const release = data.length > 0 ? data[0] : undefined
+            if (release && release.tag_name.startsWith(BASE_VERSION)) {
               await github.rest.repos.updateRelease({
                 owner,
                 repo,
-                release_id: id,
+                release_id: release.id,
                 prerelease: PRERELEASE === 'true',
                 name: RELEASE_NAME,
                 tag_name: RELEASE_NAME,
