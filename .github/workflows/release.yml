@@ -62,7 +62,7 @@ jobs:
         env:
           version-tag: ${{ steps.get-latest-tag.outputs.version-tag }}
         run: |
-          export BASE_VERSION=$(${{ env.version-tag }} | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+(?=-[0-9]+)?')
+          export BASE_VERSION=$(echo ${{ env.version-tag }} | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+(?=-[0-9]+)?')
           echo ::set-output name=base-version::$BASE_VERSION
 
       - name: Upsert release
