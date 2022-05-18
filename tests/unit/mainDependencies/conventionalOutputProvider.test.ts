@@ -117,4 +117,17 @@ describe('conventionalOutputProvider', () => {
       expect(actual).to.equal('*Features*\n• abcd123 feature 1\n• abcd124 feature 2\n\n')
     })
   })
+
+  context('1 commit that starts with "chore(release):"', () => {
+    it('returns empty string', async () => {
+      const commits: Commit[] = [
+        { sha: 'abcd123', rawBody: 'chore(release): v1.0.0', header: 'chore(release): v1.0.0' },
+      ]
+      const markdownWriter = new SlackMarkdown()
+      const changelogConfig = getDefaultConfig()
+      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const actual = await sut.execute(commits)
+      expect(actual).to.equal('')
+    })
+  })
 })

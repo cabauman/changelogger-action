@@ -21,6 +21,10 @@ export default class ConventionalOutputProvider implements IOutputProvider {
       map[x.type] = []
     }
     for (const commit of commits) {
+      // TODO: Replace with user input predicate.
+      if (commit.header.startsWith('chore(release):')) {
+        continue
+      }
       const parsed = sync(commit.rawBody, options.parserOpts)
       const type = parsed.type ?? 'OTHER'
       const subject = parsed.subject ?? commit.header
