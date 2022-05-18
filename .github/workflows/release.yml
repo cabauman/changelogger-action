@@ -57,13 +57,44 @@ jobs:
           git push origin ${{ env.version-tag }}
           git push origin main
 
-      - name: Create Release
-        uses: actions/create-release@v1.1.4
+      - name: Get base version
+        id: get-base-version
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          version-tag: ${{ steps.get-latest-tag.outputs.version-tag }}
+        run: |
+          export base-version=$(${{ env.version-tag }} | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+(?=-[0-9]+)?')
+          echo ::set-output name=base-version::$base-version
+
+      - name: Upsert release
+        uses: actions/github-script@v4
+        env:
+          BASE_VERSION: ${{ steps.get-latest-tag.outputs.get-base-version }}
+          RELEASE_NAME: ${{ steps.get-latest-tag.outputs.version-tag }}
+          PRERELEASE: ${{ github.event.inputs.prerelease != '' }}
+          BODY: ${{ steps.changelog.outputs.commit-list }}
         with:
-          tag_name: ${{ steps.get-latest-tag.outputs.version-tag }}
-          release_name: ${{ steps.get-latest-tag.outputs.version-tag }}
-          prerelease: ${{ github.event.inputs.prerelease != '' }}
-          body: |
-            ${{ steps.changelog.outputs.commit-list }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { BASE_VERSION, RELEASE_NAME, PRERELEASE, BODY } = process.env
+            const { owner, repo } = context.repo
+            const { data: { id, tag_name } } = await github.repos.getLatestRelease({ owner, repo })
+            if (tag_name.startsWith(BASE_VERSION)) {
+              await github.repos.updateRelease({
+                owner,
+                repo,
+                release_id: id,
+                prerelease: PRERELEASE === 'true',
+                name: RELEASE_NAME,
+                tag_name: RELEASE_NAME,
+                body: BODY,
+              })
+            } else {
+              await github.repos.createRelease({
+                owner,
+                repo,
+                prerelease: PRERELEASE === 'true',
+                name: RELEASE_NAME,
+                tag_name: RELEASE_NAME,
+                body: BODY,
+              })
+            }
