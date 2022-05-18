@@ -8,6 +8,7 @@ import { ActionInput, ActionContext, CommitRefRange } from '../../src/contracts/
 import WorkflowIdProvider from '../../src/helpers/workflowIdProvider'
 import WorkflowShaProvider from '../../src/helpers/workflowShaProvider'
 
+// TODO: Replace test composition roots with builder pattern.
 class TestCompositionRoot extends CompositionRoot {
   public resultSetter?: IResultSetter
 
@@ -112,7 +113,7 @@ describe('compositionRoot', () => {
     })
   })
 
-  context('................', () => {
+  context.skip('................', () => {
     it('----------------------------', async () => {
       tsSinon.default.stub(github.context, 'repo').get(() => {
         return {

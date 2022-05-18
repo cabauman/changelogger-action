@@ -102,7 +102,7 @@ export default class CompositionRoot {
     return async (currentTag: string): Promise<string> => {
       let current: string | null = currentTag
       await exec.exec('git fetch origin --unshallow')
-      // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
+      // TODO: Consider using a fancier command, such as git + grep, rather than a loop.
       do {
         try {
           const gitDescribe: exec.ExecOutput = await exec.getExecOutput(
@@ -110,6 +110,7 @@ export default class CompositionRoot {
           )
           current = gitDescribe.stdout.trim()
         } catch (error) {
+          core.info(`This is the first commit so there are no earlier commits to compare to.`)
           current = null
         }
       } while (current != null && !regex.test(current))

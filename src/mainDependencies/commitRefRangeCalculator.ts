@@ -19,11 +19,7 @@ export default class CommitRefRangeCalculator {
       const branchName = githubRef.slice('refs/heads/'.length)
       currentRef = branchName
       if (this.input.branchComparisonStrategy === 'tag') {
-        try {
-          previousRef = await this.previousTagProvider(branchName)
-        } catch (error) {
-          core.info(`This is the first commit so there are no earlier commits to compare to.`)
-        }
+        previousRef = await this.previousTagProvider(branchName)
       } else if (this.input.branchComparisonStrategy === 'workflow') {
         previousRef = await this.commitHashCalculator.execute(branchName)
       } else {
