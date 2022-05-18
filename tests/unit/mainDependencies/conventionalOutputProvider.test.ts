@@ -94,13 +94,13 @@ describe('conventionalOutputProvider', () => {
   })
 
   context('1 non-conventional commit', () => {
-    it('returns other section', async () => {
+    it('returns empty string', async () => {
       const commits: Commit[] = [{ sha: 'abcd123', rawBody: 'my feature', header: 'my feature' }]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
       const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
       const actual = await sut.execute(commits)
-      expect(actual).to.equal('*Other*\n• abcd123 my feature\n\n')
+      expect(actual).to.equal('')
     })
   })
 

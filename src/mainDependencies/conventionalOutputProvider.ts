@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const spec = require('conventional-changelog-conventionalcommits')
 import { sync } from 'conventional-commits-parser'
+import * as core from '@actions/core'
 import { Commit } from '../contracts/types'
 import { IMarkdown } from '../contracts/interfaces'
 import { IOutputProvider } from '../contracts/interfaces'
@@ -26,8 +27,12 @@ export default class ConventionalOutputProvider implements IOutputProvider {
         continue
       }
       const parsed = sync(commit.rawBody, options.parserOpts)
-      const type = parsed.type ?? 'OTHER'
-      const subject = parsed.subject ?? commit.header
+      const type = parsed.type
+      const subject = parsed.subject
+      if (!type || !subject) {
+        core.debug(`Unable to parse commit: ${commit.header}`)
+        continue
+      }
       const items = map[type] ?? []
       map[type] = items
       const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) + ' ' : ''
@@ -42,7 +47,13 @@ export default class ConventionalOutputProvider implements IOutputProvider {
     for (const key in map) {
       if (map[key].length === 0) continue
       const commitType = this.changelogConfig.types.get(key)
-      if (!commitType || commitType.hidden) continue
+      if (!commitType) {
+        core.warning(`Unrecognized commit type: ${commitType}. Skipping...`)
+        continue
+      }
+      if (commitType.hidden) {
+        continue
+      }
       const section = commitType.section
       result += this.markdown.heading(section, 3)
       result += this.markdown.ul(map[key])

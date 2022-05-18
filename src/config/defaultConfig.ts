@@ -21,7 +21,6 @@ export function getDefaultConfig(config?: RawChangelogConfig): ChangelogConfig {
   }
 
   config.types.push({ type: 'BREAKING', section: 'BREAKING CHANGES', hidden: false })
-  config.types.push({ type: 'OTHER', section: 'Other', hidden: false })
 
   const result: [string, CommitType][] = config.types.map((x) => [x.type, x])
 
