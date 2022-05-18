@@ -25,6 +25,7 @@ describe('conventionalOutputProvider', () => {
     const actual = await sut.execute(commits)
     expect(actual).to.equal('header:expected output')
   })
+
   context('1 feature commit', () => {
     it('returns features section', async () => {
       const commits: Commit[] = [

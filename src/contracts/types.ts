@@ -38,7 +38,7 @@ export type ActionConfig = {
 export type CommitType = {
   type: string
   section: string
-  hidden: boolean
+  hidden?: boolean
 }
 
 export type ChangelogConfig = {

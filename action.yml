@@ -31,6 +31,7 @@ inputs:
       Will use the .versionrc file if present.
     required: false
     default: 'true'
+  # Consider renaming this to output flavor: markdown, github-release, slack
   markdown-flavor:
     description: >
       Either slack or github
@@ -47,6 +48,7 @@ inputs:
     required: false
     default: 'tag'
   # Consider adding formatting support: {{sha}} {{commit-message}}
+  # Consider adding option to filter out. Either regex or js predicate function.
 
 runs:
   using: 'node16'
