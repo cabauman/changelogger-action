@@ -33848,13 +33848,14 @@ class CompositionRoot {
         return (currentTag) => __awaiter(this, void 0, void 0, function* () {
             let current = currentTag;
             yield exec.exec('git fetch origin --unshallow');
-            // TODO: Look into using a fancier command, such as git + grep, rather than a loop.
+            // TODO: Consider using a fancier command, such as git + grep, rather than a loop.
             do {
                 try {
                     const gitDescribe = yield exec.getExecOutput(`git describe --tags --abbrev=0 ${current}^`);
                     current = gitDescribe.stdout.trim();
                 }
                 catch (error) {
+                    core.info(`This is the first commit so there are no earlier commits to compare to.`);
                     current = null;
                 }
             } while (current != null && !regex.test(current));
@@ -33899,47 +33900,28 @@ exports["default"] = CompositionRoot;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDefaultConfig = exports.defaultConfig = void 0;
+exports.getDefaultConfig = void 0;
 // https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-changelog-conventionalcommits/writer-opts.js
-function defaultConfig(config) {
-    var _a;
-    config = config !== null && config !== void 0 ? config : {};
-    config.types = (_a = config.types) !== null && _a !== void 0 ? _a : [
-        { type: 'feat', section: 'Features' },
-        { type: 'fix', section: 'Bug Fixes' },
-        { type: 'perf', section: 'Performance Improvements' },
-        { type: 'revert', section: 'Reverts' },
-        { type: 'docs', section: 'Documentation', hidden: true },
-        { type: 'style', section: 'Styles', hidden: true },
-        { type: 'chore', section: 'Miscellaneous Chores', hidden: true },
-        { type: 'refactor', section: 'Code Refactoring', hidden: true },
-        { type: 'test', section: 'Tests', hidden: true },
-        { type: 'build', section: 'Build System', hidden: true },
-        { type: 'ci', section: 'Continuous Integration', hidden: true },
-    ];
+function getDefaultConfig(config) {
+    if (!config) {
+        config = {
+            types: [
+                { type: 'feat', section: 'Features' },
+                { type: 'fix', section: 'Bug Fixes' },
+                { type: 'perf', section: 'Performance Improvements' },
+                { type: 'revert', section: 'Reverts' },
+                { type: 'docs', section: 'Documentation', hidden: true },
+                { type: 'style', section: 'Styles', hidden: true },
+                { type: 'chore', section: 'Miscellaneous Chores', hidden: true },
+                { type: 'refactor', section: 'Code Refactoring', hidden: true },
+                { type: 'test', section: 'Tests', hidden: true },
+                { type: 'build', section: 'Build System', hidden: true },
+                { type: 'ci', section: 'Continuous Integration', hidden: true },
+            ],
+        };
+    }
     config.types.push({ type: 'BREAKING', section: 'BREAKING CHANGES', hidden: false });
-    config.types.push({ type: 'OTHER', section: 'Other', hidden: false });
     const result = config.types.map((x) => [x.type, x]);
-    return { types: new Map(result) };
-}
-exports.defaultConfig = defaultConfig;
-function getDefaultConfig() {
-    const types = [
-        { type: 'feat', section: 'Features', hidden: false },
-        { type: 'fix', section: 'Bug Fixes', hidden: false },
-        { type: 'perf', section: 'Performance Improvements', hidden: false },
-        { type: 'revert', section: 'Reverts', hidden: false },
-        { type: 'docs', section: 'Documentation', hidden: true },
-        { type: 'style', section: 'Styles', hidden: true },
-        { type: 'chore', section: 'Miscellaneous Chores', hidden: true },
-        { type: 'refactor', section: 'Code Refactoring', hidden: true },
-        { type: 'test', section: 'Tests', hidden: true },
-        { type: 'build', section: 'Build System', hidden: true },
-        { type: 'ci', section: 'Continuous Integration', hidden: true },
-        { type: 'BREAKING', section: 'BREAKING CHANGES', hidden: false },
-        { type: 'OTHER', section: 'Other', hidden: false },
-    ];
-    const result = types.map((x) => [x.type, x]);
     return { types: new Map(result) };
 }
 exports.getDefaultConfig = getDefaultConfig;
@@ -33960,9 +33942,12 @@ const defaultConfig_1 = __nccwpck_require__(7630);
 // https://github.com/conventional-changelog/standard-version/blob/master/lib/configuration.js
 function getChangelogConfig() {
     const configPath = './.versionrc';
-    const configJson = (0, fs_1.readFileSync)(configPath, 'utf8');
-    let config = JSON.parse(configJson);
-    config = (0, defaultConfig_1.defaultConfig)(config);
+    let userConfig;
+    if ((0, fs_1.existsSync)(configPath)) {
+        const configJson = (0, fs_1.readFileSync)(configPath, 'utf8');
+        userConfig = JSON.parse(configJson);
+    }
+    const config = (0, defaultConfig_1.getDefaultConfig)(userConfig);
     return config;
 }
 exports.getChangelogConfig = getChangelogConfig;
@@ -34343,12 +34328,7 @@ class CommitRefRangeCalculator {
                 const branchName = githubRef.slice('refs/heads/'.length);
                 currentRef = branchName;
                 if (this.input.branchComparisonStrategy === 'tag') {
-                    try {
-                        previousRef = yield this.previousTagProvider(branchName);
-                    }
-                    catch (error) {
-                        core.info(`This is the first commit so there are no earlier commits to compare to.`);
-                    }
+                    previousRef = yield this.previousTagProvider(branchName);
                 }
                 else if (this.input.branchComparisonStrategy === 'workflow') {
                     previousRef = yield this.commitHashCalculator.execute(branchName);
@@ -34388,6 +34368,25 @@ exports["default"] = CommitRefRangeCalculator;
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34401,25 +34400,37 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 /* eslint-disable @typescript-eslint/no-var-requires */
 const spec = __nccwpck_require__(8761);
 const conventional_commits_parser_1 = __nccwpck_require__(1655);
+const core = __importStar(__nccwpck_require__(2186));
 class ConventionalOutputProvider {
     constructor(markdown, changelogConfig) {
         this.markdown = markdown;
         this.changelogConfig = changelogConfig;
     }
     execute(commits) {
-        var _a, _b, _c;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const options = yield spec();
             const map = {};
             map['BREAKING'] = [];
+            for (const x of this.changelogConfig.types.values()) {
+                map[x.type] = [];
+            }
             for (const commit of commits) {
+                // TODO: Replace with user input predicate.
+                if (commit.header.startsWith('chore(release):')) {
+                    continue;
+                }
                 const parsed = (0, conventional_commits_parser_1.sync)(commit.rawBody, options.parserOpts);
-                const type = (_a = parsed.type) !== null && _a !== void 0 ? _a : 'OTHER';
-                const subject = (_b = parsed.subject) !== null && _b !== void 0 ? _b : commit.header;
-                const items = (_c = map[type]) !== null && _c !== void 0 ? _c : [];
+                const type = parsed.type;
+                const subject = parsed.subject;
+                if (!type || !subject) {
+                    core.debug(`Unable to parse commit: ${commit.header}`);
+                    continue;
+                }
+                const items = (_a = map[type]) !== null && _a !== void 0 ? _a : [];
                 map[type] = items;
-                const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) : '';
-                items.push(`${commit.sha} ${scope} ${subject}`);
+                const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) + ' ' : '';
+                items.push(`${commit.sha} ${scope}${subject}`);
                 const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE');
                 if (breakingChanges.length === 0)
                     continue;
@@ -34430,8 +34441,13 @@ class ConventionalOutputProvider {
                 if (map[key].length === 0)
                     continue;
                 const commitType = this.changelogConfig.types.get(key);
-                if (!commitType || commitType.hidden)
+                if (!commitType) {
+                    core.warning(`Unrecognized commit type: ${commitType}. Skipping...`);
                     continue;
+                }
+                if (commitType.hidden) {
+                    continue;
+                }
                 const section = commitType.section;
                 result += this.markdown.heading(section, 3);
                 result += this.markdown.ul(map[key]);
