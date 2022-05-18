@@ -73,6 +73,7 @@ jobs:
           PRERELEASE: ${{ github.event.inputs.prerelease != '' }}
           BODY: ${{ steps.changelog.outputs.commit-list }}
         with:
+          github-token: ${{ secrets.PAT }}
           script: |
             const { BASE_VERSION, RELEASE_NAME, PRERELEASE, BODY } = process.env
             const { owner, repo } = context.repo
