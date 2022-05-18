@@ -17,6 +17,9 @@ export default class ConventionalOutputProvider implements IOutputProvider {
 
     const map: { [key: string]: string[] } = {}
     map['BREAKING'] = []
+    for (const x of this.changelogConfig.types.values()) {
+      map[x.type] = []
+    }
     for (const commit of commits) {
       const parsed = sync(commit.rawBody, options.parserOpts)
       const type = parsed.type ?? 'OTHER'
