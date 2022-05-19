@@ -12,7 +12,7 @@ export type CommitRefRange = {
 export type ActionInput = {
   token: string
   preamble: string
-  markdownFlavor: string
+  outputFlavor: string
   isConventional: boolean
   branchComparisonStrategy: string
 }

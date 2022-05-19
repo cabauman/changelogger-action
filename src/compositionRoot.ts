@@ -147,6 +147,7 @@ export default class CompositionRoot {
   }
 
   protected getMarkdown() {
-    return this.getInput().markdownFlavor === 'github' ? new GitHubMarkdown() : new SlackMarkdown()
+    // TODO: Implement markdown flavor.
+    return this.getInput().outputFlavor === 'slack' ? new SlackMarkdown() : new GitHubMarkdown()
   }
 }

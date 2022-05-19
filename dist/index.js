@@ -33884,7 +33884,8 @@ class CompositionRoot {
         return new commitHashCalculator_1.default(this.getWorkflowIdProvider(), this.getWorkflowShaProvider());
     }
     getMarkdown() {
-        return this.getInput().markdownFlavor === 'github' ? new githubMarkdown_1.default() : new slackMarkdown_1.default();
+        // TODO: Implement markdown flavor.
+        return this.getInput().outputFlavor === 'slack' ? new slackMarkdown_1.default() : new githubMarkdown_1.default();
     }
 }
 exports["default"] = CompositionRoot;
@@ -33959,31 +33960,32 @@ exports.getChangelogConfig = getChangelogConfig;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.MARKDOWN_FLAVOR = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_MARKDOWN_FLAVORS = void 0;
-exports.SUPPORTED_MARKDOWN_FLAVORS = ['github', 'slack'];
+exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.OUTPUT_FLAVOR = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_OUTPUT_FLAVORS = void 0;
+// TODO: Implement markdown flavor.
+exports.SUPPORTED_OUTPUT_FLAVORS = ['github-release', 'markdown', 'slack'];
 exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = ['tag', 'workflow'];
 exports.IS_CONVENTIONAL = 'is-conventional';
-exports.MARKDOWN_FLAVOR = 'markdown-flavor';
+exports.OUTPUT_FLAVOR = 'output-flavor';
 exports.PREAMBLE = 'preamble';
 exports.TOKEN = 'token';
 exports.BRANCH_COMPARISON_STRATEGY = 'branch-comparison-strategy';
 function retrieveAndValidateInput(inputRetriever) {
     const input = {
         isConventional: inputRetriever.getBooleanInput(exports.IS_CONVENTIONAL),
-        markdownFlavor: inputRetriever.getInput(exports.MARKDOWN_FLAVOR),
+        outputFlavor: inputRetriever.getInput(exports.OUTPUT_FLAVOR),
         preamble: inputRetriever.getInput(exports.PREAMBLE),
         token: inputRetriever.getInput(exports.TOKEN),
         branchComparisonStrategy: inputRetriever.getInput(exports.BRANCH_COMPARISON_STRATEGY),
     };
-    validateMarkdownFlavor(input.markdownFlavor);
+    validateOutputFlavor(input.outputFlavor);
     validateToken(input.token);
     validateBranchComparisonStrategy(input.branchComparisonStrategy);
     return input;
 }
 exports["default"] = retrieveAndValidateInput;
-function validateMarkdownFlavor(value) {
-    if (!exports.SUPPORTED_MARKDOWN_FLAVORS.includes(value)) {
-        throw new Error(`Invalid value '${value}' for 'markdown-flavor' input. It must be one of ${exports.SUPPORTED_MARKDOWN_FLAVORS}`);
+function validateOutputFlavor(value) {
+    if (!exports.SUPPORTED_OUTPUT_FLAVORS.includes(value)) {
+        throw new Error(`Invalid value '${value}' for 'output-flavor' input. It must be one of ${exports.SUPPORTED_OUTPUT_FLAVORS}`);
     }
 }
 function validateToken(value) {
@@ -34437,6 +34439,8 @@ class DecoratedOutputProvider {
     }
     execute(commits) {
         return __awaiter(this, void 0, void 0, function* () {
+            // TODO: Consider letting the user specify the header markdown instead of us.
+            // preamble: ## What's changed?\n\nSome sub-heading.
             let result = this.markdownWriter.heading(this.preamble, 2);
             result += yield this.outputProvider.execute(commits);
             return result;

@@ -29,12 +29,16 @@ inputs:
       Will use the .versionrc file if present.
     required: false
     default: 'true'
-  # Consider renaming this to output flavor: markdown, github-release, slack
-  markdown-flavor:
+  output-flavor:
     description: >
-      Either slack or github
+      Options: github-release, markdown, slack
+      github-release: GitHub Releases supports autolinked references + formatting.
+        Source: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls
+      markdown: Basic markdown for providers like GitHub and Bitbucket.
+      slack: Slack uses its own special markup language called mrkdwn.
+        Source: https://api.slack.com/reference/surfaces/formatting
     required: false
-    default: github
+    default: github-release
   # Consider only supporting tag comparisons.
   branch-comparison-strategy:
     description: >
@@ -45,7 +49,8 @@ inputs:
         and uses that to compare against HEAD
     required: false
     default: tag
-  # Consider adding formatting support: {{sha}} {{commit-message}}
+  # Consider adding option to include author(s): @cabauman
+  # Consider adding option to customize format: {{sha}} {{commit-message}} {{author}}
   # Consider adding option to filter out. Either regex or js predicate function.
 
 runs:

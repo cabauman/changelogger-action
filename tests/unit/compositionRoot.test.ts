@@ -20,7 +20,7 @@ class TestCompositionRoot extends CompositionRoot {
   protected getInput(): ActionInput {
     return {
       isConventional: true,
-      markdownFlavor: 'github',
+      outputFlavor: 'github-release',
       preamble: 'Commit List:',
       token: 'dummy-token',
       branchComparisonStrategy: 'tag',
@@ -80,11 +80,11 @@ describe('compositionRoot', () => {
     await result.run()
   })
 
-  context('getInput.markdownFlavor = slack', () => {
+  context('getInput.outputFlavor = slack', () => {
     class TestCompositionRoot2 extends TestCompositionRoot {
       protected getInput(): ActionInput {
         const input = super.getInput()
-        input.markdownFlavor = 'slack'
+        input.outputFlavor = 'slack'
         return input
       }
     }
@@ -142,7 +142,7 @@ class TestCompositionRootBase extends CompositionRoot {
   protected getInput(): ActionInput {
     return {
       isConventional: true,
-      markdownFlavor: 'github',
+      outputFlavor: 'github-release',
       preamble: 'Commit List:',
       token: 'dummy-token',
       branchComparisonStrategy: 'tag',
