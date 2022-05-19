@@ -32,12 +32,12 @@ jobs:
 
       - name: Version bump
         env:
-          prerelease: ${{ github.event.inputs.prerelease }}
-          release-as: ${{ github.event.inputs.release-as }}
+          PRERELEASE: ${{ github.event.inputs.prerelease }}
+          RELEASE_AS: ${{ github.event.inputs.release-as }}
         run: >
           npx standard-version --skip.changelog 
-          ${{ env.prerelease != '' && format('--prerelease {0}', env.prerelease) || '' }}
-          ${{ env.release-as != 'auto' && format('--release-as {0}', env.release-as) || '' }}
+          ${{ env.PRERELEASE != '' && format('--prerelease {0}', env.PRERELEASE) || '' }}
+          ${{ env.RELEASE_AS != 'auto' && format('--release-as {0}', env.RELEASE_AS) || '' }}
 
       - name: Get latest tag
         id: get-latest-tag
@@ -50,20 +50,20 @@ jobs:
           is-conventional: true
           preamble: What's changed?
 
-      - name: Commit changes
-        env:
-          version-tag: ${{ steps.get-latest-tag.outputs.version-tag }}
-        run: |
-          git push origin ${{ env.version-tag }}
-          git push origin main
-
       - name: Get base version
         id: get-base-version
         env:
-          version-tag: ${{ steps.get-latest-tag.outputs.version-tag }}
+          VERSION_TAG: ${{ steps.get-latest-tag.outputs.version-tag }}
         run: |
-          export BASE_VERSION=$(echo ${{ env.version-tag }} | grep -Po 'v[0-9]+\.[0-9]+\.[0-9]+(?=-[0-9]+)?')
-          echo ::set-output name=base-version::$BASE_VERSION
+          base_version=$(echo ${{ env.VERSION_TAG }} | cut -d- -f1)
+          echo ::set-output name=base-version::$base_version
+
+      - name: Commit changes
+        env:
+          VERSION_TAG: ${{ steps.get-latest-tag.outputs.version-tag }}
+        run: |
+          git push origin ${{ env.VERSION_TAG }}
+          git push origin main
 
       - name: Upsert release
         uses: actions/github-script@v6.1.0

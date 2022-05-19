@@ -10,3 +10,23 @@
 
     const versionLink = this.markdown.link('version', 'url')
     let result = this.markdown.heading(versionLink, 2)
+
+
+
+DELETING PRERELEASE TAGS
+
+x=$(git tag -l | grep -Po "^${version}-\w+\.\d+$")
+
+- name: Delete prerelease tags
+  if: ${{ github.event.inputs.prerelease == '' }}
+  run: |
+    version=${{ steps.get-latest-tag.outputs.version-tag }}
+    tag=$(git describe --tags --abbrev=0 $version^)
+    i=1
+    regex_base="^v[0-9]+\.[0-9]+\.[0-9]+-"
+    regex1="$regex_base[[:alnum:]]+\.[0-9]+$"
+    regex2="$regex_base[0-9]+$"
+    while [[ $tag =~ $regex1 || $tag =~ $regex2 ]]; do
+      git push --delete origin $tag
+      tag=$(git describe --tags --abbrev=0 $tag^)
+    done
