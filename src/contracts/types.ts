@@ -1,6 +1,5 @@
 export type Commit = {
-  // TODO: Is this needed?
-  sha: string // %H
+  sha: string // %h
   rawBody: string // %B
   header: string // %s
 }

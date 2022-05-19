@@ -49,7 +49,7 @@ export default class CommitRefRangeCalculator {
 }
 
 export type CommitRefRangeCalculatorInput = {
-  // Consider enforcing type: 'tag' | 'workflow'
+  // TODO: Consider enforcing type: 'tag' | 'workflow'
   branchComparisonStrategy: string
   githubRef: string
   prTarget: string | undefined

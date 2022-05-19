@@ -50,10 +50,6 @@ export default class CompositionRoot {
       prSource: process.env.GITHUB_HEAD_REF,
       prTarget: process.env.GITHUB_BASE_REF,
     }
-    // const url = `https://github.com/${this.actionContext.owner}/${this.actionContext.repo}`
-    // const commitUrl = `${url}/commit/${sha}`
-    // const issueUrl = `${url}/issues/${id}`
-    // const compareUrl = `${url}/compare/${from}...${to}`
     return this.actionContext
   }
 

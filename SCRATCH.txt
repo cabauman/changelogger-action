@@ -30,3 +30,10 @@ x=$(git tag -l | grep -Po "^${version}-\w+\.\d+$")
       git push --delete origin $tag
       tag=$(git describe --tags --abbrev=0 $tag^)
     done
+
+
+
+// const url = `https://github.com/${this.actionContext.owner}/${this.actionContext.repo}`
+// const commitUrl = `${url}/commit/${sha}`
+// const issueUrl = `${url}/issues/${id}`
+// const compareUrl = `${url}/compare/${from}...${to}`
