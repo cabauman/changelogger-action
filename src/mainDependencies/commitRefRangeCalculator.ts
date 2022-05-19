@@ -24,17 +24,13 @@ export default class CommitRefRangeCalculator {
         previousRef = await this.commitHashCalculator.execute(branchName)
       } else {
         throw new Error(
-          `Unsupported branchComparisonStrategy: ${this.input.branchComparisonStrategy}`,
+          `[CommitRefRangeCalculator] Unsupported branchComparisonStrategy: ${this.input.branchComparisonStrategy}`,
         )
       }
     } else if (githubRef.startsWith('refs/tags/')) {
       const tagName = githubRef.slice('refs/tags/'.length)
       currentRef = tagName
-      try {
-        previousRef = await this.previousTagProvider(tagName)
-      } catch (error) {
-        core.info(`This is the first commit so there are no earlier commits to compare to.`)
-      }
+      previousRef = await this.previousTagProvider(tagName)
     } else if (githubRef.startsWith('refs/pull/')) {
       previousRef = this.input.prTarget ? 'origin/' + this.input.prTarget : undefined
       currentRef = this.input.prSource ? 'origin/' + this.input.prSource : undefined

@@ -33787,6 +33787,7 @@ const workflowShaProvider_1 = __importDefault(__nccwpck_require__(5219));
 const conventionalOutputProvider_1 = __importDefault(__nccwpck_require__(8447));
 const getChangelogConfig_1 = __nccwpck_require__(8921);
 const decoratedOutputProvider_1 = __importDefault(__nccwpck_require__(331));
+const errorUtil_1 = __nccwpck_require__(5539);
 class CompositionRoot {
     constructAction() {
         return new githubAction_1.default(this.getCommitRefRangeCalculator(), this.getCommitListCalculator(), this.getOutputProvider(), this.getResultSetter());
@@ -33811,18 +33812,15 @@ class CompositionRoot {
             prSource: process.env.GITHUB_HEAD_REF,
             prTarget: process.env.GITHUB_BASE_REF,
         });
-        // const url = `https://github.com/${this.actionContext.owner}/${this.actionContext.repo}`
-        // const commitUrl = `${url}/commit/${sha}`
-        // const issueUrl = `${url}/issues/${id}`
-        // const compareUrl = `${url}/compare/${from}...${to}`
         return this.actionContext;
     }
     getResultSetter() {
         return core;
     }
     getOctokit() {
-        // TODO: single instance
-        return github.getOctokit(this.getInput().token);
+        var _a;
+        (_a = this.octokit) !== null && _a !== void 0 ? _a : (this.octokit = github.getOctokit(this.getInput().token));
+        return this.octokit;
     }
     getWorkflowIdProvider() {
         return new workflowIdProvider_1.default(this.getOctokit(), this.getContext());
@@ -33855,7 +33853,7 @@ class CompositionRoot {
                     current = gitDescribe.stdout.trim();
                 }
                 catch (error) {
-                    core.info(`This is the first commit so there are no earlier commits to compare to.`);
+                    core.error(`[getPreviousTagProvider] ${(0, errorUtil_1.error2Json)(error)}`);
                     current = null;
                 }
             } while (current != null && !regex.test(current));
@@ -34004,7 +34002,7 @@ function validateBranchComparisonStrategy(value) {
 /***/ }),
 
 /***/ 6900:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -34018,6 +34016,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+const errorUtil_1 = __nccwpck_require__(5539);
 class GitHubAction {
     constructor(commitRefRangeCalculator, commitListCalculator, outputProvider, resultSetter) {
         this.commitRefRangeCalculator = commitRefRangeCalculator;
@@ -34028,21 +34027,17 @@ class GitHubAction {
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                console.log('running action...');
                 const commitRefRange = yield this.commitRefRangeCalculator.execute();
                 if (commitRefRange.previousRef == null) {
-                    // TODO: Consider setting the preamble as the output.
                     this.resultSetter.setOutput('commit-list', 'No previous commits to compare to.');
                     return;
                 }
-                const commits = yield this.commitListCalculator.execute(commitRefRange); // commitListCreator
-                const markdown = yield this.outputProvider.execute(commits); // markdownCreator
+                const commits = yield this.commitListCalculator.execute(commitRefRange);
+                const markdown = yield this.outputProvider.execute(commits);
                 this.resultSetter.setOutput('commit-list', markdown);
             }
             catch (error) {
-                // TODO: Consider using error util. JSON.stringify doesn't do well with errors.
-                const message = error instanceof Error ? error.message : JSON.stringify(error);
-                this.resultSetter.setFailed(message);
+                this.resultSetter.setFailed((0, errorUtil_1.error2Json)(error));
             }
         });
     }
@@ -34188,7 +34183,7 @@ class WorkflowShaProvider {
                     yield this.commitRefValidator(workflowSha);
                     break;
                 }
-                catch (e) {
+                catch (error) {
                     // A force push must have overwritten this commit.
                     core.debug(`commit '${workflowSha}' doesn't exist.`);
                     page += 1;
@@ -34260,29 +34255,10 @@ exports["default"] = CommitListCalculator;
 /***/ }),
 
 /***/ 1802:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34293,7 +34269,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
 // TODO: Consider splitting this into 3 distinct implementations of an interface,
 // one of which is chosen at composition time.
 class CommitRefRangeCalculator {
@@ -34317,18 +34292,13 @@ class CommitRefRangeCalculator {
                     previousRef = yield this.commitHashCalculator.execute(branchName);
                 }
                 else {
-                    throw new Error(`Unsupported branchComparisonStrategy: ${this.input.branchComparisonStrategy}`);
+                    throw new Error(`[CommitRefRangeCalculator] Unsupported branchComparisonStrategy: ${this.input.branchComparisonStrategy}`);
                 }
             }
             else if (githubRef.startsWith('refs/tags/')) {
                 const tagName = githubRef.slice('refs/tags/'.length);
                 currentRef = tagName;
-                try {
-                    previousRef = yield this.previousTagProvider(tagName);
-                }
-                catch (error) {
-                    core.info(`This is the first commit so there are no earlier commits to compare to.`);
-                }
+                previousRef = yield this.previousTagProvider(tagName);
             }
             else if (githubRef.startsWith('refs/pull/')) {
                 previousRef = this.input.prTarget ? 'origin/' + this.input.prTarget : undefined;
@@ -34399,7 +34369,7 @@ class ConventionalOutputProvider {
                 map[x.type] = [];
             }
             for (const commit of commits) {
-                // TODO: Replace with user input predicate.
+                // TODO: Consider replacing with user input predicate.
                 if (commit.header.startsWith('chore(release):')) {
                     continue;
                 }
@@ -34411,7 +34381,7 @@ class ConventionalOutputProvider {
                     continue;
                 }
                 const items = (_a = map[type]) !== null && _a !== void 0 ? _a : [];
-                map[type] = items;
+                map[type.toLowerCase()] = items;
                 const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) + ' ' : '';
                 items.push(`${commit.sha} ${scope}${subject}`);
                 const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE');
@@ -34556,6 +34526,37 @@ class SlackMarkdown {
     }
 }
 exports["default"] = SlackMarkdown;
+
+
+/***/ }),
+
+/***/ 5539:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.error2Obj = exports.error2Json = void 0;
+function error2Json(error) {
+    if (error == null) {
+        return '';
+    }
+    return JSON.stringify(error, jsonFriendlyErrorReplacer);
+}
+exports.error2Json = error2Json;
+function error2Obj(error) {
+    const json = error2Json(error);
+    return JSON.parse(json);
+}
+exports.error2Obj = error2Obj;
+function jsonFriendlyErrorReplacer(key, value) {
+    if (value instanceof Error) {
+        return Object.assign(Object.assign({}, value), { 
+            // Explicitly pull Error's non-enumerable properties, except stack.
+            name: value.name, message: value.message });
+    }
+    return value;
+}
 
 
 /***/ }),

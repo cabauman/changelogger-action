@@ -100,7 +100,7 @@ describe('CommitRefRangeCalculator', () => {
       expect(actual).to.deep.equal(expected)
     })
 
-    context('previousTagProvider throws an error', () => {
+    context('previousTagProvider retuns current tag (because no earlier tags were found)', () => {
       it('previousRef is undefined and currentRef is v0.2.0', async () => {
         const context: ActionContext = {
           owner: 'colt',
@@ -112,7 +112,7 @@ describe('CommitRefRangeCalculator', () => {
         const { ref: githubRef, prSource, prTarget } = context
         const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
         const previousTagProvider = (currentTag: string) => {
-          return Promise.reject()
+          return Promise.resolve(currentTag)
         }
 
         commitHashCalculator.execute.rejects('This was not supposed to be called.')
@@ -126,7 +126,7 @@ describe('CommitRefRangeCalculator', () => {
         // Act
         const actual = await sut.execute()
 
-        const expected: CommitRefRange = { previousRef: undefined, currentRef: 'v0.2.0' }
+        const expected: CommitRefRange = { previousRef: 'v0.2.0', currentRef: 'v0.2.0' }
         expect(actual).to.deep.equal(expected)
       })
     })

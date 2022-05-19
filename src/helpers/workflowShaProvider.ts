@@ -35,7 +35,7 @@ export default class WorkflowShaProvider {
         // Check if the commit still exists.
         await this.commitRefValidator(workflowSha)
         break
-      } catch (e) {
+      } catch (error) {
         // A force push must have overwritten this commit.
         core.debug(`commit '${workflowSha}' doesn't exist.`)
         page += 1

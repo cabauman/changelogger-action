@@ -17,6 +17,7 @@ import ConventionalOutputProvider from './mainDependencies/conventionalOutputPro
 import { getChangelogConfig } from './config/getChangelogConfig'
 import DecoratedOutputProvider from './mainDependencies/decoratedOutputProvider'
 import { GitHub } from '@actions/github/lib/utils'
+import { error2Json } from './utils/errorUtil'
 
 export default class CompositionRoot {
   private actionInput?: ActionInput
@@ -106,7 +107,7 @@ export default class CompositionRoot {
           )
           current = gitDescribe.stdout.trim()
         } catch (error) {
-          core.info(`This is the first commit so there are no earlier commits to compare to.`)
+          core.error(`[getPreviousTagProvider] ${error2Json(error)}`)
           current = null
         }
       } while (current != null && !regex.test(current))

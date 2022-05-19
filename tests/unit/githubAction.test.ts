@@ -89,7 +89,7 @@ describe('GitHubAction', () => {
       await sut.run()
 
       // Assert
-      resultSetter.received(1).setFailed('oops')
+      resultSetter.received(1).setFailed('{"name":"Error","message":"oops"}')
     })
   })
 })
