@@ -16,10 +16,12 @@ import WorkflowShaProvider from './helpers/workflowShaProvider'
 import ConventionalOutputProvider from './mainDependencies/conventionalOutputProvider'
 import { getChangelogConfig } from './config/getChangelogConfig'
 import DecoratedOutputProvider from './mainDependencies/decoratedOutputProvider'
+import { GitHub } from '@actions/github/lib/utils'
 
 export default class CompositionRoot {
   private actionInput?: ActionInput
   private actionContext?: ActionContext
+  private octokit?: InstanceType<typeof GitHub>
 
   protected constructAction(): GitHubAction {
     return new GitHubAction(
@@ -57,9 +59,9 @@ export default class CompositionRoot {
     return core
   }
 
-  protected getOctokit() {
-    // TODO: single instance
-    return github.getOctokit(this.getInput().token)
+  protected getOctokit(): InstanceType<typeof GitHub> {
+    this.octokit ??= github.getOctokit(this.getInput().token)
+    return this.octokit
   }
 
   protected getWorkflowIdProvider() {
