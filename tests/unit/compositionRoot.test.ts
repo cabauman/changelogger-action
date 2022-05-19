@@ -112,8 +112,9 @@ describe('compositionRoot', () => {
     })
   })
 
-  context.skip('................', () => {
-    it('----------------------------', async () => {
+  // TODO: Remove or finish.
+  context.skip('...', () => {
+    it('...', async () => {
       tsSinon.default.stub(github.context, 'repo').get(() => {
         return {
           owner: 'colt',
