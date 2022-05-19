@@ -130,4 +130,22 @@ describe('conventionalOutputProvider', () => {
       expect(actual).to.equal('')
     })
   })
+
+  // TODO: Add a variety of input.
+  context('1 revert commit where the first letter of the type is capitalized', () => {
+    it('returns revert section with 1 commit', async () => {
+      const commits: Commit[] = [
+        {
+          sha: 'abcd123',
+          rawBody: 'Revert: This reverts commit abc',
+          header: 'Revert: This reverts commit abc',
+        },
+      ]
+      const markdownWriter = new SlackMarkdown()
+      const changelogConfig = getDefaultConfig()
+      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const actual = await sut.execute(commits)
+      expect(actual).to.equal('*Reverts*\n• abcd123 This reverts commit abc\n\n')
+    })
+  })
 })

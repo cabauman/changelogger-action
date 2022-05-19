@@ -34,7 +34,7 @@ export default class ConventionalOutputProvider implements IOutputProvider {
         continue
       }
       const items = map[type] ?? []
-      map[type] = items
+      map[type.toLowerCase()] = items
       const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) + ' ' : ''
       items.push(`${commit.sha} ${scope}${subject}`)
 
