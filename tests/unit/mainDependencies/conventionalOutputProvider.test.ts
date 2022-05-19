@@ -49,7 +49,7 @@ describe('conventionalOutputProvider', () => {
       const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
       const actual = await sut.execute(commits)
       expect(actual).to.equal(
-        '*BREAKING CHANGES*\n• my feature\n\n*Features*\n• abcd123 my feature\n\n',
+        '*⚠️ BREAKING CHANGES*\n• my feature\n\n*Features*\n• abcd123 my feature\n\n',
       )
     })
   })

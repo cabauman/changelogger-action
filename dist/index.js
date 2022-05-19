@@ -33920,7 +33920,7 @@ function getDefaultConfig(config) {
             ],
         };
     }
-    config.types.push({ type: 'BREAKING', section: 'BREAKING CHANGES', hidden: false });
+    config.types.push({ type: 'BREAKING', section: '⚠️ BREAKING CHANGES', hidden: false });
     const result = config.types.map((x) => [x.type, x]);
     return { types: new Map(result) };
 }
