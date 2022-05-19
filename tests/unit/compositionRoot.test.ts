@@ -30,7 +30,7 @@ class TestCompositionRoot extends CompositionRoot {
   protected getContext(): ActionContext {
     return {
       owner: 'colt',
-      repo: 'CommitsDiff',
+      repo: 'Changelogger',
       ref: 'refs/heads/feat/conventional-commits',
       runId: 1,
     }
@@ -117,7 +117,7 @@ describe('compositionRoot', () => {
       tsSinon.default.stub(github.context, 'repo').get(() => {
         return {
           owner: 'colt',
-          repo: 'CommitsDiff',
+          repo: 'Changelogger',
         }
       })
       github.context.ref = 'refs/heads/feat/conventional-commits'
@@ -130,6 +130,7 @@ describe('compositionRoot', () => {
   })
 })
 
+// TODO: Replace test composition roots with builder pattern.
 class TestCompositionRootBase extends CompositionRoot {
   public resultSetter?: IResultSetter
 

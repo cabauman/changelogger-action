@@ -13,7 +13,7 @@ describe('CommitRefRangeCalculator', () => {
       const context: ActionContext = {
         owner: 'colt',
         ref: 'refs/heads/main',
-        repo: 'CommitsDiff',
+        repo: 'Changelogger',
         runId: 1,
       }
       const branchComparisonStrategy = 'workflow'
@@ -43,7 +43,7 @@ describe('CommitRefRangeCalculator', () => {
         const context: ActionContext = {
           owner: 'colt',
           ref: 'refs/heads/main',
-          repo: 'CommitsDiff',
+          repo: 'Changelogger',
           runId: 1,
         }
         const branchComparisonStrategy = 'workflow'
@@ -75,7 +75,7 @@ describe('CommitRefRangeCalculator', () => {
       const context: ActionContext = {
         owner: 'colt',
         ref: 'refs/tags/v0.2.0',
-        repo: 'CommitsDiff',
+        repo: 'Changelogger',
         runId: 1,
       }
       const branchComparisonStrategy = 'workflow'
@@ -105,7 +105,7 @@ describe('CommitRefRangeCalculator', () => {
         const context: ActionContext = {
           owner: 'colt',
           ref: 'refs/tags/v0.2.0',
-          repo: 'CommitsDiff',
+          repo: 'Changelogger',
           runId: 1,
         }
         const branchComparisonStrategy = 'workflow'
@@ -137,7 +137,7 @@ describe('CommitRefRangeCalculator', () => {
       const context: ActionContext = {
         owner: 'colt',
         ref: 'refs/pull/1',
-        repo: 'CommitsDiff',
+        repo: 'Changelogger',
         runId: 1,
         prSource: 'my-feat',
         prTarget: 'main',
@@ -170,7 +170,7 @@ describe('CommitRefRangeCalculator', () => {
       const context: ActionContext = {
         owner: 'colt',
         ref: 'refs/issues/1',
-        repo: 'CommitsDiff',
+        repo: 'Changelogger',
         runId: 1,
         prSource: 'my-feat',
         prTarget: 'main',

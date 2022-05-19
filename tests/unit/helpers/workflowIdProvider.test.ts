@@ -11,7 +11,7 @@ describe('WorkflowIdProvider', () => {
     const context: ActionContext = {
       owner: 'colt',
       ref: 'refs/heads/main',
-      repo: 'CommitsDiff',
+      repo: 'Changelogger',
       runId: 45,
     }
 

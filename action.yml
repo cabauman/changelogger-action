@@ -1,6 +1,9 @@
-name: 'Changelogger'
-author: 'Colt Alan Bauman'
-description: 'Outputs a changelog diff'
+name: Changelogger
+author: Colt Alan Bauman
+description: >
+  Outputs a changelog diff since the last full release. I'm a fan of standard-version,
+  but at the time of writing it doesn't support including prerelease commits when a
+  full release is made.
 inputs:
   token:
     description: >
@@ -31,7 +34,7 @@ inputs:
     description: >
       Either slack or github
     required: false
-    default: 'github'
+    default: github
   # Consider only supporting tag comparisons.
   branch-comparison-strategy:
     description: >
@@ -41,10 +44,10 @@ inputs:
       workflow: searches for the last successful workflow run for the current branch + current workflow,
         and uses that to compare against HEAD
     required: false
-    default: 'tag'
+    default: tag
   # Consider adding formatting support: {{sha}} {{commit-message}}
   # Consider adding option to filter out. Either regex or js predicate function.
 
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: node16
+  main: dist/index.js

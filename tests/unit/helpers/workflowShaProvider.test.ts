@@ -13,7 +13,7 @@ describe('WorkflowShaProvider', () => {
       const context: ActionContext = {
         owner: 'colt',
         ref: 'refs/heads/main',
-        repo: 'CommitsDiff',
+        repo: 'Changelogger',
         runId: 2,
       }
       const commitRefValidator = async (commitRef: string) => {
@@ -44,7 +44,7 @@ describe('WorkflowShaProvider', () => {
       const context: ActionContext = {
         owner: 'colt',
         ref: 'refs/heads/main',
-        repo: 'CommitsDiff',
+        repo: 'Changelogger',
         runId: 2,
       }
       const firstSha = 'xyz1234'
@@ -86,7 +86,7 @@ describe('WorkflowShaProvider', () => {
       const context: ActionContext = {
         owner: 'colt',
         ref: 'refs/heads/main',
-        repo: 'CommitsDiff',
+        repo: 'Changelogger',
         runId: 2,
       }
       const commitRefValidator = async (commitRef: string) => {
