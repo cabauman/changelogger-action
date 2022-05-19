@@ -13,7 +13,6 @@ export type CommitRefRange = {
 export type ActionInput = {
   token: string
   preamble: string
-  maxCommits: string
   markdownFlavor: string
   isConventional: boolean
   branchComparisonStrategy: string

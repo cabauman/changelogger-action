@@ -12,11 +12,6 @@ inputs:
       [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
     default: ${{ github.token }}
     required: false
-  # Consider getting rid of this option.
-  max-commits:
-    description: 'Max number of commits to include in the output'
-    required: false
-    default: '100'
   # Consider adding postamble like: Full Changelog: v11.2.3...v11.3.0
   preamble:
     description: >

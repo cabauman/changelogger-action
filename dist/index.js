@@ -33839,7 +33839,7 @@ class CompositionRoot {
     getCommitProvider() {
         return ({ previousRef, currentRef }, delimeter) => __awaiter(this, void 0, void 0, function* () {
             yield exec.exec('git fetch origin');
-            const gitLog = yield exec.getExecOutput(`git log ${previousRef}..${currentRef} --format=%h|%B${delimeter} --max-count=${this.getInput().maxCommits}`);
+            const gitLog = yield exec.getExecOutput(`git log ${previousRef}..${currentRef} --format=%h|%B${delimeter}`);
             return gitLog.stdout;
         });
     }
@@ -33961,11 +33961,10 @@ exports.getChangelogConfig = getChangelogConfig;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.MARKDOWN_FLAVOR = exports.MAX_COMMITS = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_MARKDOWN_FLAVORS = void 0;
+exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.MARKDOWN_FLAVOR = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_MARKDOWN_FLAVORS = void 0;
 exports.SUPPORTED_MARKDOWN_FLAVORS = ['github', 'slack'];
 exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = ['tag', 'workflow'];
 exports.IS_CONVENTIONAL = 'is-conventional';
-exports.MAX_COMMITS = 'max-commits';
 exports.MARKDOWN_FLAVOR = 'markdown-flavor';
 exports.PREAMBLE = 'preamble';
 exports.TOKEN = 'token';
@@ -33973,14 +33972,12 @@ exports.BRANCH_COMPARISON_STRATEGY = 'branch-comparison-strategy';
 function retrieveAndValidateInput(inputRetriever) {
     const input = {
         isConventional: inputRetriever.getBooleanInput(exports.IS_CONVENTIONAL),
-        maxCommits: inputRetriever.getInput(exports.MAX_COMMITS),
         markdownFlavor: inputRetriever.getInput(exports.MARKDOWN_FLAVOR),
         preamble: inputRetriever.getInput(exports.PREAMBLE),
         token: inputRetriever.getInput(exports.TOKEN),
         branchComparisonStrategy: inputRetriever.getInput(exports.BRANCH_COMPARISON_STRATEGY),
     };
     validateMarkdownFlavor(input.markdownFlavor);
-    validateMaxCommits(input.maxCommits);
     validateToken(input.token);
     validateBranchComparisonStrategy(input.branchComparisonStrategy);
     return input;
@@ -33989,15 +33986,6 @@ exports["default"] = retrieveAndValidateInput;
 function validateMarkdownFlavor(value) {
     if (!exports.SUPPORTED_MARKDOWN_FLAVORS.includes(value)) {
         throw new Error(`Invalid value '${value}' for 'markdown-flavor' input. It must be one of ${exports.SUPPORTED_MARKDOWN_FLAVORS}`);
-    }
-}
-function validateMaxCommits(value) {
-    if (value === '' ||
-        !Number.isInteger(Number(value)) ||
-        value.startsWith('0b') ||
-        value.startsWith('0x') ||
-        value.startsWith('0o')) {
-        throw new Error(`Invalid value '${value}' for 'max-commits' input.`);
     }
 }
 function validateToken(value) {
@@ -34253,11 +34241,6 @@ class CommitListCalculator {
     }
     execute(commitRefRange) {
         return __awaiter(this, void 0, void 0, function* () {
-            // TODO: Get the total count of commits so we can inform the user how many
-            // are being excluded from output due to maxCommits.
-            // const commitCount = await executeCliCommand(
-            //   `git rev-list ${previousState}..${currentState} --count`,
-            // )
             const rawCommits = yield this.commitProvider(commitRefRange, exports.DELIMITER);
             const commitInfo = rawCommits.split(`\n${exports.DELIMITER}\n`).filter((x) => x != '');
             const commits = commitInfo.map((x) => {

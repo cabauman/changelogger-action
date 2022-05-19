@@ -21,7 +21,6 @@ class TestCompositionRoot extends CompositionRoot {
     return {
       isConventional: true,
       markdownFlavor: 'github',
-      maxCommits: '100',
       preamble: 'Commit List:',
       token: 'dummy-token',
       branchComparisonStrategy: 'tag',
@@ -143,7 +142,6 @@ class TestCompositionRootBase extends CompositionRoot {
     return {
       isConventional: true,
       markdownFlavor: 'github',
-      maxCommits: '100',
       preamble: 'Commit List:',
       token: 'dummy-token',
       branchComparisonStrategy: 'tag',

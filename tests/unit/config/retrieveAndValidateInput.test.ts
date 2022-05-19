@@ -14,7 +14,6 @@ describe('retrieveAndValidateInput', () => {
     // TODO: make the input keys constants.
     inputRetriever.getBooleanInput.withArgs('is-conventional').returns(true)
     inputRetriever.getInput.withArgs('markdown-flavor').returns('github')
-    inputRetriever.getInput.withArgs('max-commits').returns('10')
     inputRetriever.getInput.withArgs('preamble').returns('Commit list:')
     inputRetriever.getInput.withArgs('token').returns('my-token')
     inputRetriever.getInput.withArgs(BRANCH_COMPARISON_STRATEGY).returns('tag')
@@ -22,25 +21,11 @@ describe('retrieveAndValidateInput', () => {
     const expected: ActionInput = {
       isConventional: true,
       markdownFlavor: 'github',
-      maxCommits: '10',
       preamble: 'Commit list:',
       token: 'my-token',
       branchComparisonStrategy: 'tag',
     }
     expect(actual).to.deep.equal(expected)
-  })
-
-  context(`max-commits value is 'a'`, () => {
-    it('throws invalid value error for max-commits', () => {
-      const sut = retrieveAndValidateInput
-      const inputRetriever = tsSinon.stubInterface<IInputRetriever>()
-      inputRetriever.getBooleanInput.withArgs('is-conventional').returns(true)
-      inputRetriever.getInput.withArgs('markdown-flavor').returns('github')
-      inputRetriever.getInput.withArgs('max-commits').returns('a')
-      inputRetriever.getInput.withArgs('preamble').returns('Commit list:')
-      inputRetriever.getInput.withArgs('token').returns('my-token')
-      expect(() => sut(inputRetriever)).to.throw(`Invalid value 'a' for 'max-commits' input.`)
-    })
   })
 
   context(`markdown-flavor value is 'html'`, () => {
@@ -49,7 +34,6 @@ describe('retrieveAndValidateInput', () => {
       const inputRetriever = tsSinon.stubInterface<IInputRetriever>()
       inputRetriever.getBooleanInput.withArgs('is-conventional').returns(true)
       inputRetriever.getInput.withArgs('markdown-flavor').returns('html')
-      inputRetriever.getInput.withArgs('max-commits').returns('10')
       inputRetriever.getInput.withArgs('preamble').returns('Commit list:')
       inputRetriever.getInput.withArgs('token').returns('my-token')
       expect(() => sut(inputRetriever))
@@ -67,7 +51,6 @@ describe('retrieveAndValidateInput', () => {
       const inputRetriever = tsSinon.stubInterface<IInputRetriever>()
       inputRetriever.getBooleanInput.withArgs('is-conventional').returns(true)
       inputRetriever.getInput.withArgs('markdown-flavor').returns('github')
-      inputRetriever.getInput.withArgs('max-commits').returns('10')
       inputRetriever.getInput.withArgs('preamble').returns('Commit list:')
       inputRetriever.getInput.withArgs('token').returns('')
       expect(() => sut(inputRetriever))

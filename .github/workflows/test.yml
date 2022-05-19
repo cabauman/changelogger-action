@@ -26,7 +26,6 @@ jobs:
       - uses: ./
         id: run-action
         with:
-          max-commits: 50
           is-conventional: true
           preamble: Test was successful
       - run: echo "The output is '${{ steps.run-action.outputs.commit-list }}'"
