@@ -34,7 +34,10 @@ describe('CommitRefRangeCalculator', () => {
       // Act
       const actual = await sut.execute()
 
-      const expected: CommitRefRange = { previousRef: '67671cd', currentRef: 'main' }
+      const expected: CommitRefRange = {
+        previousRef: '67671cd',
+        currentRef: 'main',
+      }
       expect(actual).to.deep.equal(expected)
     })
 
@@ -48,7 +51,8 @@ describe('CommitRefRangeCalculator', () => {
         }
         const branchComparisonStrategy = 'workflow'
         const { ref: githubRef } = context
-        const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
+        const commitHashCalculator =
+          tsSinon.stubConstructor(CommitHashCalculator)
         const previousTagProvider = (currentTag: string) => {
           return Promise.resolve('v0.1.0')
         }
@@ -64,7 +68,10 @@ describe('CommitRefRangeCalculator', () => {
         // Act
         const actual = await sut.execute()
 
-        const expected: CommitRefRange = { previousRef: undefined, currentRef: 'main' }
+        const expected: CommitRefRange = {
+          previousRef: undefined,
+          currentRef: 'main',
+        }
         expect(actual).to.deep.equal(expected)
       })
     })
@@ -85,7 +92,9 @@ describe('CommitRefRangeCalculator', () => {
         return Promise.resolve('v0.1.0')
       }
 
-      commitHashCalculator.execute.rejects('This was not supposed to be called.')
+      commitHashCalculator.execute.rejects(
+        'This was not supposed to be called.',
+      )
 
       const sut = new CommitRefRangeCalculator(
         { githubRef, branchComparisonStrategy },
@@ -96,40 +105,52 @@ describe('CommitRefRangeCalculator', () => {
       // Act
       const actual = await sut.execute()
 
-      const expected: CommitRefRange = { previousRef: 'v0.1.0', currentRef: 'v0.2.0' }
+      const expected: CommitRefRange = {
+        previousRef: 'v0.1.0',
+        currentRef: 'v0.2.0',
+      }
       expect(actual).to.deep.equal(expected)
     })
 
-    context('previousTagProvider retuns current tag (because no earlier tags were found)', () => {
-      it('previousRef is undefined and currentRef is v0.2.0', async () => {
-        const context: ActionContext = {
-          owner: 'colt',
-          ref: 'refs/tags/v0.2.0',
-          repo: 'Changelogger',
-          runId: 1,
-        }
-        const branchComparisonStrategy = 'workflow'
-        const { ref: githubRef } = context
-        const commitHashCalculator = tsSinon.stubConstructor(CommitHashCalculator)
-        const previousTagProvider = (currentTag: string) => {
-          return Promise.resolve(currentTag)
-        }
+    context(
+      'previousTagProvider retuns current tag (because no earlier tags were found)',
+      () => {
+        it('previousRef is undefined and currentRef is v0.2.0', async () => {
+          const context: ActionContext = {
+            owner: 'colt',
+            ref: 'refs/tags/v0.2.0',
+            repo: 'Changelogger',
+            runId: 1,
+          }
+          const branchComparisonStrategy = 'workflow'
+          const { ref: githubRef } = context
+          const commitHashCalculator =
+            tsSinon.stubConstructor(CommitHashCalculator)
+          const previousTagProvider = (currentTag: string) => {
+            return Promise.resolve(currentTag)
+          }
 
-        commitHashCalculator.execute.rejects('This was not supposed to be called.')
+          commitHashCalculator.execute.rejects(
+            'This was not supposed to be called.',
+          )
 
-        const sut = new CommitRefRangeCalculator(
-          { githubRef, branchComparisonStrategy },
-          commitHashCalculator,
-          previousTagProvider,
-        )
+          const sut = new CommitRefRangeCalculator(
+            { githubRef, branchComparisonStrategy },
+            commitHashCalculator,
+            previousTagProvider,
+          )
 
-        // Act
-        const actual = await sut.execute()
+          // Act
+          const actual = await sut.execute()
 
-        const expected: CommitRefRange = { previousRef: 'v0.2.0', currentRef: 'v0.2.0' }
-        expect(actual).to.deep.equal(expected)
-      })
-    })
+          const expected: CommitRefRange = {
+            previousRef: 'v0.2.0',
+            currentRef: 'v0.2.0',
+          }
+          expect(actual).to.deep.equal(expected)
+        })
+      },
+    )
   })
 
   context('context.ref is something unsupported: refs/pull/1', () => {
@@ -147,7 +168,9 @@ describe('CommitRefRangeCalculator', () => {
         return Promise.resolve('v0.1.0')
       }
 
-      commitHashCalculator.execute.rejects('This was not supposed to be called.')
+      commitHashCalculator.execute.rejects(
+        'This was not supposed to be called.',
+      )
 
       const sut = new CommitRefRangeCalculator(
         { githubRef, branchComparisonStrategy },

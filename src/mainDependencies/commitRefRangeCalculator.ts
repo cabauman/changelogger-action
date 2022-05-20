@@ -7,7 +7,9 @@ export default class CommitRefRangeCalculator {
   constructor(
     private readonly input: CommitRefRangeCalculatorInput,
     private readonly commitHashCalculator: CommitHashCalculator,
-    private readonly previousTagProvider: (currentTag: string) => Promise<string>,
+    private readonly previousTagProvider: (
+      currentTag: string,
+    ) => Promise<string>,
   ) {}
   public async execute(): Promise<CommitRefRange> {
     let currentRef: string | undefined

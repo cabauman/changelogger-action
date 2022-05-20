@@ -19,7 +19,10 @@ describe.skip('integration.stub', () => {
     const testStub = tsSinon.stubConstructor(CommitRefRangeCalculator)
     expect(testStub.execute()).to.be.undefined
     testStub.execute.resolves({ previousRef: 'a', currentRef: 'b' })
-    expect(testStub.execute()).to.deep.equal({ previousRef: 'a', currentRef: 'b' })
+    expect(testStub.execute()).to.deep.equal({
+      previousRef: 'a',
+      currentRef: 'b',
+    })
 
     expect(1 + 2).to.equal(3)
 

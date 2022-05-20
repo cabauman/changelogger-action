@@ -5,7 +5,9 @@ export function error2Json(error: Error | unknown | null | undefined): string {
   return JSON.stringify(error, jsonFriendlyErrorReplacer)
 }
 
-export function error2Obj(error: Error | unknown | null | undefined): Record<string, unknown> {
+export function error2Obj(
+  error: Error | unknown | null | undefined,
+): Record<string, unknown> {
   const json = error2Json(error)
   return JSON.parse(json)
 }

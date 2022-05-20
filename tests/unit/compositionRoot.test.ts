@@ -4,7 +4,11 @@ import * as tsSinon from 'ts-sinon'
 import { expect } from 'chai'
 import CompositionRoot from '../../src/compositionRoot'
 import { IResultSetter } from '../../src/contracts/interfaces'
-import { ActionInput, ActionContext, CommitRefRange } from '../../src/contracts/types'
+import {
+  ActionInput,
+  ActionContext,
+  CommitRefRange,
+} from '../../src/contracts/types'
 import WorkflowIdProvider from '../../src/helpers/workflowIdProvider'
 import WorkflowShaProvider from '../../src/helpers/workflowShaProvider'
 
@@ -60,7 +64,10 @@ class TestCompositionRoot extends CompositionRoot {
   }
 
   protected getCommitProvider() {
-    return async ({ previousRef, currentRef }: CommitRefRange, delimeter: string) => {
+    return async (
+      { previousRef, currentRef }: CommitRefRange,
+      delimeter: string,
+    ) => {
       return `47c6658|feat: my feature\n${delimeter}\n47c6658|fix: my fix\n${delimeter}`
     }
   }
@@ -174,7 +181,10 @@ class TestCompositionRootBase extends CompositionRoot {
   }
 
   protected getCommitProvider() {
-    return async ({ previousRef, currentRef }: CommitRefRange, delimeter: string) => {
+    return async (
+      { previousRef, currentRef }: CommitRefRange,
+      delimeter: string,
+    ) => {
       return `47c6658|feat: my feature\n${delimeter}\n47c6658|fix: my fix\n${delimeter}`
     }
   }

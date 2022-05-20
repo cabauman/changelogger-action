@@ -12,8 +12,14 @@ describe('DecoratedOutputProvider', () => {
     markdownWriter.ul.returns('My fix')
     markdownWriter.heading.withArgs(preamble, 2).returns('Commit list:\n\n')
     outputProvider.execute.resolves('My fix')
-    const sut = new DecoratedOutputProvider(outputProvider, markdownWriter, preamble)
-    const commits: ReadonlyArray<Commit> = [{ sha: 'abc1234', header: 'My fix', rawBody: 'My fix' }]
+    const sut = new DecoratedOutputProvider(
+      outputProvider,
+      markdownWriter,
+      preamble,
+    )
+    const commits: ReadonlyArray<Commit> = [
+      { sha: 'abc1234', header: 'My fix', rawBody: 'My fix' },
+    ]
     const actual = await sut.execute(commits)
     expect(actual).to.equal('Commit list:\n\nMy fix')
   })

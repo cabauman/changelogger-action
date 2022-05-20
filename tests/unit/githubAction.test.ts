@@ -13,14 +13,20 @@ import CommitRefRangeCalculator from '../../src/mainDependencies/commitRefRangeC
 describe('GitHubAction', () => {
   context('previousRef is v0.1.0 and currentRef is v0.2.0', () => {
     it('resultSetter.setOutput is called once with expected markdown', async () => {
-      const commitRefRangeCalculator = tsSinon.stubConstructor(CommitRefRangeCalculator)
+      const commitRefRangeCalculator = tsSinon.stubConstructor(
+        CommitRefRangeCalculator,
+      )
       const commitListCalculator = tsSinon.stubConstructor(CommitListCalculator)
       const outputProvider = tsSinon.stubInterface<IOutputProvider>()
       const resultSetter = Substitute.for<IResultSetter>()
 
       const commitRefRange = { previousRef: 'v0.1.0', currentRef: 'v0.2.0' }
       const commits: Commit[] = [
-        { sha: 'abc1234', header: 'feat: my feature', rawBody: 'feat: my feature' },
+        {
+          sha: 'abc1234',
+          header: 'feat: my feature',
+          rawBody: 'feat: my feature',
+        },
       ]
       const markdown = '### Features\n\n• my feature'
 
@@ -45,7 +51,9 @@ describe('GitHubAction', () => {
 
   context('previousRef is undefined and currentRef is v0.2.0', () => {
     it('resultSetter.setOutput is called once with failure message', async () => {
-      const commitRefRangeCalculator = tsSinon.stubConstructor(CommitRefRangeCalculator)
+      const commitRefRangeCalculator = tsSinon.stubConstructor(
+        CommitRefRangeCalculator,
+      )
       const commitListCalculator = tsSinon.stubConstructor(CommitListCalculator)
       const outputProvider = tsSinon.stubInterface<IOutputProvider>()
       const resultSetter = Substitute.for<IResultSetter>()
@@ -65,13 +73,17 @@ describe('GitHubAction', () => {
       await sut.run()
 
       // Assert
-      resultSetter.received(1).setOutput('changelog', 'No previous commits to compare to.')
+      resultSetter
+        .received(1)
+        .setOutput('changelog', 'No previous commits to compare to.')
     })
   })
 
   context('commitRefRangeCalculator throws an error', () => {
     it('resultSetter.setFailed is called once with failure message', async () => {
-      const commitRefRangeCalculator = tsSinon.stubConstructor(CommitRefRangeCalculator)
+      const commitRefRangeCalculator = tsSinon.stubConstructor(
+        CommitRefRangeCalculator,
+      )
       const commitListCalculator = tsSinon.stubConstructor(CommitListCalculator)
       const outputProvider = tsSinon.stubInterface<IOutputProvider>()
       const resultSetter = Substitute.for<IResultSetter>()

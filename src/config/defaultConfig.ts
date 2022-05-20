@@ -1,4 +1,8 @@
-import { ChangelogConfig, CommitType, RawChangelogConfig } from '../contracts/types'
+import {
+  ChangelogConfig,
+  CommitType,
+  RawChangelogConfig,
+} from '../contracts/types'
 
 // https://github.com/conventional-changelog/conventional-changelog/blob/master/packages/conventional-changelog-conventionalcommits/writer-opts.js
 export function getDefaultConfig(config?: RawChangelogConfig): ChangelogConfig {
@@ -20,7 +24,11 @@ export function getDefaultConfig(config?: RawChangelogConfig): ChangelogConfig {
     }
   }
 
-  config.types.push({ type: 'BREAKING', section: '⚠️ BREAKING CHANGES', hidden: false })
+  config.types.push({
+    type: 'BREAKING',
+    section: '⚠️ BREAKING CHANGES',
+    hidden: false,
+  })
 
   const result: [string, CommitType][] = config.types.map((x) => [x.type, x])
 

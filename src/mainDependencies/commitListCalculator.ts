@@ -11,9 +11,13 @@ export default class CommitListCalculator {
       delimeter: string,
     ) => Promise<string>,
   ) {}
-  public async execute(commitRefRange: CommitRefRange): Promise<readonly Commit[]> {
+  public async execute(
+    commitRefRange: CommitRefRange,
+  ): Promise<readonly Commit[]> {
     const rawCommits = await this.commitProvider(commitRefRange, DELIMITER)
-    const commitInfo = rawCommits.split(`\n${DELIMITER}\n`).filter((x) => x != '')
+    const commitInfo = rawCommits
+      .split(`\n${DELIMITER}\n`)
+      .filter((x) => x != '')
     const commits: Commit[] = commitInfo.map((x) => {
       const components = x.split('|', 2)
       const sha = components[0]

@@ -29,11 +29,18 @@ describe('conventionalOutputProvider', () => {
   context('1 feature commit', () => {
     it('returns features section', async () => {
       const commits: Commit[] = [
-        { sha: 'abcd123', rawBody: 'feat: my feature', header: 'feat: my feature' },
+        {
+          sha: 'abcd123',
+          rawBody: 'feat: my feature',
+          header: 'feat: my feature',
+        },
       ]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const sut = new ConventionalOutputProvider(
+        markdownWriter,
+        changelogConfig,
+      )
       const actual = await sut.execute(commits)
       expect(actual).to.equal('*Features*\n• abcd123 my feature\n\n')
     })
@@ -42,11 +49,18 @@ describe('conventionalOutputProvider', () => {
   context('1 breaking change feature commit', () => {
     it('returns 2 sections: breaking changes and features', async () => {
       const commits: Commit[] = [
-        { sha: 'abcd123', rawBody: 'feat!: my feature', header: 'feat: my feature' },
+        {
+          sha: 'abcd123',
+          rawBody: 'feat!: my feature',
+          header: 'feat: my feature',
+        },
       ]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const sut = new ConventionalOutputProvider(
+        markdownWriter,
+        changelogConfig,
+      )
       const actual = await sut.execute(commits)
       expect(actual).to.equal(
         '*⚠️ BREAKING CHANGES*\n• my feature\n\n*Features*\n• abcd123 my feature\n\n',
@@ -57,11 +71,18 @@ describe('conventionalOutputProvider', () => {
   context('1 chore commit (section hidden by default)', () => {
     it('returns empty string', async () => {
       const commits: Commit[] = [
-        { sha: 'acbd123', rawBody: 'chore: my chore', header: 'chore: my chore' },
+        {
+          sha: 'acbd123',
+          rawBody: 'chore: my chore',
+          header: 'chore: my chore',
+        },
       ]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const sut = new ConventionalOutputProvider(
+        markdownWriter,
+        changelogConfig,
+      )
       const actual = await sut.execute(commits)
       expect(actual).to.equal('')
     })
@@ -70,11 +91,18 @@ describe('conventionalOutputProvider', () => {
   context('1 custom commit type (does not exist in config)', () => {
     it('returns empty string', async () => {
       const commits: Commit[] = [
-        { sha: 'acbd123', rawBody: 'wip: my feature', header: 'wip: my feature' },
+        {
+          sha: 'acbd123',
+          rawBody: 'wip: my feature',
+          header: 'wip: my feature',
+        },
       ]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const sut = new ConventionalOutputProvider(
+        markdownWriter,
+        changelogConfig,
+      )
       const actual = await sut.execute(commits)
       expect(actual).to.equal('')
     })
@@ -83,11 +111,18 @@ describe('conventionalOutputProvider', () => {
   context('1 feature commit with scope', () => {
     it('returns features section with scope in bold', async () => {
       const commits: Commit[] = [
-        { sha: 'abcd123', rawBody: 'feat(ux): my feature', header: 'feat(ux): my feature' },
+        {
+          sha: 'abcd123',
+          rawBody: 'feat(ux): my feature',
+          header: 'feat(ux): my feature',
+        },
       ]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const sut = new ConventionalOutputProvider(
+        markdownWriter,
+        changelogConfig,
+      )
       const actual = await sut.execute(commits)
       expect(actual).to.equal('*Features*\n• abcd123 *ux:* my feature\n\n')
     })
@@ -95,10 +130,15 @@ describe('conventionalOutputProvider', () => {
 
   context('1 non-conventional commit', () => {
     it('returns empty string', async () => {
-      const commits: Commit[] = [{ sha: 'abcd123', rawBody: 'my feature', header: 'my feature' }]
+      const commits: Commit[] = [
+        { sha: 'abcd123', rawBody: 'my feature', header: 'my feature' },
+      ]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const sut = new ConventionalOutputProvider(
+        markdownWriter,
+        changelogConfig,
+      )
       const actual = await sut.execute(commits)
       expect(actual).to.equal('')
     })
@@ -107,45 +147,73 @@ describe('conventionalOutputProvider', () => {
   context('2 feature commits', () => {
     it('returns features section with 2 commits', async () => {
       const commits: Commit[] = [
-        { sha: 'abcd123', rawBody: 'feat: feature 1', header: 'feat: feature 1' },
-        { sha: 'abcd124', rawBody: 'feat: feature 2', header: 'feat: feature 2' },
+        {
+          sha: 'abcd123',
+          rawBody: 'feat: feature 1',
+          header: 'feat: feature 1',
+        },
+        {
+          sha: 'abcd124',
+          rawBody: 'feat: feature 2',
+          header: 'feat: feature 2',
+        },
       ]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const sut = new ConventionalOutputProvider(
+        markdownWriter,
+        changelogConfig,
+      )
       const actual = await sut.execute(commits)
-      expect(actual).to.equal('*Features*\n• abcd123 feature 1\n• abcd124 feature 2\n\n')
+      expect(actual).to.equal(
+        '*Features*\n• abcd123 feature 1\n• abcd124 feature 2\n\n',
+      )
     })
   })
 
   context('1 commit that starts with "chore(release):"', () => {
     it('returns empty string', async () => {
       const commits: Commit[] = [
-        { sha: 'abcd123', rawBody: 'chore(release): v1.0.0', header: 'chore(release): v1.0.0' },
+        {
+          sha: 'abcd123',
+          rawBody: 'chore(release): v1.0.0',
+          header: 'chore(release): v1.0.0',
+        },
       ]
       const markdownWriter = new SlackMarkdown()
       const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+      const sut = new ConventionalOutputProvider(
+        markdownWriter,
+        changelogConfig,
+      )
       const actual = await sut.execute(commits)
       expect(actual).to.equal('')
     })
   })
 
   // TODO: Add a variety of input.
-  context('1 revert commit where the first letter of the type is capitalized', () => {
-    it('returns revert section with 1 commit', async () => {
-      const commits: Commit[] = [
-        {
-          sha: 'abcd123',
-          rawBody: 'Revert: This reverts commit abc',
-          header: 'Revert: This reverts commit abc',
-        },
-      ]
-      const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
-      const actual = await sut.execute(commits)
-      expect(actual).to.equal('*Reverts*\n• abcd123 This reverts commit abc\n\n')
-    })
-  })
+  context(
+    '1 revert commit where the first letter of the type is capitalized',
+    () => {
+      it('returns revert section with 1 commit', async () => {
+        const commits: Commit[] = [
+          {
+            sha: 'abcd123',
+            rawBody: 'Revert: This reverts commit abc',
+            header: 'Revert: This reverts commit abc',
+          },
+        ]
+        const markdownWriter = new SlackMarkdown()
+        const changelogConfig = getDefaultConfig()
+        const sut = new ConventionalOutputProvider(
+          markdownWriter,
+          changelogConfig,
+        )
+        const actual = await sut.execute(commits)
+        expect(actual).to.equal(
+          '*Reverts*\n• abcd123 This reverts commit abc\n\n',
+        )
+      })
+    },
+  )
 })

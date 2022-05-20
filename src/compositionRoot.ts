@@ -83,7 +83,10 @@ export default class CompositionRoot {
   }
 
   protected getCommitProvider() {
-    return async ({ previousRef, currentRef }: CommitRefRange, delimeter: string) => {
+    return async (
+      { previousRef, currentRef }: CommitRefRange,
+      delimeter: string,
+    ) => {
       await exec.exec('git fetch origin')
       const gitLog = await exec.getExecOutput(
         `git log ${previousRef}..${currentRef} --format=%h|%B${delimeter}`,
@@ -133,19 +136,31 @@ export default class CompositionRoot {
     const markdownWriter = this.getMarkdown()
     let outputProvider: IOutputProvider
     if (this.getInput().isConventional) {
-      outputProvider = new ConventionalOutputProvider(markdownWriter, getChangelogConfig())
+      outputProvider = new ConventionalOutputProvider(
+        markdownWriter,
+        getChangelogConfig(),
+      )
     } else {
       outputProvider = new NonConventionalOutputProvider(markdownWriter)
     }
-    return new DecoratedOutputProvider(outputProvider, markdownWriter, this.getInput().preamble)
+    return new DecoratedOutputProvider(
+      outputProvider,
+      markdownWriter,
+      this.getInput().preamble,
+    )
   }
 
   protected getCommitHashCalculator() {
-    return new CommitHashCalculator(this.getWorkflowIdProvider(), this.getWorkflowShaProvider())
+    return new CommitHashCalculator(
+      this.getWorkflowIdProvider(),
+      this.getWorkflowShaProvider(),
+    )
   }
 
   protected getMarkdown() {
     // TODO: Implement markdown flavor.
-    return this.getInput().outputFlavor === 'slack' ? new SlackMarkdown() : new GitHubMarkdown()
+    return this.getInput().outputFlavor === 'slack'
+      ? new SlackMarkdown()
+      : new GitHubMarkdown()
   }
 }

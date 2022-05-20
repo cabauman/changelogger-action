@@ -9,7 +9,10 @@ export default class CommitHashCalculator {
 
   public async execute(branchName: string): Promise<string | undefined> {
     const workflowId = await this.workflowIdProvider.execute()
-    const workflowSha = await this.workflowShaProvider.execute(branchName, workflowId)
+    const workflowSha = await this.workflowShaProvider.execute(
+      branchName,
+      workflowId,
+    )
     return workflowSha
   }
 }

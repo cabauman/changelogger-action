@@ -15,7 +15,10 @@ export default class GitHubAction {
     try {
       const commitRefRange = await this.commitRefRangeCalculator.execute()
       if (commitRefRange.previousRef == null) {
-        this.resultSetter.setOutput('changelog', 'No previous commits to compare to.')
+        this.resultSetter.setOutput(
+          'changelog',
+          'No previous commits to compare to.',
+        )
         return
       }
       const commits = await this.commitListCalculator.execute(commitRefRange)

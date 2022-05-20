@@ -9,7 +9,10 @@ export default class WorkflowShaProvider {
     private readonly commitRefValidator: (commitRef: string) => Promise<void>,
   ) {}
 
-  public async execute(branchName: string, workflowId: number): Promise<string | undefined> {
+  public async execute(
+    branchName: string,
+    workflowId: number,
+  ): Promise<string | undefined> {
     let page = 1
     let workflowSha: string | undefined
     // eslint-disable-next-line no-constant-condition

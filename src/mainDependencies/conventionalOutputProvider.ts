@@ -35,10 +35,14 @@ export default class ConventionalOutputProvider implements IOutputProvider {
       }
       const items = map[type] ?? []
       map[type.toLowerCase()] = items
-      const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) + ' ' : ''
+      const scope = parsed.scope
+        ? this.markdown.bold(`${parsed.scope}:`) + ' '
+        : ''
       items.push(`${commit.sha} ${scope}${subject}`)
 
-      const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE')
+      const breakingChanges = parsed.notes.filter(
+        (x) => x.title === 'BREAKING CHANGE',
+      )
       if (breakingChanges.length === 0) continue
       map['BREAKING'].push(...breakingChanges.map((x) => x.text))
     }

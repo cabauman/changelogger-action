@@ -16,7 +16,9 @@ describe('WorkflowIdProvider', () => {
     }
 
     const scoped = nock('https://api.github.com')
-      .get(`/repos/${context.owner}/${context.repo}/actions/runs/${context.runId}`)
+      .get(
+        `/repos/${context.owner}/${context.repo}/actions/runs/${context.runId}`,
+      )
       .reply(200, { workflow_id: 2 })
 
     // Act

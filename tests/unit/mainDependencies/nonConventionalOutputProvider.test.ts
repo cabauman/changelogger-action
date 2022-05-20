@@ -9,7 +9,9 @@ describe('NonConventionalOutputProvider', () => {
     const markdownWriter = tsSinon.stubInterface<IMarkdown>()
     markdownWriter.ul.returns('My fix')
     const sut = new NonConventionalOutputProvider(markdownWriter)
-    const commits: ReadonlyArray<Commit> = [{ sha: 'abc1234', header: 'My fix', rawBody: 'My fix' }]
+    const commits: ReadonlyArray<Commit> = [
+      { sha: 'abc1234', header: 'My fix', rawBody: 'My fix' },
+    ]
     const actual = await sut.execute(commits)
     expect(actual).to.equal('My fix')
   })

@@ -8,11 +8,13 @@ export default class WorkflowIdProvider {
   ) {}
 
   public async execute(): Promise<number> {
-    const { data: currentRun } = await this.octokit.rest.actions.getWorkflowRun({
-      owner: this.context.owner,
-      repo: this.context.repo,
-      run_id: this.context.runId,
-    })
+    const { data: currentRun } = await this.octokit.rest.actions.getWorkflowRun(
+      {
+        owner: this.context.owner,
+        repo: this.context.repo,
+        run_id: this.context.runId,
+      },
+    )
     return currentRun.workflow_id
   }
 }
