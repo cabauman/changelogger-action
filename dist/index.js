@@ -34031,12 +34031,12 @@ class GitHubAction {
             try {
                 const commitRefRange = yield this.commitRefRangeCalculator.execute();
                 if (commitRefRange.previousRef == null) {
-                    this.resultSetter.setOutput('commit-list', 'No previous commits to compare to.');
+                    this.resultSetter.setOutput('changelog', 'No previous commits to compare to.');
                     return;
                 }
                 const commits = yield this.commitListCalculator.execute(commitRefRange);
                 const markdown = yield this.outputProvider.execute(commits);
-                this.resultSetter.setOutput('commit-list', markdown);
+                this.resultSetter.setOutput('changelog', markdown);
             }
             catch (error) {
                 this.resultSetter.setFailed((0, errorUtil_1.error2Json)(error));
@@ -34303,6 +34303,7 @@ class CommitRefRangeCalculator {
                 previousRef = yield this.previousTagProvider(tagName);
             }
             else if (githubRef.startsWith('refs/pull/')) {
+                // TODO: Consider not supporting PRs.
                 previousRef = this.input.prTarget ? 'origin/' + this.input.prTarget : undefined;
                 currentRef = this.input.prSource ? 'origin/' + this.input.prSource : undefined;
             }
