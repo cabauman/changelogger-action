@@ -37,7 +37,7 @@ export default function retrieveAndValidateInput(inputRetriever: IInputRetriever
 function validateOutputFlavor(value: string): OutputFlavor {
   if (!SUPPORTED_OUTPUT_FLAVORS.includes(value as OutputFlavor)) {
     throw new Error(
-      `Invalid value '${value}' for 'output-flavor' input. It must be one of ${SUPPORTED_OUTPUT_FLAVORS}`,
+      `Invalid value '${value}' for ${OUTPUT_FLAVOR} input. It must be one of ${SUPPORTED_OUTPUT_FLAVORS}`,
     )
   }
   return value as OutputFlavor
