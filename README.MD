@@ -3,3 +3,45 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
+## Inputs
+
+| Name | Required | Default |
+| ----- | --- | --- |
+| `token` | No | ${{ github.token }} |
+| `preamble` | No | What's changed? |
+| `is-conventional` | No | true |
+| `output-flavor` | No | github-release |
+| `branch-comparison-strategy` | No | tag |
+
+### token
+
+Used to access releases and workflows.
+
+### preamble
+
+Message positioned before the list of commits. Prefixed with ## (header markdown).
+
+### is-conventional
+
+Parse conventional commits and organize into sections (like conventional changelog libraries). By default, only feat, fix, and breaking changes are included. Will use the .versionrc file if present.
+
+### output-flavor
+
+**Options:**
+* `github-release`: GitHub Releases supports [autolinked references + formatting](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls).
+* `markdown`: Basic GitHub markdown without autolinked references. (NOT FINISHED)
+* `slack`: Slack uses its own special markup language called [mrkdwn](https://api.slack.com/reference/surfaces/formatting).
+
+### branch-comparison-strategy
+
+_Only applies when the workflow ref starts with refs/heads/_
+
+**Options:**
+* `tag`: searches for the last non-prerelease tag, and uses that to compare against HEAD
+* `workflow`: searches for the last successful workflow run for the current branch + current workflow, and uses that to compare against HEAD
+
+## Outputs
+
+| Name | Description |
+| ----- | --- |
+| `changelog` | The generated changelog for the new version. |

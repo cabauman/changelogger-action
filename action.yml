@@ -4,22 +4,12 @@ description: >
   Outputs a changelog diff since the last full release. I'm a fan of standard-version,
   but at the time of writing it doesn't support including prerelease commits when a
   full release is made.
+
 inputs:
-  token:
-    description: >
-      Personal access token (PAT) used to fetch the repository. The PAT is configured
-      with the local git config, which enables your scripts to run authenticated git
-      commands. The post-job step removes the PAT.
-      We recommend using a service account with the least permissions necessary.
-      Also when generating a new PAT, select the least scopes necessary.
-      [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
-    default: ${{ github.token }}
-    required: false
-  # Consider adding postamble like: Full Changelog: v11.2.3...v11.3.0
   preamble:
     description: >
-      Message positioned before the list of commits. This message is displayed
-      even if the retrieval of commits fails.
+      Message positioned before the list of commits. Prefixed with ## (header markdown).
+    default: What's changed?
     required: false
   # Consider only supporting conventional commits.
   is-conventional:
@@ -34,7 +24,7 @@ inputs:
       Options: github-release, markdown, slack
       github-release: GitHub Releases supports autolinked references + formatting.
         Source: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls
-      markdown: Basic markdown for providers like GitHub and Bitbucket.
+      markdown: Basic GitHub markdown without autolinked references. (NOT FINISHED)
       slack: Slack uses its own special markup language called mrkdwn.
         Source: https://api.slack.com/reference/surfaces/formatting
     required: false
@@ -42,16 +32,27 @@ inputs:
   # Consider only supporting tag comparisons.
   branch-comparison-strategy:
     description: >
-      Either tag or workflow
+      Options: tag, workflow
       Only applies when the workflow trigger ref starts with `refs/heads/`
       tag: searches for the last non-prerelease tag, and uses that to compare against HEAD
       workflow: searches for the last successful workflow run for the current branch + current workflow,
         and uses that to compare against HEAD
     required: false
     default: tag
+  token:
+    description: Used to access releases and workflows.
+    default: ${{ github.token }}
+    required: false
+
+  # Consider adding postamble like: Full Changelog: v11.2.3...v11.3.0
   # Consider adding option to include author(s): @cabauman
   # Consider adding option to customize format: {{sha}} {{commit-message}} {{author}}
-  # Consider adding option to filter out. Either regex or js predicate function.
+  # Consider adding option to filter out certain commits. Either regex or js predicate function.
+  # Consider adding option to specify .versionrc path.
+
+outputs:
+  changelog:
+    description: The generated changelog for the new version.
 
 runs:
   using: node16
