@@ -50,13 +50,13 @@ jobs:
           is-conventional: true
           preamble: What's changed?
 
-      - name: Get base version
-        id: get-base-version
+      - name: Get previous version
+        id: get-previous-version
         env:
           VERSION_TAG: ${{ steps.get-latest-tag.outputs.version-tag }}
         run: |
-          base_version=$(echo ${{ env.VERSION_TAG }} | cut -d- -f1)
-          echo ::set-output name=base-version::$base_version
+          previous_version=$(git describe --tags --abbrev=0 ${{ env.VERSION_TAG }}^)
+          echo ::set-output name=previous-version::$previous_version
 
       - name: Commit changes
         env:
@@ -68,17 +68,26 @@ jobs:
       - name: Upsert release
         uses: actions/github-script@v6.1.0
         env:
-          BASE_VERSION: ${{ steps.get-base-version.outputs.base-version }}
+          PREVIOUS_VERSION: ${{ steps.get-previous-version.outputs.previous-version }}
           RELEASE_NAME: ${{ steps.get-latest-tag.outputs.version-tag }}
           PRERELEASE: ${{ github.event.inputs.prerelease != '' }}
           BODY: ${{ steps.changelog.outputs.commit-list }}
         with:
           script: |
-            const { BASE_VERSION, RELEASE_NAME, PRERELEASE, BODY } = process.env
+            const { PREVIOUS_VERSION, RELEASE_NAME, PRERELEASE, BODY } = process.env
             const { owner, repo } = context.repo
             const { data } = await github.rest.repos.listReleases({ owner, repo, per_page: 1 })
             const release = data.length > 0 ? data[0] : undefined
-            if (release && release.tag_name.startsWith(BASE_VERSION)) {
+            let updateExisting = false
+            if (release) {
+              const regex = /^(v[0-9]+\.[0-9]+\.[0-9]+)-.*$/
+              const match = regex.exec(PREVIOUS_VERSION)
+              if (match) {
+                const previousBaseVersion = match[1]
+                updateExisting = release.tag_name.startsWith(previousBaseVersion)
+              }
+            }
+            if (updateExisting) {
               await github.rest.repos.updateRelease({
                 owner,
                 repo,
