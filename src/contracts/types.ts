@@ -1,3 +1,5 @@
+import { BranchComparisonStrategy, OutputFlavor } from '../config/getInput'
+
 export type Commit = {
   sha: string // %h
   rawBody: string // %B
@@ -12,9 +14,9 @@ export type CommitRefRange = {
 export type ActionInput = {
   token: string
   preamble: string
-  outputFlavor: string
+  outputFlavor: OutputFlavor
   isConventional: boolean
-  branchComparisonStrategy: string
+  branchComparisonStrategy: BranchComparisonStrategy
 }
 
 export type ActionContext = {

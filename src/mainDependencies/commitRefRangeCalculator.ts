@@ -1,9 +1,8 @@
 import * as core from '@actions/core'
 import CommitHashCalculator from '../helpers/commitHashCalculator'
 import { CommitRefRange, ActionContext } from '../contracts/types'
+import { BranchComparisonStrategy } from '../config/getInput'
 
-// TODO: Consider splitting this into 3 distinct implementations of an interface,
-// one of which is chosen at composition time.
 export default class CommitRefRangeCalculator {
   constructor(
     private readonly input: CommitRefRangeCalculatorInput,
@@ -22,10 +21,6 @@ export default class CommitRefRangeCalculator {
         previousRef = await this.previousTagProvider(branchName)
       } else if (this.input.branchComparisonStrategy === 'workflow') {
         previousRef = await this.commitHashCalculator.execute(branchName)
-      } else {
-        throw new Error(
-          `[CommitRefRangeCalculator] Unsupported branchComparisonStrategy: ${this.input.branchComparisonStrategy}`,
-        )
       }
     } else if (githubRef.startsWith('refs/tags/')) {
       const tagName = githubRef.slice('refs/tags/'.length)
@@ -42,7 +37,6 @@ export default class CommitRefRangeCalculator {
 }
 
 export type CommitRefRangeCalculatorInput = {
-  // TODO: Consider enforcing type: 'tag' | 'workflow'
-  branchComparisonStrategy: string
+  branchComparisonStrategy: BranchComparisonStrategy
   githubRef: string
 }

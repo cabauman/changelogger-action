@@ -2,8 +2,12 @@ import { IInputRetriever } from '../contracts/interfaces'
 import { ActionInput } from '../contracts/types'
 
 // TODO: Implement markdown flavor.
-export const SUPPORTED_OUTPUT_FLAVORS: string[] = ['github-release', 'markdown', 'slack']
-export const SUPPORTED_BRANCH_COMPARISON_STRATEGIES: string[] = ['tag', 'workflow']
+export const SUPPORTED_OUTPUT_FLAVORS = ['github-release', 'markdown', 'slack'] as const
+export type OutputFlavor = typeof SUPPORTED_OUTPUT_FLAVORS[number]
+
+export const SUPPORTED_BRANCH_COMPARISON_STRATEGIES = ['tag', 'workflow'] as const
+export type BranchComparisonStrategy = typeof SUPPORTED_BRANCH_COMPARISON_STRATEGIES[number]
+
 export const IS_CONVENTIONAL = 'is-conventional'
 export const OUTPUT_FLAVOR = 'output-flavor'
 export const PREAMBLE = 'preamble'
@@ -11,26 +15,32 @@ export const TOKEN = 'token'
 export const BRANCH_COMPARISON_STRATEGY = 'branch-comparison-strategy'
 
 export default function retrieveAndValidateInput(inputRetriever: IInputRetriever): ActionInput {
-  const input: ActionInput = {
-    isConventional: inputRetriever.getBooleanInput(IS_CONVENTIONAL),
-    outputFlavor: inputRetriever.getInput(OUTPUT_FLAVOR),
-    preamble: inputRetriever.getInput(PREAMBLE),
-    token: inputRetriever.getInput(TOKEN),
-    branchComparisonStrategy: inputRetriever.getInput(BRANCH_COMPARISON_STRATEGY),
-  }
-  validateOutputFlavor(input.outputFlavor)
-  validateToken(input.token)
-  validateBranchComparisonStrategy(input.branchComparisonStrategy)
+  const isConventional = inputRetriever.getBooleanInput(IS_CONVENTIONAL)
+  const rawOutputFlavor = inputRetriever.getInput(OUTPUT_FLAVOR)
+  const preamble = inputRetriever.getInput(PREAMBLE)
+  const token = inputRetriever.getInput(TOKEN)
+  const rawBranchComparisonStrategy = inputRetriever.getInput(BRANCH_COMPARISON_STRATEGY)
 
-  return input
+  validateToken(token)
+  const outputFlavor = validateOutputFlavor(rawOutputFlavor)
+  const branchComparisonStrategy = validateBranchComparisonStrategy(rawBranchComparisonStrategy)
+
+  return {
+    isConventional,
+    outputFlavor,
+    preamble,
+    token,
+    branchComparisonStrategy,
+  }
 }
 
-function validateOutputFlavor(value: string) {
-  if (!SUPPORTED_OUTPUT_FLAVORS.includes(value)) {
+function validateOutputFlavor(value: string): OutputFlavor {
+  if (!SUPPORTED_OUTPUT_FLAVORS.includes(value as OutputFlavor)) {
     throw new Error(
       `Invalid value '${value}' for 'output-flavor' input. It must be one of ${SUPPORTED_OUTPUT_FLAVORS}`,
     )
   }
+  return value as OutputFlavor
 }
 
 function validateToken(value: string) {
@@ -39,11 +49,12 @@ function validateToken(value: string) {
   }
 }
 
-function validateBranchComparisonStrategy(value: string) {
-  if (!SUPPORTED_BRANCH_COMPARISON_STRATEGIES.includes(value)) {
+function validateBranchComparisonStrategy(value: string): BranchComparisonStrategy {
+  if (!SUPPORTED_BRANCH_COMPARISON_STRATEGIES.includes(value as BranchComparisonStrategy)) {
     throw new Error(
       `Invalid value '${value}' for 'branch-comparison-strategy' input. ` +
         `It must be one of ${SUPPORTED_BRANCH_COMPARISON_STRATEGIES}`,
     )
   }
+  return value as BranchComparisonStrategy
 }
