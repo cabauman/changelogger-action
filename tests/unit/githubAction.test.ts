@@ -39,7 +39,7 @@ describe('GitHubAction', () => {
       await sut.run()
 
       // Assert
-      resultSetter.received(1).setOutput('commit-list', markdown)
+      resultSetter.received(1).setOutput('changelog', markdown)
     })
   })
 
@@ -65,7 +65,7 @@ describe('GitHubAction', () => {
       await sut.run()
 
       // Assert
-      resultSetter.received(1).setOutput('commit-list', 'No previous commits to compare to.')
+      resultSetter.received(1).setOutput('changelog', 'No previous commits to compare to.')
     })
   })
 

@@ -7,7 +7,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "ts-node src/newStructure/main.ts",
-    "debug": "node src/debug.js",
+    "debug": "node src/debug/debug.js",
     "build": "ncc build --source-map --license licenses.txt",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "mocha --require ts-node/register tests/unit/**/*.test.ts",

@@ -27,4 +27,4 @@ jobs:
         with:
           is-conventional: true
           preamble: Test was successful
-      - run: echo "The output is '${{ steps.run-action.outputs.commit-list }}'"
+      - run: echo "The output is '${{ steps.run-action.outputs.changelog }}'"

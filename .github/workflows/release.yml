@@ -71,7 +71,7 @@ jobs:
           PREVIOUS_VERSION: ${{ steps.get-previous-version.outputs.previous-version }}
           RELEASE_NAME: ${{ steps.get-latest-tag.outputs.version-tag }}
           PRERELEASE: ${{ github.event.inputs.prerelease != '' }}
-          BODY: ${{ steps.changelog.outputs.commit-list }}
+          BODY: ${{ steps.changelog.outputs.changelog }}
         with:
           script: |
             const { PREVIOUS_VERSION, RELEASE_NAME, PRERELEASE, BODY } = process.env

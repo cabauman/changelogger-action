@@ -32,6 +32,7 @@ export default class CommitRefRangeCalculator {
       currentRef = tagName
       previousRef = await this.previousTagProvider(tagName)
     } else if (githubRef.startsWith('refs/pull/')) {
+      // TODO: Consider not supporting PRs.
       previousRef = this.input.prTarget ? 'origin/' + this.input.prTarget : undefined
       currentRef = this.input.prSource ? 'origin/' + this.input.prSource : undefined
     } else {
