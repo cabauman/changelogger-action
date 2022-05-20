@@ -31,10 +31,6 @@ export default class CommitRefRangeCalculator {
       const tagName = githubRef.slice('refs/tags/'.length)
       currentRef = tagName
       previousRef = await this.previousTagProvider(tagName)
-    } else if (githubRef.startsWith('refs/pull/')) {
-      // TODO: Consider not supporting PRs.
-      previousRef = this.input.prTarget ? 'origin/' + this.input.prTarget : undefined
-      currentRef = this.input.prSource ? 'origin/' + this.input.prSource : undefined
     } else {
       throw new Error(
         `Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`,
@@ -49,6 +45,4 @@ export type CommitRefRangeCalculatorInput = {
   // TODO: Consider enforcing type: 'tag' | 'workflow'
   branchComparisonStrategy: string
   githubRef: string
-  prTarget: string | undefined
-  prSource: string | undefined
 }

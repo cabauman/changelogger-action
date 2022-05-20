@@ -22,10 +22,6 @@ export type ActionContext = {
   readonly owner: string
   readonly repo: string
   readonly runId: number
-  // GITHUB_HEAD_REF
-  readonly prSource?: string
-  // GITHUB_BASE_REF
-  readonly prTarget?: string
 }
 
 export type ActionConfig = {

@@ -50,8 +50,6 @@ export default class CompositionRoot {
       repo: github.context.repo.repo,
       ref: github.context.ref,
       runId: github.context.runId,
-      prSource: process.env.GITHUB_HEAD_REF,
-      prTarget: process.env.GITHUB_BASE_REF,
     }
     return this.actionContext
   }
@@ -118,10 +116,10 @@ export default class CompositionRoot {
   // =============== END Override in tests =============== //
 
   protected getCommitRefRangeCalculator() {
-    const { ref: githubRef, prTarget, prSource } = this.getContext()
+    const { ref: githubRef } = this.getContext()
     const { branchComparisonStrategy } = this.getInput()
     return new CommitRefRangeCalculator(
-      { githubRef, prTarget, prSource, branchComparisonStrategy },
+      { githubRef, branchComparisonStrategy },
       this.getCommitHashCalculator(),
       this.getPreviousTagProvider(),
     )
