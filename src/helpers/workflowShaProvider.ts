@@ -1,10 +1,10 @@
 import * as core from '@actions/core'
-import { Api } from '@octokit/plugin-rest-endpoint-methods/dist-types/types'
+import { GitHub } from '@actions/github/lib/utils'
 import { ActionContext } from '../contracts/types'
 
 export default class WorkflowShaProvider {
   public constructor(
-    private readonly octokit: Api,
+    private readonly octokit: InstanceType<typeof GitHub>,
     private readonly context: ActionContext,
     private readonly commitRefValidator: (commitRef: string) => Promise<void>,
   ) {}
