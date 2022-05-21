@@ -33809,8 +33809,6 @@ class CompositionRoot {
             repo: github.context.repo.repo,
             ref: github.context.ref,
             runId: github.context.runId,
-            prSource: process.env.GITHUB_HEAD_REF,
-            prTarget: process.env.GITHUB_BASE_REF,
         });
         return this.actionContext;
     }
@@ -33862,9 +33860,9 @@ class CompositionRoot {
     }
     // =============== END Override in tests =============== //
     getCommitRefRangeCalculator() {
-        const { ref: githubRef, prTarget, prSource } = this.getContext();
+        const { ref: githubRef } = this.getContext();
         const { branchComparisonStrategy } = this.getInput();
-        return new commitRefRangeCalculator_1.default({ githubRef, prTarget, prSource, branchComparisonStrategy }, this.getCommitHashCalculator(), this.getPreviousTagProvider());
+        return new commitRefRangeCalculator_1.default({ githubRef, branchComparisonStrategy }, this.getCommitHashCalculator(), this.getPreviousTagProvider());
     }
     getCommitListCalculator() {
         return new commitListCalculator_1.default(this.getCommitProvider());
@@ -33885,7 +33883,9 @@ class CompositionRoot {
     }
     getMarkdown() {
         // TODO: Implement markdown flavor.
-        return this.getInput().outputFlavor === 'slack' ? new slackMarkdown_1.default() : new githubMarkdown_1.default();
+        return this.getInput().outputFlavor === 'slack'
+            ? new slackMarkdown_1.default()
+            : new githubMarkdown_1.default();
     }
 }
 exports["default"] = CompositionRoot;
@@ -33919,7 +33919,11 @@ function getDefaultConfig(config) {
             ],
         };
     }
-    config.types.push({ type: 'BREAKING', section: '⚠️ BREAKING CHANGES', hidden: false });
+    config.types.push({
+        type: 'BREAKING',
+        section: '⚠️ BREAKING CHANGES',
+        hidden: false,
+    });
     const result = config.types.map((x) => [x.type, x]);
     return { types: new Map(result) };
 }
@@ -33937,7 +33941,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getChangelogConfig = void 0;
 const fs_1 = __nccwpck_require__(7147);
 const defaultConfig_1 = __nccwpck_require__(7630);
-// TODO: Consider loading all the different versionrc file types.
 // https://github.com/conventional-changelog/standard-version/blob/master/lib/configuration.js
 function getChangelogConfig() {
     const configPath = './.versionrc';
@@ -33962,31 +33965,43 @@ exports.getChangelogConfig = getChangelogConfig;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.OUTPUT_FLAVOR = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_OUTPUT_FLAVORS = void 0;
 // TODO: Implement markdown flavor.
-exports.SUPPORTED_OUTPUT_FLAVORS = ['github-release', 'markdown', 'slack'];
-exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = ['tag', 'workflow'];
+exports.SUPPORTED_OUTPUT_FLAVORS = [
+    'github-release',
+    'markdown',
+    'slack',
+];
+exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = [
+    'tag',
+    'workflow',
+];
 exports.IS_CONVENTIONAL = 'is-conventional';
 exports.OUTPUT_FLAVOR = 'output-flavor';
 exports.PREAMBLE = 'preamble';
 exports.TOKEN = 'token';
 exports.BRANCH_COMPARISON_STRATEGY = 'branch-comparison-strategy';
 function retrieveAndValidateInput(inputRetriever) {
-    const input = {
-        isConventional: inputRetriever.getBooleanInput(exports.IS_CONVENTIONAL),
-        outputFlavor: inputRetriever.getInput(exports.OUTPUT_FLAVOR),
-        preamble: inputRetriever.getInput(exports.PREAMBLE),
-        token: inputRetriever.getInput(exports.TOKEN),
-        branchComparisonStrategy: inputRetriever.getInput(exports.BRANCH_COMPARISON_STRATEGY),
+    const isConventional = inputRetriever.getBooleanInput(exports.IS_CONVENTIONAL);
+    const rawOutputFlavor = inputRetriever.getInput(exports.OUTPUT_FLAVOR);
+    const preamble = inputRetriever.getInput(exports.PREAMBLE);
+    const token = inputRetriever.getInput(exports.TOKEN);
+    const rawBranchComparisonStrategy = inputRetriever.getInput(exports.BRANCH_COMPARISON_STRATEGY);
+    validateToken(token);
+    const outputFlavor = validateOutputFlavor(rawOutputFlavor);
+    const branchComparisonStrategy = validateBranchComparisonStrategy(rawBranchComparisonStrategy);
+    return {
+        isConventional,
+        outputFlavor,
+        preamble,
+        token,
+        branchComparisonStrategy,
     };
-    validateOutputFlavor(input.outputFlavor);
-    validateToken(input.token);
-    validateBranchComparisonStrategy(input.branchComparisonStrategy);
-    return input;
 }
 exports["default"] = retrieveAndValidateInput;
 function validateOutputFlavor(value) {
     if (!exports.SUPPORTED_OUTPUT_FLAVORS.includes(value)) {
-        throw new Error(`Invalid value '${value}' for 'output-flavor' input. It must be one of ${exports.SUPPORTED_OUTPUT_FLAVORS}`);
+        throw new Error(`Invalid value '${value}' for ${exports.OUTPUT_FLAVOR} input. It must be one of ${exports.SUPPORTED_OUTPUT_FLAVORS}`);
     }
+    return value;
 }
 function validateToken(value) {
     if (value === '') {
@@ -33998,6 +34013,7 @@ function validateBranchComparisonStrategy(value) {
         throw new Error(`Invalid value '${value}' for 'branch-comparison-strategy' input. ` +
             `It must be one of ${exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES}`);
     }
+    return value;
 }
 
 
@@ -34239,7 +34255,9 @@ class CommitListCalculator {
     execute(commitRefRange) {
         return __awaiter(this, void 0, void 0, function* () {
             const rawCommits = yield this.commitProvider(commitRefRange, exports.DELIMITER);
-            const commitInfo = rawCommits.split(`\n${exports.DELIMITER}\n`).filter((x) => x != '');
+            const commitInfo = rawCommits
+                .split(`\n${exports.DELIMITER}\n`)
+                .filter((x) => x != '');
             const commits = commitInfo.map((x) => {
                 const components = x.split('|', 2);
                 const sha = components[0];
@@ -34271,8 +34289,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-// TODO: Consider splitting this into 3 distinct implementations of an interface,
-// one of which is chosen at composition time.
 class CommitRefRangeCalculator {
     constructor(input, commitHashCalculator, previousTagProvider) {
         this.input = input;
@@ -34293,19 +34309,11 @@ class CommitRefRangeCalculator {
                 else if (this.input.branchComparisonStrategy === 'workflow') {
                     previousRef = yield this.commitHashCalculator.execute(branchName);
                 }
-                else {
-                    throw new Error(`[CommitRefRangeCalculator] Unsupported branchComparisonStrategy: ${this.input.branchComparisonStrategy}`);
-                }
             }
             else if (githubRef.startsWith('refs/tags/')) {
                 const tagName = githubRef.slice('refs/tags/'.length);
                 currentRef = tagName;
                 previousRef = yield this.previousTagProvider(tagName);
-            }
-            else if (githubRef.startsWith('refs/pull/')) {
-                // TODO: Consider not supporting PRs.
-                previousRef = this.input.prTarget ? 'origin/' + this.input.prTarget : undefined;
-                currentRef = this.input.prSource ? 'origin/' + this.input.prSource : undefined;
             }
             else {
                 throw new Error(`Expected github.context.ref to start with refs/heads/ or refs/tags/ but instead was ${githubRef}`);
@@ -34385,7 +34393,9 @@ class ConventionalOutputProvider {
                 }
                 const items = (_a = map[type]) !== null && _a !== void 0 ? _a : [];
                 map[type.toLowerCase()] = items;
-                const scope = parsed.scope ? this.markdown.bold(`${parsed.scope}:`) + ' ' : '';
+                const scope = parsed.scope
+                    ? this.markdown.bold(`${parsed.scope}:`) + ' '
+                    : '';
                 items.push(`${commit.sha} ${scope}${subject}`);
                 const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE');
                 if (breakingChanges.length === 0)
