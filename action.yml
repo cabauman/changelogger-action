@@ -3,33 +3,34 @@ author: Colt Alan Bauman
 description: >
   Outputs a changelog diff since the last full release. I'm a fan of standard-version,
   but at the time of writing it doesn't support including prerelease commits when a
-  full release is made.
+  full release is made. This addresses that limitation.
 
 inputs:
   preamble:
     description: >
-      Message positioned before the list of commits. Prefixed with ## (header markdown).
+      Message positioned before the list of commits. Prefixed with '## ' (header markdown).
     default: What's changed?
     required: false
-  # Consider only supporting conventional commits.
   is-conventional:
     description: >
-      Parse conventional commits and organize into sections (like conventional changelog libraries).
+      If false, it just returns a simple list of commits messages.
+      If true, it parses conventional commits and organizes them into sections
+      (like any conventional changelog library).
       By default, only feat, fix, and breaking changes are included.
-      Will use the .versionrc file if present.
+      Will use the .versionrc file if present in the root directory.
     required: false
     default: 'true'
   output-flavor:
     description: >
       Options: github-release, markdown, slack
-      github-release: GitHub Releases supports autolinked references + formatting.
+      github-release: GitHub Releases support autolinked references + formatting.
         Source: https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls
-      markdown: Basic GitHub markdown without autolinked references. (NOT FINISHED)
+      markdown: Basic GitHub markdown without autolinked references. This option
+      isn't ready yet so it currenlty uses github-release as a fallback.
       slack: Slack uses its own special markup language called mrkdwn.
         Source: https://api.slack.com/reference/surfaces/formatting
     required: false
     default: github-release
-  # Consider only supporting tag comparisons.
   branch-comparison-strategy:
     description: >
       Options: tag, workflow

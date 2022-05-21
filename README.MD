@@ -3,6 +3,10 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
+## Description
+
+Outputs a changelog diff since the last full release. I'm a fan of standard-version, but at the time of writing it doesn't support including prerelease commits when a full release is made. This addresses that limitation.
+
 ## Inputs
 
 | Name | Required | Default |
@@ -19,17 +23,17 @@ Used to access releases and workflows.
 
 ### preamble
 
-Message positioned before the list of commits. Prefixed with ## (header markdown).
+Message positioned before the list of commits. Prefixed with '## ' (header markdown).
 
 ### is-conventional
 
-Parse conventional commits and organize into sections (like conventional changelog libraries). By default, only feat, fix, and breaking changes are included. Will use the .versionrc file if present.
+If false, it just returns a simple list of commits messages. If true, it parses conventional commits and organizes them into sections (like any conventional changelog library). By default, only feat, fix, and breaking changes are included. Will use the .versionrc file if present.
 
 ### output-flavor
 
 **Options:**
-* `github-release`: GitHub Releases supports [autolinked references + formatting](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls).
-* `markdown`: Basic GitHub markdown without autolinked references. (NOT FINISHED)
+* `github-release`: GitHub Releases support [autolinked references + formatting](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls).
+* `markdown`: Basic GitHub markdown without autolinked references. This option isn't ready yet so it currenlty uses github-release as a fallback.
 * `slack`: Slack uses its own special markup language called [mrkdwn](https://api.slack.com/reference/surfaces/formatting).
 
 ### branch-comparison-strategy
