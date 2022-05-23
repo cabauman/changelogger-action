@@ -49,3 +49,14 @@ _Only applies when the workflow ref starts with refs/heads/_
 | Name | Description |
 | ----- | --- |
 | `changelog` | The generated changelog for the new version. |
+
+## Example usage
+
+Use all the defaults
+
+```yaml
+- name: Generate changelog
+  uses: cabauman/changelogger-action
+```
+
+...
