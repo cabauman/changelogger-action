@@ -34396,11 +34396,12 @@ class ConventionalOutputProvider {
                 const scope = parsed.scope
                     ? this.markdown.bold(`${parsed.scope}:`) + ' '
                     : '';
-                items.push(`${commit.sha} ${scope}${subject}`);
-                const breakingChanges = parsed.notes.filter((x) => x.title === 'BREAKING CHANGE');
-                if (breakingChanges.length === 0)
-                    continue;
-                map['BREAKING'].push(...breakingChanges.map((x) => x.text));
+                const commitLine = `${commit.sha} ${scope}${subject}`;
+                items.push(commitLine);
+                const isBreakingChange = parsed.notes.some((x) => x.title === 'BREAKING CHANGE');
+                if (isBreakingChange) {
+                    map['BREAKING'].push(commitLine);
+                }
             }
             let result = '';
             for (const key in map) {

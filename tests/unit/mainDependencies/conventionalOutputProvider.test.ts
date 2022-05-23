@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import * as tsSinon from 'ts-sinon'
-import { Commit } from '../../../src/contracts/types'
+import { Commit, RawChangelogConfig } from '../../../src/contracts/types'
 import { getDefaultConfig } from '../../../src/config/defaultConfig'
 import ConventionalOutputProvider from '../../../src/mainDependencies/conventionalOutputProvider'
 import SlackMarkdown from '../../../src/markdown/slackMarkdown'
@@ -46,27 +46,83 @@ describe('conventionalOutputProvider', () => {
     })
   })
 
-  context('1 breaking change feature commit', () => {
-    it('returns 2 sections: breaking changes and features', async () => {
-      const commits: Commit[] = [
-        {
-          sha: 'abcd123',
-          rawBody: 'feat!: my feature',
-          header: 'feat: my feature',
-        },
-      ]
-      const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(
-        markdownWriter,
-        changelogConfig,
-      )
-      const actual = await sut.execute(commits)
-      expect(actual).to.equal(
-        '*⚠️ BREAKING CHANGES*\n• my feature\n\n*Features*\n• abcd123 my feature\n\n',
-      )
-    })
-  })
+  context(
+    '1 breaking change (exclamation point) feature commit with scope',
+    () => {
+      it('returns 2 sections: breaking changes and features', async () => {
+        const commits: Commit[] = [
+          {
+            sha: 'abcd123',
+            rawBody: 'feat(myscope)!: my feature',
+            header: 'feat(myscope)!: my feature',
+          },
+        ]
+        const markdownWriter = new SlackMarkdown()
+        const changelogConfig = getDefaultConfig()
+        const sut = new ConventionalOutputProvider(
+          markdownWriter,
+          changelogConfig,
+        )
+        const actual = await sut.execute(commits)
+        expect(actual).to.equal(
+          '*⚠️ BREAKING CHANGES*\n• abcd123 *myscope:* my feature\n\n*Features*\n• abcd123 *myscope:* my feature\n\n',
+        )
+      })
+    },
+  )
+
+  context(
+    '1 breaking change (exclamation point) refactor commit without scope',
+    () => {
+      it('returns 2 sections: breaking changes and refactor', async () => {
+        const commits: Commit[] = [
+          {
+            sha: 'abcd123',
+            rawBody: 'refactor!: my refactor',
+            header: 'refactor!: my refactor',
+          },
+        ]
+        const rawChangelogConfig: RawChangelogConfig = {
+          types: [{ type: 'refactor', section: 'Refactor' }],
+        }
+        const markdownWriter = new SlackMarkdown()
+        const changelogConfig = getDefaultConfig(rawChangelogConfig)
+        const sut = new ConventionalOutputProvider(
+          markdownWriter,
+          changelogConfig,
+        )
+        const actual = await sut.execute(commits)
+        expect(actual).to.equal(
+          '*⚠️ BREAKING CHANGES*\n• abcd123 my refactor\n\n*Refactor*\n• abcd123 my refactor\n\n',
+        )
+      })
+    },
+  )
+
+  context(
+    '1 breaking change (BREAKING CHANGE text in body) fix commit without scope',
+    () => {
+      it('returns 2 sections: breaking changes and bug fixes', async () => {
+        const commits: Commit[] = [
+          {
+            sha: 'abcd123',
+            rawBody: 'fix: my fix\n\nBREAKING CHANGE: xyz is gone',
+            header: 'fix: my fix',
+          },
+        ]
+        const markdownWriter = new SlackMarkdown()
+        const changelogConfig = getDefaultConfig()
+        const sut = new ConventionalOutputProvider(
+          markdownWriter,
+          changelogConfig,
+        )
+        const actual = await sut.execute(commits)
+        expect(actual).to.equal(
+          '*⚠️ BREAKING CHANGES*\n• abcd123 my fix\n\n*Bug Fixes*\n• abcd123 my fix\n\n',
+        )
+      })
+    },
+  )
 
   context('1 chore commit (section hidden by default)', () => {
     it('returns empty string', async () => {
