@@ -33843,7 +33843,10 @@ class CompositionRoot {
         const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/;
         return (currentTag) => __awaiter(this, void 0, void 0, function* () {
             let current = currentTag;
-            yield exec.exec('git fetch origin --unshallow');
+            const isShallow = yield exec.getExecOutput(`git rev-parse --is-shallow-repository`);
+            if (isShallow.stdout.trim() === 'true') {
+                yield exec.exec('git fetch origin --unshallow');
+            }
             // TODO: Consider using a fancier command, such as git + grep, rather than a loop.
             do {
                 try {

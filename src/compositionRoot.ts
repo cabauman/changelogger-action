@@ -99,7 +99,12 @@ export default class CompositionRoot {
     const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/
     return async (currentTag: string): Promise<string> => {
       let current: string | null = currentTag
-      await exec.exec('git fetch origin --unshallow')
+      const isShallow: exec.ExecOutput = await exec.getExecOutput(
+        `git rev-parse --is-shallow-repository`,
+      )
+      if (isShallow.stdout.trim() === 'true') {
+        await exec.exec('git fetch origin --unshallow')
+      }
       // TODO: Consider using a fancier command, such as git + grep, rather than a loop.
       do {
         try {
