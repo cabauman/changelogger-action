@@ -56,7 +56,20 @@ Use all the defaults
 
 ```yaml
 - name: Generate changelog
-  uses: cabauman/changelogger-action
-```
+  id: changelog
+  uses: cabauman/changelogger-action@main
+  
+- name: Get latest tag
+  id: get-latest-tag
+  run: echo ::set-output name=tag::$(git describe --tags --abbrev=0)
 
-...
+- name: Create Release
+  id: create_release
+  uses: actions/create-release@v1
+  with:
+    tag_name: ${{ steps.get-latest-tag.outputs.tag }}
+    release_name: Release ${{ steps.get-latest-tag.outputs.tag }}
+    body: ${{ steps.changelog.outputs.changelog }}
+    draft: false
+    prerelease: false
+```
