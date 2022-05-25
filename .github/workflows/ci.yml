@@ -2,6 +2,16 @@ name: CI
 
 on:
   workflow_dispatch:
+    inputs:
+      output-flavor:
+        type: choice
+        required: true
+        description: Which kind of markdown to use
+        default: markdown
+        options: 
+          - markdown
+          - github-release
+          - slack
   pull_request:
     branches: [ main ]
 
@@ -26,5 +36,6 @@ jobs:
         id: run-action
         with:
           is-conventional: true
+          output-flavor: ${{ github.event.inputs.output-flavor }}
           preamble: Test was successful
       - run: echo "The output is '${{ steps.run-action.outputs.changelog }}'"
