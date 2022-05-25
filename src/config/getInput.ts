@@ -1,7 +1,6 @@
 import { IInputRetriever } from '../contracts/interfaces'
 import { ActionInput } from '../contracts/types'
 
-// TODO: Implement markdown flavor.
 export const SUPPORTED_OUTPUT_FLAVORS = [
   'github-release',
   'markdown',

@@ -33,7 +33,7 @@ If false, it just returns a simple list of commits messages. If true, it parses 
 
 **Options:**
 * `github-release`: GitHub Releases support [autolinked references + formatting](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/autolinked-references-and-urls).
-* `markdown`: Basic GitHub markdown without autolinked references. This option isn't ready yet so it currenlty uses github-release as a fallback.
+* `markdown`: Basic GitHub markdown. Links are explicit (no autolinked-references).
 * `slack`: Slack uses its own special markup language called [mrkdwn](https://api.slack.com/reference/surfaces/formatting).
 
 ### branch-comparison-strategy

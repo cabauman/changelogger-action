@@ -25,3 +25,7 @@ export interface IInputRetriever {
 export interface IOutputProvider {
   execute(commits: ReadonlyArray<Commit>): Promise<string>
 }
+
+export interface ILinkProvider {
+  getShaLink(sha: string): string
+}

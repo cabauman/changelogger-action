@@ -24,7 +24,7 @@ export function getDefaultConfig(config?: RawChangelogConfig): ChangelogConfig {
     }
   }
 
-  config.types.push({
+  config.types.unshift({
     type: 'BREAKING',
     section: '⚠️ BREAKING CHANGES',
     hidden: false,

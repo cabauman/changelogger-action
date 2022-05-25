@@ -33788,6 +33788,9 @@ const conventionalOutputProvider_1 = __importDefault(__nccwpck_require__(8447));
 const getChangelogConfig_1 = __nccwpck_require__(8921);
 const decoratedOutputProvider_1 = __importDefault(__nccwpck_require__(331));
 const errorUtil_1 = __nccwpck_require__(5539);
+const conventionalProvider_1 = __importDefault(__nccwpck_require__(4965));
+const manualLinkProvider_1 = __nccwpck_require__(5464);
+const autoLinkProvider_1 = __nccwpck_require__(8818);
 class CompositionRoot {
     constructAction() {
         return new githubAction_1.default(this.getCommitRefRangeCalculator(), this.getCommitListCalculator(), this.getOutputProvider(), this.getResultSetter());
@@ -33871,24 +33874,39 @@ class CompositionRoot {
         return new commitListCalculator_1.default(this.getCommitProvider());
     }
     getOutputProvider() {
-        const markdownWriter = this.getMarkdown();
         let outputProvider;
         if (this.getInput().isConventional) {
-            outputProvider = new conventionalOutputProvider_1.default(markdownWriter, (0, getChangelogConfig_1.getChangelogConfig)());
+            outputProvider = new conventionalOutputProvider_1.default(this.getConventionalProvider(), this.getMarkdown(), this.getLinkProvider());
         }
         else {
-            outputProvider = new nonConventionalOutputProvider_1.default(markdownWriter);
+            outputProvider = new nonConventionalOutputProvider_1.default(this.getMarkdown());
         }
-        return new decoratedOutputProvider_1.default(outputProvider, markdownWriter, this.getInput().preamble);
+        return new decoratedOutputProvider_1.default(outputProvider, this.getMarkdown(), this.getInput().preamble);
+    }
+    getConventionalProvider() {
+        return new conventionalProvider_1.default((0, getChangelogConfig_1.getChangelogConfig)());
+    }
+    getLinkProvider() {
+        const outputFlavor = this.getInput().outputFlavor;
+        if (outputFlavor === 'github-release') {
+            return new autoLinkProvider_1.AutoLinkProvider();
+        }
+        const { owner, repo } = this.getContext();
+        const baseUrl = new URL(`https://github.com/${owner}/${repo}`);
+        return new manualLinkProvider_1.ManualLinkProvider(baseUrl, this.getMarkdown());
     }
     getCommitHashCalculator() {
         return new commitHashCalculator_1.default(this.getWorkflowIdProvider(), this.getWorkflowShaProvider());
     }
     getMarkdown() {
-        // TODO: Implement markdown flavor.
-        return this.getInput().outputFlavor === 'slack'
-            ? new slackMarkdown_1.default()
-            : new githubMarkdown_1.default();
+        if (this.markdown) {
+            return this.markdown;
+        }
+        this.markdown =
+            this.getInput().outputFlavor === 'slack'
+                ? new slackMarkdown_1.default()
+                : new githubMarkdown_1.default();
+        return this.markdown;
     }
 }
 exports["default"] = CompositionRoot;
@@ -33922,7 +33940,7 @@ function getDefaultConfig(config) {
             ],
         };
     }
-    config.types.push({
+    config.types.unshift({
         type: 'BREAKING',
         section: '⚠️ BREAKING CHANGES',
         hidden: false,
@@ -33967,7 +33985,6 @@ exports.getChangelogConfig = getChangelogConfig;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.OUTPUT_FLAVOR = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_OUTPUT_FLAVORS = void 0;
-// TODO: Implement markdown flavor.
 exports.SUPPORTED_OUTPUT_FLAVORS = [
     'github-release',
     'markdown',
@@ -34068,6 +34085,23 @@ exports["default"] = GitHubAction;
 
 /***/ }),
 
+/***/ 8818:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AutoLinkProvider = void 0;
+class AutoLinkProvider {
+    getShaLink(sha) {
+        return sha;
+    }
+}
+exports.AutoLinkProvider = AutoLinkProvider;
+
+
+/***/ }),
+
 /***/ 2237:
 /***/ (function(__unused_webpack_module, exports) {
 
@@ -34097,6 +34131,125 @@ class CommitHashCalculator {
     }
 }
 exports["default"] = CommitHashCalculator;
+
+
+/***/ }),
+
+/***/ 4965:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+/* eslint-disable @typescript-eslint/no-var-requires */
+const spec = __nccwpck_require__(8761);
+const conventional_commits_parser_1 = __nccwpck_require__(1655);
+const core = __importStar(__nccwpck_require__(2186));
+class ConventionalProvider {
+    constructor(changelogConfig) {
+        this.changelogConfig = changelogConfig;
+    }
+    execute(commits) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            const options = yield spec();
+            const map = {};
+            for (const x of this.changelogConfig.types.values()) {
+                map[x.type] = { name: x.section, commits: [] };
+            }
+            for (const commit of commits) {
+                // TODO: Consider replacing with user input predicate.
+                if (commit.header.startsWith('chore(release):')) {
+                    continue;
+                }
+                const parsed = (0, conventional_commits_parser_1.sync)(commit.rawBody, options.parserOpts);
+                const sha = commit.sha;
+                const type = (_a = parsed.type) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+                const subject = parsed.subject;
+                if (!type || !subject) {
+                    core.debug(`Unable to parse commit: ${commit.header}`);
+                    continue;
+                }
+                const commitType = this.changelogConfig.types.get(type);
+                if (!commitType) {
+                    core.warning(`Unrecognized commit type: ${commitType}. Skipping...`);
+                    continue;
+                }
+                if (commitType.hidden) {
+                    continue;
+                }
+                const scope = (_b = parsed.scope) !== null && _b !== void 0 ? _b : undefined;
+                map[commitType.type].commits.push({ scope, sha, subject });
+                const isBreakingChange = parsed.notes.some((x) => x.title === 'BREAKING CHANGE');
+                if (isBreakingChange) {
+                    map['BREAKING'].commits.push({ scope, sha, subject });
+                }
+            }
+            for (const key of Object.keys(map)) {
+                if (map[key].commits.length === 0) {
+                    delete map[key];
+                }
+            }
+            return map;
+        });
+    }
+}
+exports["default"] = ConventionalProvider;
+
+
+/***/ }),
+
+/***/ 5464:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ManualLinkProvider = void 0;
+const path_1 = __nccwpck_require__(1017);
+class ManualLinkProvider {
+    constructor(baseUrl, markdown) {
+        this.baseUrl = baseUrl;
+        this.markdown = markdown;
+    }
+    getShaLink(sha) {
+        const pathname = path_1.posix.join(this.baseUrl.pathname, `/commit/${sha}`);
+        const url = new URL(pathname, this.baseUrl);
+        // TODO: This makes the assumption that the IMarkdown implementation supports
+        // the back-tick code block markdown. Both Slack and GitHub do, but might
+        // want to eventually move this formatting to the markdown implementation.
+        return this.markdown.link('`' + sha + '`', url.toString());
+    }
+}
+exports.ManualLinkProvider = ManualLinkProvider;
 
 
 /***/ }),
@@ -34331,29 +34484,10 @@ exports["default"] = CommitRefRangeCalculator;
 /***/ }),
 
 /***/ 8447:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34364,63 +34498,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-/* eslint-disable @typescript-eslint/no-var-requires */
-const spec = __nccwpck_require__(8761);
-const conventional_commits_parser_1 = __nccwpck_require__(1655);
-const core = __importStar(__nccwpck_require__(2186));
 class ConventionalOutputProvider {
-    constructor(markdown, changelogConfig) {
+    constructor(conventionalProvider, markdown, linkProvider) {
+        this.conventionalProvider = conventionalProvider;
         this.markdown = markdown;
-        this.changelogConfig = changelogConfig;
+        this.linkProvider = linkProvider;
     }
     execute(commits) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const options = yield spec();
-            const map = {};
-            map['BREAKING'] = [];
-            for (const x of this.changelogConfig.types.values()) {
-                map[x.type] = [];
-            }
-            for (const commit of commits) {
-                // TODO: Consider replacing with user input predicate.
-                if (commit.header.startsWith('chore(release):')) {
-                    continue;
-                }
-                const parsed = (0, conventional_commits_parser_1.sync)(commit.rawBody, options.parserOpts);
-                const type = parsed.type;
-                const subject = parsed.subject;
-                if (!type || !subject) {
-                    core.debug(`Unable to parse commit: ${commit.header}`);
-                    continue;
-                }
-                const items = (_a = map[type]) !== null && _a !== void 0 ? _a : [];
-                map[type.toLowerCase()] = items;
-                const scope = parsed.scope
-                    ? this.markdown.bold(`${parsed.scope}:`) + ' '
-                    : '';
-                const commitLine = `${commit.sha} ${scope}${subject}`;
-                items.push(commitLine);
-                const isBreakingChange = parsed.notes.some((x) => x.title === 'BREAKING CHANGE');
-                if (isBreakingChange) {
-                    map['BREAKING'].push(commitLine);
-                }
-            }
+            const sections = yield this.conventionalProvider.execute(commits);
             let result = '';
-            for (const key in map) {
-                if (map[key].length === 0)
+            for (const section of Object.values(sections)) {
+                if (section.commits.length === 0)
                     continue;
-                const commitType = this.changelogConfig.types.get(key);
-                if (!commitType) {
-                    core.warning(`Unrecognized commit type: ${commitType}. Skipping...`);
-                    continue;
+                result += this.markdown.heading(section.name, 3);
+                const formattedCommits = [];
+                for (const commit of section.commits) {
+                    const scope = commit.scope
+                        ? this.markdown.bold(`${commit.scope}:`) + ' '
+                        : '';
+                    const shaLink = this.linkProvider.getShaLink(commit.sha);
+                    const formattedCommit = `${shaLink} ${scope}${commit.subject}`;
+                    formattedCommits.push(formattedCommit);
                 }
-                if (commitType.hidden) {
-                    continue;
-                }
-                const section = commitType.section;
-                result += this.markdown.heading(section, 3);
-                result += this.markdown.ul(map[key]);
+                result += this.markdown.ul(formattedCommits);
             }
             return result;
         });

@@ -44,3 +44,14 @@ export type ChangelogConfig = {
 export type RawChangelogConfig = {
   types: CommitType[]
 }
+
+export type CommitInfo = {
+  sha: string
+  scope: string | undefined
+  subject: string
+}
+
+export type Section = {
+  name: string
+  commits: CommitInfo[]
+}

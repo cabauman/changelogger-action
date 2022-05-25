@@ -9,7 +9,12 @@ import CommitListCalculator from './mainDependencies/commitListCalculator'
 import CommitRefRangeCalculator from './mainDependencies/commitRefRangeCalculator'
 import NonConventionalOutputProvider from './mainDependencies/nonConventionalOutputProvider'
 import GitHubAction from './githubAction'
-import { IResultSetter, IOutputProvider } from './contracts/interfaces'
+import {
+  IResultSetter,
+  IOutputProvider,
+  ILinkProvider,
+  IMarkdown,
+} from './contracts/interfaces'
 import { ActionInput, ActionContext, CommitRefRange } from './contracts/types'
 import WorkflowIdProvider from './helpers/workflowIdProvider'
 import WorkflowShaProvider from './helpers/workflowShaProvider'
@@ -18,11 +23,15 @@ import { getChangelogConfig } from './config/getChangelogConfig'
 import DecoratedOutputProvider from './mainDependencies/decoratedOutputProvider'
 import { GitHub } from '@actions/github/lib/utils'
 import { error2Json } from './utils/errorUtil'
+import ConventionalProvider from './helpers/conventionalProvider'
+import { ManualLinkProvider } from './helpers/manualLinkProvider'
+import { AutoLinkProvider } from './helpers/autoLinkProvider'
 
 export default class CompositionRoot {
   private actionInput?: ActionInput
   private actionContext?: ActionContext
   private octokit?: InstanceType<typeof GitHub>
+  private markdown?: IMarkdown
 
   protected constructAction(): GitHubAction {
     return new GitHubAction(
@@ -138,21 +147,35 @@ export default class CompositionRoot {
   }
 
   protected getOutputProvider(): IOutputProvider {
-    const markdownWriter = this.getMarkdown()
     let outputProvider: IOutputProvider
     if (this.getInput().isConventional) {
       outputProvider = new ConventionalOutputProvider(
-        markdownWriter,
-        getChangelogConfig(),
+        this.getConventionalProvider(),
+        this.getMarkdown(),
+        this.getLinkProvider(),
       )
     } else {
-      outputProvider = new NonConventionalOutputProvider(markdownWriter)
+      outputProvider = new NonConventionalOutputProvider(this.getMarkdown())
     }
     return new DecoratedOutputProvider(
       outputProvider,
-      markdownWriter,
+      this.getMarkdown(),
       this.getInput().preamble,
     )
+  }
+
+  protected getConventionalProvider(): ConventionalProvider {
+    return new ConventionalProvider(getChangelogConfig())
+  }
+
+  protected getLinkProvider(): ILinkProvider {
+    const outputFlavor = this.getInput().outputFlavor
+    if (outputFlavor === 'github-release') {
+      return new AutoLinkProvider()
+    }
+    const { owner, repo } = this.getContext()
+    const baseUrl = new URL(`https://github.com/${owner}/${repo}`)
+    return new ManualLinkProvider(baseUrl, this.getMarkdown())
   }
 
   protected getCommitHashCalculator() {
@@ -162,10 +185,14 @@ export default class CompositionRoot {
     )
   }
 
-  protected getMarkdown() {
-    // TODO: Implement markdown flavor.
-    return this.getInput().outputFlavor === 'slack'
-      ? new SlackMarkdown()
-      : new GitHubMarkdown()
+  protected getMarkdown(): IMarkdown {
+    if (this.markdown) {
+      return this.markdown
+    }
+    this.markdown =
+      this.getInput().outputFlavor === 'slack'
+        ? new SlackMarkdown()
+        : new GitHubMarkdown()
+    return this.markdown
   }
 }

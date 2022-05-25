@@ -1,48 +1,81 @@
 import { expect } from 'chai'
 import * as tsSinon from 'ts-sinon'
-import { Commit, RawChangelogConfig } from '../../../src/contracts/types'
-import { getDefaultConfig } from '../../../src/config/defaultConfig'
+import { Commit, Section } from '../../../src/contracts/types'
 import ConventionalOutputProvider from '../../../src/mainDependencies/conventionalOutputProvider'
 import SlackMarkdown from '../../../src/markdown/slackMarkdown'
-import { ChangelogConfig } from '../../../src/contracts/types'
-import { IMarkdown } from '../../../src/contracts/interfaces'
+import { ILinkProvider } from '../../../src/contracts/interfaces'
+import ConventionalProvider from '../../../src/helpers/conventionalProvider'
 
 describe('conventionalOutputProvider', () => {
   it('returns expected output', async () => {
-    const markdownWriter = tsSinon.stubInterface<IMarkdown>()
-    markdownWriter.heading.returns('header:')
-    markdownWriter.ul.returns('expected output')
-    const changelogConfig: ChangelogConfig = {
-      types: new Map([
-        ['feat', { type: 'feat', section: 'Features', hidden: false }],
-        ['fix', { type: 'fix', section: 'Fixes', hidden: false }],
-      ]),
-    }
-    const sut = new ConventionalOutputProvider(markdownWriter, changelogConfig)
+    // Arrange
     const commits: ReadonlyArray<Commit> = [
       { sha: 'abc1234', header: 'fix: my fix', rawBody: 'fix: my fix' },
     ]
+    const sections: Record<string, Section> = {
+      ['fix']: {
+        name: 'Bug Fixes',
+        commits: [{ scope: undefined, sha: 'abc1234', subject: 'my fix' }],
+      },
+    }
+    const markdownWriter = new SlackMarkdown()
+    const conventionalProvider = tsSinon.stubConstructor(ConventionalProvider)
+    const linkProvider = tsSinon.stubInterface<ILinkProvider>()
+
+    // Mock return values
+    conventionalProvider.execute.resolves(sections)
+    linkProvider.getShaLink.returns('abc1234')
+
+    const sut = new ConventionalOutputProvider(
+      conventionalProvider,
+      markdownWriter,
+      linkProvider,
+    )
+
+    // Act
     const actual = await sut.execute(commits)
-    expect(actual).to.equal('header:expected output')
+
+    // Assert
+    expect(actual).to.equal('*Bug Fixes*\n• abc1234 my fix\n\n')
   })
 
   context('1 feature commit', () => {
     it('returns features section', async () => {
+      // Arrange
       const commits: Commit[] = [
         {
-          sha: 'abcd123',
+          sha: 'abc1234',
           rawBody: 'feat: my feature',
           header: 'feat: my feature',
         },
       ]
+      const sections: Record<string, Section> = {
+        ['feat']: {
+          name: 'Features',
+          commits: [
+            { scope: undefined, sha: 'abc1234', subject: 'my feature' },
+          ],
+        },
+      }
       const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
+      const conventionalProvider = tsSinon.stubConstructor(ConventionalProvider)
+      const linkProvider = tsSinon.stubInterface<ILinkProvider>()
+
+      // Mock return values
+      conventionalProvider.execute.resolves(sections)
+      linkProvider.getShaLink.returns('abc1234')
+
       const sut = new ConventionalOutputProvider(
+        conventionalProvider,
         markdownWriter,
-        changelogConfig,
+        linkProvider,
       )
+
+      // Act
       const actual = await sut.execute(commits)
-      expect(actual).to.equal('*Features*\n• abcd123 my feature\n\n')
+
+      // Assert
+      expect(actual).to.equal('*Features*\n• abc1234 my feature\n\n')
     })
   })
 
@@ -50,22 +83,49 @@ describe('conventionalOutputProvider', () => {
     '1 breaking change (exclamation point) feature commit with scope',
     () => {
       it('returns 2 sections: breaking changes and features', async () => {
+        // Arrange
         const commits: Commit[] = [
           {
-            sha: 'abcd123',
+            sha: 'abc1234',
             rawBody: 'feat(myscope)!: my feature',
             header: 'feat(myscope)!: my feature',
           },
         ]
+        const sections: Record<string, Section> = {
+          ['BREAKING']: {
+            name: '⚠️ BREAKING CHANGES',
+            commits: [
+              { scope: 'myscope', sha: 'abc1234', subject: 'my feature' },
+            ],
+          },
+          ['feat']: {
+            name: 'Features',
+            commits: [
+              { scope: 'myscope', sha: 'abc1234', subject: 'my feature' },
+            ],
+          },
+        }
+        const conventionalProvider =
+          tsSinon.stubConstructor(ConventionalProvider)
         const markdownWriter = new SlackMarkdown()
-        const changelogConfig = getDefaultConfig()
+        const linkProvider = tsSinon.stubInterface<ILinkProvider>()
+
+        // Mock return values
+        conventionalProvider.execute.resolves(sections)
+        linkProvider.getShaLink.returns('abc1234')
+
         const sut = new ConventionalOutputProvider(
+          conventionalProvider,
           markdownWriter,
-          changelogConfig,
+          linkProvider,
         )
+
+        // Act
         const actual = await sut.execute(commits)
+
+        // Assert
         expect(actual).to.equal(
-          '*⚠️ BREAKING CHANGES*\n• abcd123 *myscope:* my feature\n\n*Features*\n• abcd123 *myscope:* my feature\n\n',
+          '*⚠️ BREAKING CHANGES*\n• abc1234 *myscope:* my feature\n\n*Features*\n• abc1234 *myscope:* my feature\n\n',
         )
       })
     },
@@ -75,25 +135,49 @@ describe('conventionalOutputProvider', () => {
     '1 breaking change (exclamation point) refactor commit without scope',
     () => {
       it('returns 2 sections: breaking changes and refactor', async () => {
+        // Arrange
         const commits: Commit[] = [
           {
-            sha: 'abcd123',
+            sha: 'abc1234',
             rawBody: 'refactor!: my refactor',
             header: 'refactor!: my refactor',
           },
         ]
-        const rawChangelogConfig: RawChangelogConfig = {
-          types: [{ type: 'refactor', section: 'Refactor' }],
+        const sections: Record<string, Section> = {
+          ['BREAKING']: {
+            name: '⚠️ BREAKING CHANGES',
+            commits: [
+              { scope: undefined, sha: 'abc1234', subject: 'my refactor' },
+            ],
+          },
+          ['refactor']: {
+            name: 'Refactor',
+            commits: [
+              { scope: undefined, sha: 'abc1234', subject: 'my refactor' },
+            ],
+          },
         }
+        const conventionalProvider =
+          tsSinon.stubConstructor(ConventionalProvider)
         const markdownWriter = new SlackMarkdown()
-        const changelogConfig = getDefaultConfig(rawChangelogConfig)
+        const linkProvider = tsSinon.stubInterface<ILinkProvider>()
+
+        // Mock return values
+        conventionalProvider.execute.resolves(sections)
+        linkProvider.getShaLink.returns('abc1234')
+
         const sut = new ConventionalOutputProvider(
+          conventionalProvider,
           markdownWriter,
-          changelogConfig,
+          linkProvider,
         )
+
+        // Act
         const actual = await sut.execute(commits)
+
+        // Assert
         expect(actual).to.equal(
-          '*⚠️ BREAKING CHANGES*\n• abcd123 my refactor\n\n*Refactor*\n• abcd123 my refactor\n\n',
+          '*⚠️ BREAKING CHANGES*\n• abc1234 my refactor\n\n*Refactor*\n• abc1234 my refactor\n\n',
         )
       })
     },
@@ -103,173 +187,163 @@ describe('conventionalOutputProvider', () => {
     '1 breaking change (BREAKING CHANGE text in body) fix commit without scope',
     () => {
       it('returns 2 sections: breaking changes and bug fixes', async () => {
+        // Arrange
         const commits: Commit[] = [
           {
-            sha: 'abcd123',
+            sha: 'abc1234',
             rawBody: 'fix: my fix\n\nBREAKING CHANGE: xyz is gone',
             header: 'fix: my fix',
           },
         ]
+        const sections: Record<string, Section> = {
+          ['BREAKING']: {
+            name: '⚠️ BREAKING CHANGES',
+            commits: [{ scope: undefined, sha: 'abc1234', subject: 'my fix' }],
+          },
+          ['fix']: {
+            name: 'Bug Fixes',
+            commits: [{ scope: undefined, sha: 'abc1234', subject: 'my fix' }],
+          },
+        }
+        const conventionalProvider =
+          tsSinon.stubConstructor(ConventionalProvider)
         const markdownWriter = new SlackMarkdown()
-        const changelogConfig = getDefaultConfig()
+        const linkProvider = tsSinon.stubInterface<ILinkProvider>()
+
+        // Mock return values
+        conventionalProvider.execute.resolves(sections)
+        linkProvider.getShaLink.returns('abc1234')
+
         const sut = new ConventionalOutputProvider(
+          conventionalProvider,
           markdownWriter,
-          changelogConfig,
+          linkProvider,
         )
+
+        // Act
         const actual = await sut.execute(commits)
+
+        // Assert
         expect(actual).to.equal(
-          '*⚠️ BREAKING CHANGES*\n• abcd123 my fix\n\n*Bug Fixes*\n• abcd123 my fix\n\n',
+          '*⚠️ BREAKING CHANGES*\n• abc1234 my fix\n\n*Bug Fixes*\n• abc1234 my fix\n\n',
         )
       })
     },
   )
 
-  context('1 chore commit (section hidden by default)', () => {
-    it('returns empty string', async () => {
-      const commits: Commit[] = [
-        {
-          sha: 'acbd123',
-          rawBody: 'chore: my chore',
-          header: 'chore: my chore',
-        },
-      ]
-      const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(
-        markdownWriter,
-        changelogConfig,
-      )
-      const actual = await sut.execute(commits)
-      expect(actual).to.equal('')
-    })
-  })
-
-  context('1 custom commit type (does not exist in config)', () => {
-    it('returns empty string', async () => {
-      const commits: Commit[] = [
-        {
-          sha: 'acbd123',
-          rawBody: 'wip: my feature',
-          header: 'wip: my feature',
-        },
-      ]
-      const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(
-        markdownWriter,
-        changelogConfig,
-      )
-      const actual = await sut.execute(commits)
-      expect(actual).to.equal('')
-    })
-  })
-
   context('1 feature commit with scope', () => {
     it('returns features section with scope in bold', async () => {
+      // Arrange
       const commits: Commit[] = [
         {
-          sha: 'abcd123',
+          sha: 'abc1234',
           rawBody: 'feat(ux): my feature',
           header: 'feat(ux): my feature',
         },
       ]
+      const sections: Record<string, Section> = {
+        ['feat']: {
+          name: 'Features',
+          commits: [{ scope: 'ux', sha: 'abc1234', subject: 'my feature' }],
+        },
+      }
+      const conventionalProvider = tsSinon.stubConstructor(ConventionalProvider)
       const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
+      const linkProvider = tsSinon.stubInterface<ILinkProvider>()
+
+      // Mock return values
+      conventionalProvider.execute.resolves(sections)
+      linkProvider.getShaLink.returns('abc1234')
+
       const sut = new ConventionalOutputProvider(
+        conventionalProvider,
         markdownWriter,
-        changelogConfig,
+        linkProvider,
       )
+
+      // Act
       const actual = await sut.execute(commits)
-      expect(actual).to.equal('*Features*\n• abcd123 *ux:* my feature\n\n')
+
+      // Assert
+      expect(actual).to.equal('*Features*\n• abc1234 *ux:* my feature\n\n')
     })
   })
 
   context('1 non-conventional commit', () => {
     it('returns empty string', async () => {
+      // Arrange
       const commits: Commit[] = [
-        { sha: 'abcd123', rawBody: 'my feature', header: 'my feature' },
+        { sha: 'abc1234', rawBody: 'my feature', header: 'my feature' },
       ]
+      const sections: Record<string, Section> = {}
+      const conventionalProvider = tsSinon.stubConstructor(ConventionalProvider)
       const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
+      const linkProvider = tsSinon.stubInterface<ILinkProvider>()
+
+      // Mock return values
+      conventionalProvider.execute.resolves(sections)
+      linkProvider.getShaLink.returns('abc1234')
+
       const sut = new ConventionalOutputProvider(
+        conventionalProvider,
         markdownWriter,
-        changelogConfig,
+        linkProvider,
       )
+
+      // Act
       const actual = await sut.execute(commits)
+
+      // Assert
       expect(actual).to.equal('')
     })
   })
 
   context('2 feature commits', () => {
     it('returns features section with 2 commits', async () => {
+      // Arrange
       const commits: Commit[] = [
         {
-          sha: 'abcd123',
+          sha: 'abc1234',
           rawBody: 'feat: feature 1',
           header: 'feat: feature 1',
         },
         {
-          sha: 'abcd124',
+          sha: 'abcd123',
           rawBody: 'feat: feature 2',
           header: 'feat: feature 2',
         },
       ]
-      const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
-      const sut = new ConventionalOutputProvider(
-        markdownWriter,
-        changelogConfig,
-      )
-      const actual = await sut.execute(commits)
-      expect(actual).to.equal(
-        '*Features*\n• abcd123 feature 1\n• abcd124 feature 2\n\n',
-      )
-    })
-  })
-
-  context('1 commit that starts with "chore(release):"', () => {
-    it('returns empty string', async () => {
-      const commits: Commit[] = [
-        {
-          sha: 'abcd123',
-          rawBody: 'chore(release): v1.0.0',
-          header: 'chore(release): v1.0.0',
+      const sections: Record<string, Section> = {
+        ['feat']: {
+          name: 'Features',
+          commits: [
+            { scope: undefined, sha: 'abc1234', subject: 'feature 1' },
+            { scope: undefined, sha: 'abcd123', subject: 'feature 2' },
+          ],
         },
-      ]
+      }
+      const conventionalProvider = tsSinon.stubConstructor(ConventionalProvider)
       const markdownWriter = new SlackMarkdown()
-      const changelogConfig = getDefaultConfig()
+      const linkProvider = tsSinon.stubInterface<ILinkProvider>()
+
+      // Mock return values
+      conventionalProvider.execute.resolves(sections)
+      linkProvider.getShaLink.withArgs('abc1234').returns('abc1234')
+      linkProvider.getShaLink.withArgs('abcd123').returns('abcd123')
+
       const sut = new ConventionalOutputProvider(
+        conventionalProvider,
         markdownWriter,
-        changelogConfig,
+        linkProvider,
       )
+
+      // Act
       const actual = await sut.execute(commits)
-      expect(actual).to.equal('')
+
+      // Assert
+      expect(actual).to.equal(
+        '*Features*\n• abc1234 feature 1\n• abcd123 feature 2\n\n',
+      )
     })
   })
-
-  // TODO: Add a variety of input.
-  context(
-    '1 revert commit where the first letter of the type is capitalized',
-    () => {
-      it('returns revert section with 1 commit', async () => {
-        const commits: Commit[] = [
-          {
-            sha: 'abcd123',
-            rawBody: 'Revert: This reverts commit abc',
-            header: 'Revert: This reverts commit abc',
-          },
-        ]
-        const markdownWriter = new SlackMarkdown()
-        const changelogConfig = getDefaultConfig()
-        const sut = new ConventionalOutputProvider(
-          markdownWriter,
-          changelogConfig,
-        )
-        const actual = await sut.execute(commits)
-        expect(actual).to.equal(
-          '*Reverts*\n• abcd123 This reverts commit abc\n\n',
-        )
-      })
-    },
-  )
 })
