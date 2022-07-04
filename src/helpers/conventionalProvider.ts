@@ -2,20 +2,26 @@
 const spec = require('conventional-changelog-conventionalcommits')
 import { sync } from 'conventional-commits-parser'
 import * as core from '@actions/core'
-import { Commit, Section, ChangelogConfig } from '../contracts/types'
+import {
+  Commit,
+  Section,
+  ChangelogConfig,
+  ConventionalCommitInfo,
+} from '../contracts/types'
+import { ILinkProvider } from '../contracts/interfaces'
 
 export default class ConventionalProvider {
-  public constructor(private readonly changelogConfig: ChangelogConfig) {}
+  public constructor(
+    private readonly changelogConfig: ChangelogConfig,
+    private readonly linkProvider: ILinkProvider,
+  ) {}
 
   public async execute(
     commits: ReadonlyArray<Commit>,
-  ): Promise<Record<string, Section>> {
+  ): Promise<readonly ConventionalCommitInfo[]> {
     const options = await spec()
 
-    const map: { [key: string]: Section } = {}
-    for (const x of this.changelogConfig.types.values()) {
-      map[x.type] = { name: x.section, commits: [] }
-    }
+    const commitInfos: ConventionalCommitInfo[] = []
     for (const commit of commits) {
       // TODO: Consider replacing with user input predicate.
       if (commit.header.startsWith('chore(release):')) {
@@ -40,22 +46,26 @@ export default class ConventionalProvider {
       }
 
       const scope = parsed.scope ?? undefined
-      map[commitType.type].commits.push({ scope, sha, subject })
+      const sectionName = commitType.section
+      const commitUrl = this.linkProvider.getShaLink(commit.sha)
+      const commitInfo: ConventionalCommitInfo = {
+        scope,
+        sha,
+        subject,
+        type,
+        sectionName,
+        commitUrl,
+      }
+      commitInfos.push(commitInfo)
 
       const isBreakingChange = parsed.notes.some(
         (x) => x.title === 'BREAKING CHANGE',
       )
       if (isBreakingChange) {
-        map['BREAKING'].commits.push({ scope, sha, subject })
+        commitInfos.push({ ...commitInfo, type: 'BREAKING' })
       }
     }
 
-    for (const key of Object.keys(map)) {
-      if (map[key].commits.length === 0) {
-        delete map[key]
-      }
-    }
-
-    return map
+    return commitInfos
   }
 }

@@ -1,9 +1,11 @@
-import * as exec from '@actions/exec'
 import { Commit } from '../contracts/types'
 import { CommitRefRange } from '../contracts/types'
 
 export const DELIMITER = '------------------------'
 
+// TODO: Consider renaming this to GitCommitListProvider that implements
+// an ICommitListProvider. Because we may decide in the future to use
+// the GitHub API instead of git (GitHubApiCommitListProvider).
 export default class CommitListCalculator {
   constructor(
     private readonly commitProvider: (
@@ -11,6 +13,7 @@ export default class CommitListCalculator {
       delimeter: string,
     ) => Promise<string>,
   ) {}
+
   public async execute(
     commitRefRange: CommitRefRange,
   ): Promise<readonly Commit[]> {

@@ -23,7 +23,7 @@ export interface IInputRetriever {
 }
 
 export interface IOutputProvider {
-  execute(commits: ReadonlyArray<Commit>): Promise<string>
+  execute(tag: string, commits: ReadonlyArray<Commit>): Promise<string>
 }
 
 export interface ILinkProvider {

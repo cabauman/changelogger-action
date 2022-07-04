@@ -12,8 +12,8 @@ export default class CommitRefRangeCalculator {
     ) => Promise<string>,
   ) {}
   public async execute(): Promise<CommitRefRange> {
-    let currentRef: string | undefined
-    let previousRef: string | undefined
+    let currentRef: string
+    let previousRef: string
 
     const githubRef = this.input.githubRef
     if (githubRef.startsWith('refs/heads/')) {
@@ -22,7 +22,11 @@ export default class CommitRefRangeCalculator {
       if (this.input.branchComparisonStrategy === 'tag') {
         previousRef = await this.previousTagProvider(branchName)
       } else if (this.input.branchComparisonStrategy === 'workflow') {
-        previousRef = await this.commitHashCalculator.execute(branchName)
+        previousRef =
+          (await this.commitHashCalculator.execute(branchName)) ?? currentRef
+      } else {
+        // TODO: Log invalid branchComparisonStrategy.
+        previousRef = currentRef
       }
     } else if (githubRef.startsWith('refs/tags/')) {
       const tagName = githubRef.slice('refs/tags/'.length)

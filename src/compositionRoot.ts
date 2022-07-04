@@ -67,8 +67,11 @@ export default class CompositionRoot {
     return core
   }
 
-  protected getOctokit(): InstanceType<typeof GitHub> {
-    this.octokit ??= github.getOctokit(this.getInput().token)
+  protected async getOctokit(): InstanceType<typeof GitHub> {
+    await github
+      .getOctokit(this.getInput().token)
+      //.graphql({request:{}})
+      .rest.repos.compareCommits({ owner: '', repo: '', base: '', head: '' })
     return this.octokit
   }
 
@@ -104,6 +107,15 @@ export default class CompositionRoot {
     }
   }
 
+  protected getLatestTagProvider() {
+    return async () => {
+      const gitDescribe: exec.ExecOutput = await exec.getExecOutput(
+        `git describe --tags --abbrev=0`,
+      )
+      return gitDescribe.stdout.trim()
+    }
+  }
+
   protected getPreviousTagProvider() {
     const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/
     return async (currentTag: string): Promise<string> => {
@@ -128,6 +140,34 @@ export default class CompositionRoot {
       } while (current != null && !regex.test(current))
 
       return current ?? currentTag
+    }
+  }
+
+  protected getVersionHeaderProvider() {
+    return async (currentVersion: string) => {
+      const previousVersion = await this.getPreviousTagProvider()(
+        currentVersion,
+      )
+      const link = `https://github.com/owner/repo/compare/${previousVersion}...${currentVersion}`
+      const rawTagDate: exec.ExecOutput = await exec.getExecOutput(
+        `git show -s --format=%cs ${currentVersion}`,
+      )
+      // standard-version tags are annotated. So it prints output like the following:
+      /**
+       * tag v0.1.1-beta.0
+       * Tagger: GitHub Actions Bot <>
+       *
+       * chore(release): 0.1.1-beta.0 [skip ci]
+       * 2022-05-14
+       */
+      const tagDate = rawTagDate.stdout
+        .split('\n')
+        .filter((x) => x !== '')
+        .pop()
+        ?.trim()
+      const versionDisplay = currentVersion.substring(1)
+      const formattedLink = this.getMarkdown().link(versionDisplay, link)
+      return this.getMarkdown().heading(`${formattedLink} (${tagDate})`, 2)
     }
   }
   // =============== END Override in tests =============== //

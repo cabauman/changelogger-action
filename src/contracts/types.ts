@@ -7,8 +7,8 @@ export type Commit = {
 }
 
 export type CommitRefRange = {
-  previousRef: string | undefined
-  currentRef: string | undefined
+  previousRef: string
+  currentRef: string
 }
 
 export type ActionInput = {
@@ -47,11 +47,31 @@ export type RawChangelogConfig = {
 
 export type CommitInfo = {
   sha: string
-  scope: string | undefined
   subject: string
+  commitUrl: string
 }
+
+export type ConventionalCommitInfo = {
+  scope: string | undefined
+  type: string
+  sectionName: string
+} & CommitInfo
 
 export type Section = {
   name: string
-  commits: CommitInfo[]
+  commits: ConventionalCommitInfo[]
+}
+
+export type ConventionalChangelogEntry = {
+  releaseDate: string
+  version: string
+  previousVersion: string
+  sections: ReadonlyArray<Section>
+}
+
+export type ChangelogEntry = {
+  releaseDate: string
+  version: string
+  previousVersion: string
+  commits: ReadonlyArray<CommitInfo>
 }
