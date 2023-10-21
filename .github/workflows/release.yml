@@ -41,7 +41,7 @@ jobs:
 
       - name: Get latest tag
         id: get-latest-tag
-        run: echo ::set-output name=version-tag::$(git describe --tags --abbrev=0)
+        run: echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
       - name: Generate changelog
         id: changelog
@@ -52,24 +52,20 @@ jobs:
 
       - name: Get previous version
         id: get-previous-version
-        env:
-          VERSION_TAG: ${{ steps.get-latest-tag.outputs.version-tag }}
         run: |
-          previous_version=$(git describe --tags --abbrev=0 ${{ env.VERSION_TAG }}^)
-          echo ::set-output name=previous-version::$previous_version
+          previous_version=$(git describe --tags --abbrev=0 $VERSION_TAG^)
+          echo "previous-version=$previous_version" >> $GITHUB_ENV
 
       - name: Commit changes
-        env:
-          VERSION_TAG: ${{ steps.get-latest-tag.outputs.version-tag }}
         run: |
-          git push origin ${{ env.VERSION_TAG }}
+          git push origin $VERSION_TAG
           git push origin main
 
       - name: Upsert release
         uses: actions/github-script@v6.1.0
         env:
           PREVIOUS_VERSION: ${{ steps.get-previous-version.outputs.previous-version }}
-          RELEASE_NAME: ${{ steps.get-latest-tag.outputs.version-tag }}
+          RELEASE_NAME: $VERSION_TAG
           PRERELEASE: ${{ github.event.inputs.prerelease != '' }}
           BODY: ${{ steps.changelog.outputs.changelog }}
         with:

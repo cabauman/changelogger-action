@@ -61,13 +61,13 @@ Use all the defaults
   
 - name: Get latest tag
   id: get-latest-tag
-  run: echo ::set-output name=tag::$(git describe --tags --abbrev=0)
+  run: echo "VERSION_TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_ENV
 
 - name: Create Release
   id: create_release
   uses: actions/create-release@v1
   with:
-    tag_name: ${{ steps.get-latest-tag.outputs.tag }}
+    tag_name: $VERSION_TAG
     release_name: Release ${{ steps.get-latest-tag.outputs.tag }}
     body: ${{ steps.changelog.outputs.changelog }}
     draft: false
