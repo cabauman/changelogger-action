@@ -57886,7 +57886,10 @@ class CompositionRoot {
     getCommitProvider() {
         return ({ previousRef, currentRef }, delimeter) => __awaiter(this, void 0, void 0, function* () {
             yield exec.exec('git fetch origin');
-            const gitLog = yield exec.getExecOutput(`git log ${previousRef}..${currentRef} --format=%h|%B${delimeter}`);
+            const cmd = previousRef == undefined
+                ? `git log --format=%h|%B${delimeter}`
+                : `git log ${previousRef}..${currentRef} --format=%h|%B${delimeter}`;
+            const gitLog = yield exec.getExecOutput(cmd);
             return gitLog.stdout;
         });
     }
@@ -57905,11 +57908,11 @@ class CompositionRoot {
                     current = gitDescribe.stdout.trim();
                 }
                 catch (error) {
-                    core.error(`[getPreviousTagProvider] ${(0, errorUtil_1.error2Json)(error)}`);
-                    current = null;
+                    core.debug(`[getPreviousTagProvider] ${(0, errorUtil_1.error2Json)(error)}`);
+                    current = undefined;
                 }
             } while (current != null && !regex.test(current));
-            return current !== null && current !== void 0 ? current : currentTag;
+            return current;
         });
     }
     // =============== END Override in tests =============== //
@@ -58100,10 +58103,6 @@ class GitHubAction {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const commitRefRange = yield this.commitRefRangeCalculator.execute();
-                if (commitRefRange.previousRef == null) {
-                    this.resultSetter.setOutput('changelog', 'No previous commits to compare to.');
-                    return;
-                }
                 const commits = yield this.commitListCalculator.execute(commitRefRange);
                 const markdown = yield this.outputProvider.execute(commits);
                 this.resultSetter.setOutput('changelog', markdown);

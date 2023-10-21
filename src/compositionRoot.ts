@@ -88,17 +88,19 @@ export default class CompositionRoot {
       delimeter: string,
     ) => {
       await exec.exec('git fetch origin')
-      const gitLog = await exec.getExecOutput(
-        `git log ${previousRef}..${currentRef} --format=%h|%B${delimeter}`,
-      )
+      const cmd =
+        previousRef == undefined
+          ? `git log --format=%h|%B${delimeter}`
+          : `git log ${previousRef}..${currentRef} --format=%h|%B${delimeter}`
+      const gitLog = await exec.getExecOutput(cmd)
       return gitLog.stdout
     }
   }
 
   protected getPreviousTagProvider() {
     const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/
-    return async (currentTag: string): Promise<string> => {
-      let current: string | null = currentTag
+    return async (currentTag: string): Promise<string | undefined> => {
+      let current: string | undefined = currentTag
       const isShallow: exec.ExecOutput = await exec.getExecOutput(
         `git rev-parse --is-shallow-repository`,
       )
@@ -113,12 +115,12 @@ export default class CompositionRoot {
           )
           current = gitDescribe.stdout.trim()
         } catch (error) {
-          core.error(`[getPreviousTagProvider] ${error2Json(error)}`)
-          current = null
+          core.debug(`[getPreviousTagProvider] ${error2Json(error)}`)
+          current = undefined
         }
       } while (current != null && !regex.test(current))
 
-      return current ?? currentTag
+      return current
     }
   }
   // =============== END Override in tests =============== //
