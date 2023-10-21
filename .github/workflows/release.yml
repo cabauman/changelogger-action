@@ -54,18 +54,17 @@ jobs:
         id: get-previous-version
         run: |
           previous_version=$(git describe --tags --abbrev=0 $VERSION_TAG^)
-          echo "previous-version=$previous_version" >> $GITHUB_ENV
+          echo "PREVIOUS_VERSION=$previous_version" >> $GITHUB_ENV
 
       - name: Commit changes
         run: |
-          git push origin $VERSION_TAG
+          git push origin ${{ env.VERSION_TAG }}
           git push origin main
 
       - name: Upsert release
-        uses: actions/github-script@v6.1.0
+        uses: actions/github-script@v6
         env:
-          PREVIOUS_VERSION: ${{ steps.get-previous-version.outputs.previous-version }}
-          RELEASE_NAME: $VERSION_TAG
+          RELEASE_NAME: ${{ env.VERSION_TAG }}
           PRERELEASE: ${{ github.event.inputs.prerelease != '' }}
           BODY: ${{ steps.changelog.outputs.changelog }}
         with:
