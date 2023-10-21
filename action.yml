@@ -56,5 +56,5 @@ outputs:
     description: The generated changelog for the new version.
 
 runs:
-  using: node16
+  using: node20
   main: dist/index.js
