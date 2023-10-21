@@ -98,7 +98,10 @@ export default class CompositionRoot {
   }
 
   protected getPreviousTagProvider() {
-    const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/
+    let regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/
+    if (!this.getInput().aggregatePrereleases) {
+      regex = /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+    }
     return async (currentTag: string): Promise<string | undefined> => {
       let current: string | undefined = currentTag
       const isShallow: exec.ExecOutput = await exec.getExecOutput(

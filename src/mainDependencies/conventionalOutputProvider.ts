@@ -54,7 +54,7 @@ export default class ConventionalOutputProvider implements IOutputProvider {
       if (map[key].length === 0) continue
       const commitType = this.changelogConfig.types.get(key)
       if (!commitType) {
-        core.warning(`Unrecognized commit type: ${commitType}. Skipping...`)
+        core.debug(`Unrecognized commit type: ${commitType}. Skipping...`)
         continue
       }
       if (commitType.hidden) {

@@ -40,6 +40,10 @@ inputs:
         and uses that to compare against HEAD
     required: false
     default: tag
+  aggregate-prereleases:
+    description: Whether or not to combine all prerelease commits since the last full release.
+    required: false
+    default: 'true'
   token:
     description: Used to access releases and workflows.
     default: ${{ github.token }}

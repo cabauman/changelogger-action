@@ -7,6 +7,7 @@ import retrieveAndValidateInput, {
   PREAMBLE,
   SUPPORTED_OUTPUT_FLAVORS,
   TOKEN,
+  AGGREGATE_PRERELEASES,
 } from '../../../src/config/getInput'
 import { IInputRetriever } from '../../../src/contracts/interfaces'
 import { ActionInput } from '../../../src/contracts/types'
@@ -20,6 +21,7 @@ describe('retrieveAndValidateInput', () => {
     inputRetriever.getInput.withArgs(PREAMBLE).returns('Commit list:')
     inputRetriever.getInput.withArgs(TOKEN).returns('my-token')
     inputRetriever.getInput.withArgs(BRANCH_COMPARISON_STRATEGY).returns('tag')
+    inputRetriever.getBooleanInput.withArgs(AGGREGATE_PRERELEASES).returns(true)
     const actual = sut(inputRetriever)
     const expected: ActionInput = {
       isConventional: true,
@@ -27,6 +29,7 @@ describe('retrieveAndValidateInput', () => {
       preamble: 'Commit list:',
       token: 'my-token',
       branchComparisonStrategy: 'tag',
+      aggregatePrereleases: true,
     }
     expect(actual).to.deep.equal(expected)
   })

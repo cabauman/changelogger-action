@@ -21,6 +21,7 @@ export const OUTPUT_FLAVOR = 'output-flavor'
 export const PREAMBLE = 'preamble'
 export const TOKEN = 'token'
 export const BRANCH_COMPARISON_STRATEGY = 'branch-comparison-strategy'
+export const AGGREGATE_PRERELEASES = 'aggregate-prereleases'
 
 export default function retrieveAndValidateInput(
   inputRetriever: IInputRetriever,
@@ -31,6 +32,9 @@ export default function retrieveAndValidateInput(
   const token = inputRetriever.getInput(TOKEN)
   const rawBranchComparisonStrategy = inputRetriever.getInput(
     BRANCH_COMPARISON_STRATEGY,
+  )
+  const aggregatePrereleases = inputRetriever.getBooleanInput(
+    AGGREGATE_PRERELEASES,
   )
 
   validateToken(token)
@@ -45,6 +49,7 @@ export default function retrieveAndValidateInput(
     preamble,
     token,
     branchComparisonStrategy,
+    aggregatePrereleases,
   }
 }
 

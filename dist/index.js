@@ -57894,7 +57894,10 @@ class CompositionRoot {
         });
     }
     getPreviousTagProvider() {
-        const regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/;
+        let regex = /^v[0-9]+\.[0-9]+\.[0-9]+$/;
+        if (!this.getInput().aggregatePrereleases) {
+            regex = /^v[0-9]+\.[0-9]+\.[0-9]+.*/;
+        }
         return (currentTag) => __awaiter(this, void 0, void 0, function* () {
             let current = currentTag;
             const isShallow = yield exec.getExecOutput(`git rev-parse --is-shallow-repository`);
@@ -58020,7 +58023,7 @@ exports.getChangelogConfig = getChangelogConfig;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.OUTPUT_FLAVOR = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_OUTPUT_FLAVORS = void 0;
+exports.AGGREGATE_PRERELEASES = exports.BRANCH_COMPARISON_STRATEGY = exports.TOKEN = exports.PREAMBLE = exports.OUTPUT_FLAVOR = exports.IS_CONVENTIONAL = exports.SUPPORTED_BRANCH_COMPARISON_STRATEGIES = exports.SUPPORTED_OUTPUT_FLAVORS = void 0;
 // TODO: Implement markdown flavor.
 exports.SUPPORTED_OUTPUT_FLAVORS = [
     'github-release',
@@ -58036,12 +58039,14 @@ exports.OUTPUT_FLAVOR = 'output-flavor';
 exports.PREAMBLE = 'preamble';
 exports.TOKEN = 'token';
 exports.BRANCH_COMPARISON_STRATEGY = 'branch-comparison-strategy';
+exports.AGGREGATE_PRERELEASES = 'aggregate-prereleases';
 function retrieveAndValidateInput(inputRetriever) {
     const isConventional = inputRetriever.getBooleanInput(exports.IS_CONVENTIONAL);
     const rawOutputFlavor = inputRetriever.getInput(exports.OUTPUT_FLAVOR);
     const preamble = inputRetriever.getInput(exports.PREAMBLE);
     const token = inputRetriever.getInput(exports.TOKEN);
     const rawBranchComparisonStrategy = inputRetriever.getInput(exports.BRANCH_COMPARISON_STRATEGY);
+    const aggregatePrereleases = inputRetriever.getBooleanInput(exports.AGGREGATE_PRERELEASES);
     validateToken(token);
     const outputFlavor = validateOutputFlavor(rawOutputFlavor);
     const branchComparisonStrategy = validateBranchComparisonStrategy(rawBranchComparisonStrategy);
@@ -58051,6 +58056,7 @@ function retrieveAndValidateInput(inputRetriever) {
         preamble,
         token,
         branchComparisonStrategy,
+        aggregatePrereleases,
     };
 }
 exports["default"] = retrieveAndValidateInput;
@@ -58462,7 +58468,7 @@ class ConventionalOutputProvider {
                     continue;
                 const commitType = this.changelogConfig.types.get(key);
                 if (!commitType) {
-                    core.warning(`Unrecognized commit type: ${commitType}. Skipping...`);
+                    core.debug(`Unrecognized commit type: ${commitType}. Skipping...`);
                     continue;
                 }
                 if (commitType.hidden) {

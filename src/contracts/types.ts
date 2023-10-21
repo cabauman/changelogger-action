@@ -17,6 +17,7 @@ export type ActionInput = {
   outputFlavor: OutputFlavor
   isConventional: boolean
   branchComparisonStrategy: BranchComparisonStrategy
+  aggregatePrereleases: boolean
 }
 
 export type ActionContext = {

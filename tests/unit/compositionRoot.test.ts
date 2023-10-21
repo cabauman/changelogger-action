@@ -28,6 +28,7 @@ class TestCompositionRoot extends CompositionRoot {
       preamble: 'Commit List:',
       token: 'dummy-token',
       branchComparisonStrategy: 'tag',
+      aggregatePrereleases: true,
     }
   }
 
@@ -154,6 +155,7 @@ class TestCompositionRootBase extends CompositionRoot {
       preamble: 'Commit List:',
       token: 'dummy-token',
       branchComparisonStrategy: 'tag',
+      aggregatePrereleases: true,
     }
   }
 
